@@ -1,0 +1,2 @@
+RemoteRepoName,LocalRepoName,RemoteRepoURL,TargetDirectory
+vba.iot.tcp,tcp,https://github.com/ATECoder/vba.iot.tcp.git,lib\vba\iot
