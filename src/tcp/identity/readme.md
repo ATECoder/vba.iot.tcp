@@ -5,6 +5,7 @@
 ### How to Use
 
 * Open the Excel file.
+* Select the Identity sheet.
 * Enter the instrument IP address.
 * Enter the instrument port
   * 5025 for an LXI instrument or
@@ -22,7 +23,7 @@
 The main types provided by this library are:
 
 * _WinsockSession_ initiates a Winsock session.
-* _TcpSession_ opens a socket to the instrument.
+* _Socket_ opens a socket to the instrument.
 * _IEEE488Session_ implement the core IEEE488 methods for communicating with an LXI Instrument.
 
 ### Feedback

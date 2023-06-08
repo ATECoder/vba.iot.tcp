@@ -2,11 +2,11 @@ Attribute VB_Name = "CollectionExtensions"
 
 ''' <summary> returns true if the object is contained in the collection. </summary>
 Public Function Contains(col As Collection, key As Variant) As Boolean
-    On Error GoTo err
+    On Error GoTo ErrorHandler
     Contains = True
     IsObject (col.Item(key))
     Exit Function
-err:
+ErrorHandler:
     Contains = False
 End Function
 

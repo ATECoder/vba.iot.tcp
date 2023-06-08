@@ -3,15 +3,15 @@ Public Const COMMAND_ERROR = -1
 Public Const RECV_ERROR = -1
 Public Const NO_ERROR = 0
 
-Private Const sheet = "Sheet2"
+Private Const sheet = "IdentitySheet"
 Private Const versionCell = "B1"
 
-Public socketId As Long
+Public SocketId As Long
 
 Sub CloseConnection()
 
     Dim result As Long
-    result = closesocket(socketId)
+    result = closesocket(SocketId)
     
     If result < 0 Then
         MsgBox ("ERROR: closing connection = " + Str$(result))
@@ -23,7 +23,7 @@ End Sub
 Sub EndIt()
 
     ' Shutdown Winsock DLL
-    x = WSACleanup()
+    x = wsock32.WSACleanup()
 
 End Sub
 
@@ -40,7 +40,7 @@ Function StartIt() As Boolean
     Version = ActiveCell.FormulaR1C1
     
     ' Initialize Winsock DLL
-    x = WSAStartup(Version, startUpInfo)
+    x = wsock32.WSAStartup(Version, startUpInfo)
     
     If x <> 0 Then
         MsgBox ("ERROR starting winsock")
@@ -57,9 +57,9 @@ Function OpenSocket(ByVal host As String, ByVal port As Integer) As Integer
 
     ' Create a new socket
     
-    socketId = Socket(AF_INET, SOCK_STREAM, 0)
-    If socketId < 0 Then
-        MsgBox ("ERROR: open socket = " + Str$(socketId))
+    SocketId = wsock32.CreateSocket(AF_INET, SOCK_STREAM, 0)
+    If SocketId < 0 Then
+        MsgBox ("ERROR: open socket = " + Str$(SocketId))
         OpenSocket = Framework.COMMAND_ERROR
         Exit Function
     End If
@@ -72,14 +72,14 @@ Function OpenSocket(ByVal host As String, ByVal port As Integer) As Integer
     address.sin_port = wsock32.htons(port)
     
     Dim connectResult As Long
-    connectResult = wsock32.connect(socketId, address, Len(address))
+    connectResult = wsock32.connect(SocketId, address, Len(address))
     If connectResult < 0 Then
         MsgBox ("ERROR: connection failed = " + Str$(connectResult))
         OpenSocket = Framework.COMMAND_ERROR
         Exit Function
     End If
     
-    OpenSocket = socketId
+    OpenSocket = SocketId
 
 End Function
 
@@ -89,7 +89,7 @@ Function SendCommand(ByVal command As String) As Integer
     
     strSend = command + vbCrLf
     
-    count = send(socketId, ByVal strSend, Len(strSend), 0)
+    count = send(SocketId, ByVal strSend, Len(strSend), 0)
     
     If count < 0 Then
         MsgBox ("ERROR: sending command = " + Str$(count))
@@ -113,7 +113,7 @@ Function Receive(dataBuf As String, ByVal maxLength As Integer) As Integer
         c = ""
         Dim l As Long
         l = Len(c)
-        count = recv(socketId, c, l, 0)
+        count = recv(SocketId, c, l, 0)
         
         If count < 1 Then
             Receive = RECV_ERROR

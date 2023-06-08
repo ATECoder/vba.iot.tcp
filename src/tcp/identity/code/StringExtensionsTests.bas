@@ -1,4 +1,4 @@
-Attribute VB_Name = "TestStringExtensions"
+Attribute VB_Name = "StringExtensionsTests"
 Public Function TestTrimLeft() As Assert
     Set TestTrimLeft = Assert.AreEqual("bar", StringExtensions.TrimLeft("oobar", "o"), "left-trims strings")
 End Function

@@ -118,3 +118,14 @@ End Function
 Public Function StringToWideString(ByVal text As String) As String
     StringToWideString = StrConv(text, vbUnicode)
 End Function
+
+''' <summary> Returns true if the value is null or empty. </summary>
+''' <returns> true if the value is null or empty. </returns>
+Public Function IsNullOrEmpty(ByVal text As String) As Boolean
+    If IsObject(text) Then
+        IsNullOrWhiteSpace = (text = "")
+    Else
+        IsNullOrWhiteSpace = True
+    End If
+End Function
+

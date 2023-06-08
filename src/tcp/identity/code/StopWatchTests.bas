@@ -1,4 +1,4 @@
-Attribute VB_Name = "TestStopWatch"
+Attribute VB_Name = "StopWatchTests"
 
 ''' <summary> Tests stopwatch class for elapsed time. </summary>
 ''' <returns> An instance of the <see cref="Assert"/> class. </returns>

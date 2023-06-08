@@ -1,4 +1,4 @@
-Attribute VB_Name = "TestTestRunner"
+Attribute VB_Name = "TestRunnerTests"
 
 ''' <summary> Tests listing the module tests. </summary>
 ''' <returns> An instance of the <see cref="Assert"/> class. </returns>

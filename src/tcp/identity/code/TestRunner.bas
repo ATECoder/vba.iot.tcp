@@ -5,23 +5,29 @@ Attribute VB_Name = "TestRunner"
 Function ListTestModules() As Collection
 
     Dim pj As VBProject
-    Dim VBComp As VBComponent
+    Dim component As VBComponent
     On Error Resume Next
     Dim moduleNames As Collection
     Set moduleNames = New Collection
     Dim currentModuleName As String
+    Dim newModuleName As String
+    newModuleName = ""
+    currentModuleName = ""
     
     For Each pj In Application.VBE.VBProjects
-        For Each VBComp In pj.VBComponents
-            If Not VBComp Is Nothing And currentModuleName <> VBComp.CodeModule Then
-                currentModuleName = VBComp.CodeModule
-                If StringExtensions.StartsWith(moduleName, "Test") And HasMacros(VBComp) Then
-                    moduleNames.Add (moduleName)
+        For Each component In pj.VBComponents
+            If IsObject(component) Then
+                newModuleName = component.CodeModule
+                If Not StringExtensions.IsNullOrEmpty(newModuleName) And currentModuleName <> newModuleName Then
+                    currentModuleName = newModuleName
+                    If StringExtensions.EndsWith(currentModuleName, "Tests") And HasMacros(component) Then
+                        moduleNames.Add currentModuleName
+                    End If
                 End If
             End If
         Next
     Next
-    ListTestModules = moduleNames
+    Set ListTestModules = moduleNames
 End Function
 
 ''' <summary> List all macros in the specified module. <summary>
@@ -34,7 +40,7 @@ End Function
 Function ListAllMacroNames(moduleName As String, Optional ByVal delimiter As String = " ") As String
 
     Dim pj As VBProject
-    Dim VBComp As VBComponent
+    Dim component As VBComponent
     Dim curMacro As String, newMacro As String
     Dim x As String
     Dim y As String
@@ -45,11 +51,11 @@ Function ListAllMacroNames(moduleName As String, Optional ByVal delimiter As Str
     Documents.Add
     
     For Each pj In Application.VBE.VBProjects
-        For Each VBComp In pj.VBComponents
-            If Not VBComp Is Nothing Then
-                If VBComp.CodeModule = moduleName Then
-                    For i = 1 To VBComp.CodeModule.CountOfLines
-                       newMacro = VBComp.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+        For Each component In pj.VBComponents
+            If Not component Is Nothing Then
+                If component.CodeModule = moduleName Then
+                    For i = 1 To component.CodeModule.CountOfLines
+                       newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
 
                        If curMacro <> newMacro Then
                           curMacro = newMacro
@@ -70,19 +76,19 @@ Function ListAllMacroNames(moduleName As String, Optional ByVal delimiter As Str
 End Function
 
 ''' <summary> Checks if the Lists all macros in the specified module. <summary>
-''' <param name="VBComp"> The component to check for macro methods. </param>
+''' <param name="component"> The component to check for macro methods. </param>
 ''' <param name="previx"> optional prefix for the macro method name. </param>
-Function HasMacros(VBComp As VBComponent, Optional ByVal prefix As String = "Test") As Collection
+Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
 
     Dim curMacro As String, newMacro As String
     
     On Error Resume Next
     curMacro = ""
     
-    If Not VBComp Is Nothing Then
-        If VBComp.CodeModule = moduleName Then
-            For i = 1 To VBComp.CodeModule.CountOfLines
-                newMacro = VBComp.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+    If Not component Is Nothing Then
+        If component.CodeModule = moduleName Then
+            For i = 1 To component.CodeModule.CountOfLines
+                newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
                 If curMacro <> newMacro Then
                     curMacro = newMacro
                     If StringExtensions.StartsWith(curMacro, prefix) Then
@@ -108,7 +114,7 @@ End Function
 Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As String = "Test") As Collection
 
     Dim pj As VBProject
-    Dim VBComp As VBComponent
+    Dim component As VBComponent
     Dim curMacro As String, newMacro As String
     Dim macros As Collection
     Set macros = New Collection
@@ -117,11 +123,11 @@ Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As Stri
     curMacro = ""
     
     For Each pj In Application.VBE.VBProjects
-        For Each VBComp In pj.VBComponents
-            If Not VBComp Is Nothing Then
-                If VBComp.CodeModule = moduleName Then
-                    For i = 1 To VBComp.CodeModule.CountOfLines
-                        newMacro = VBComp.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+        For Each component In pj.VBComponents
+            If Not component Is Nothing Then
+                If component.CodeModule = moduleName Then
+                    For i = 1 To component.CodeModule.CountOfLines
+                        newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
                         If curMacro <> newMacro Then
                             curMacro = newMacro
                             If StringExtensions.StartsWith(curMacro, prefix) Then
@@ -133,7 +139,7 @@ Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As Stri
             End If
         Next
     Next
-    EnumerateMacroNames = macros
+    Set EnumerateMacroNames = macros
 
 End Function
 
@@ -146,7 +152,7 @@ Public Sub Execute()
     Dim failedCount As Integer
     Dim row As Integer
     row = 1
-    Set TestSheet = Sheets("TestSheet")
+    ' Set TestSheet = Sheets("TestSheet")
     TestSheet.Rows("2:" & TestSheet.Rows.count).ClearContents
     moduleName = TestSheet.Range("B" & row).Value
     row = row + 1

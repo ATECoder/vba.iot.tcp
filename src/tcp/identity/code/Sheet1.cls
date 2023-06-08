@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 
 Private Sub ListTestsButton_Click()
-    Dim moduleName As String
+    Dim moduleName As Variant
     testNamesCombo.Clear
     For Each moduleName In TestRunner.ListTestModules
         testNamesCombo.AddItem moduleName

@@ -1,13 +1,13 @@
 Attribute VB_Name = "scpi"
 Private hostname$
 Private PortNumber As Integer
-Private Const sheet = "Sheet2"
+Private Const sheet = "IdentitySheet"
 Private Const hostCell = "B2"
 Private Const portCell = "B3"
 
 Sub GetHostName()
     
-    Sheets("Sheet2").Select
+    Sheets("IdentitySheet").Select
     
     Range("B2").Select
     hostname$ = ActiveCell.FormulaR1C1
@@ -25,7 +25,7 @@ End Sub
 
 Sub preset()
 
-    On Error GoTo oops
+    On Error GoTo Finally
     
     Dim qpc As New StopWatch
     Dim idnQpc As New StopWatch
@@ -41,11 +41,11 @@ Sub preset()
     Range("C2").Value = hostname$
     Range("D2").Value = PortNumber
     
-    Dim socketId As Long
+    Dim SocketId As Long
     
-    socketId = OpenSocket(hostname$, PortNumber)
+    SocketId = OpenSocket(hostname$, PortNumber)
 
-    Range("E2").Value = socketId
+    Range("E2").Value = SocketId
 
     ' by sending a bad command, such as %IDNX we
     ' verified that the instrument is getting the command.
@@ -71,10 +71,10 @@ Sub preset()
     ' count = SendCommand(command)
     ' Call opc
     
-    Range("I3").Value = CStr(idnQpc.TimeElapsed) + "ms"
-    Range("I4").Value = CStr(qpc.TimeElapsed) + "ms"
+    Range("I3").Value = CStr(idnQpc.ElapsedMilliseconds) + "ms"
+    Range("I4").Value = CStr(qpc.ElapsedMilliseconds) + "ms"
 
-oops:
+Finally:
 
     Call CloseConnection
     Call EndIt
@@ -89,6 +89,6 @@ Sub opc()
     Dim recvBuf As String * 10
     
     x = SendCommand("*OPC?")
-    x = RecvAscii(recvBuf, 10)
+    x = Receive(recvBuf, 10)
 
 End Sub
