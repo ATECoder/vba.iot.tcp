@@ -1,10 +1,9 @@
 ### TODO
 
 #### Updates
-* List test modules: include only module that have test methods.
+* Add socket methods and test.
+* Add tests for the identity sheet.
 * Create Session Classes
-  * Winsock
-  * Tcp
   * IEEE488
 * Integrate classes with the Identity workbook.
 * Add unit testing code.

@@ -9,7 +9,10 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 <a name="Open-Source"></a>
 #### Open source
 Open source used by this software is described and licensed at the following sites:  
-[Web Excel]
+* [Web Excel] 
+* [Enumerate and execute Excel Macros]  
+* [Singleton class in VBA]  
+* [Utter Access Archive: Singleton]  
 
 <a name="Closed-software"></a>
 #### Closed software
@@ -23,3 +26,6 @@ Closed software used by this software are described and licensed on the followin
 
 [Use sockets to send and receive data over TCP]: https://learn.microsoft.com/en-us/dotnet/fundamentals/networking/sockets/socket-services
 [Web Excel]: https://github.com/michaelneu/webxcel
+[Enumerate and execute Excel Macros]: https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros
+[Singleton class in VBA]: https://stackoverflow.com/questions/396117/class-static-methods-in-vba
+[Utter Access Archive: Singleton]: https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton
