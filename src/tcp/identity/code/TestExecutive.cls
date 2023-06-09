@@ -1,0 +1,102 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "TestExecutive"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+
+' Creates a temporary test file.
+Public Function CreateTestFile() As TestFileHandle
+    Dim fso
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
+    CreateTestFile.TestFilename = fso.BuildPath(ActiveDocument.path, fso.GetTempName())
+    
+    ' Creates a specified file name and returns a TextStream object that can be used to read from or write to the file.
+    Set CreateTestFile.TestFileStream = fso.CreateTextFile(CreateTestFile.TestFilename, True)
+End Function
+
+
+' Deletes the given test file.
+' Arguments:
+' - fileHandle The file handle to delete
+Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
+    Dim fso
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    
+    fso.DeleteFile fileHandle.TestFilename
+End Sub
+
+''' <summary> Execture all test macros in the module specified in the test sheet. </summary>
+''' <para name="testDataSheet"> Specifies the work sheet were test data are set and logged. </para>
+Public Sub Execute(ByRef testDataSheet As Worksheet)
+    
+    Dim moduleName As String
+    Dim messages As New Collection
+    Dim passedCount As Integer
+    Dim failedCount As Integer
+    Dim row As Integer
+    row = 1
+    
+    testDataSheet.Rows("2:" & testDataSheet.Rows.count).ClearContents
+    moduleName = testDataSheet.Range("B" & row).Value
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Testing"
+    testDataSheet.Range("B" & row).Value = moduleName
+   
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Test Name"
+    testDataSheet.Range("B" & row).Value = "Outcome"
+    
+    Dim AppArray() As String
+    
+    Dim delimiter As String
+    delimiter = " "
+    AppArray() = Split(WorkbookUtilities.ListAllMacroNames(moduleName, delimiter), delimiter)
+    
+    Dim sw As StopWatch
+    Set sw = New StopWatch
+    For i = 0 To UBound(AppArray)
+    
+        temp = AppArray(i)
+        
+        If temp <> "" Then
+        
+            If temp <> "execute" And temp <> "ListAllMacroNames" Then
+        
+                Set Assert = Application.Run(temp)
+        
+                row = row + 1
+                testDataSheet.Range("A" & row).Value = temp
+                If Assert.AssertSuccessful Then
+                    passedCount = passedCount + 1
+                    testDataSheet.Range("B" & row).Value = "passed"
+                Else
+                    failedCount = failedCount + 1
+                    testDataSheet.Range("B" & row).Value = Assert.AssertMessage
+                End If
+            End If
+        
+        End If
+    
+    Next i
+    sw.StopCounter
+    row = row + 1
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Summary:"
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Passed"
+    testDataSheet.Range("B" & row).Value = passedCount
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Failed"
+    testDataSheet.Range("B" & row).Value = failedCount
+    row = row + 1
+    testDataSheet.Range("A" & row).Value = "Duration"
+    testDataSheet.Range("B" & row).Value = CStr(sw.ElapsedMilliseconds) & " ms"
+
+End Sub
+
+

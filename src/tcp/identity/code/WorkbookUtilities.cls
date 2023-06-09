@@ -1,8 +1,64 @@
-Attribute VB_Name = "TestRunner"
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "WorkbookUtilities"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+
+''' <summary> Exports all code files to the active workbook path. </summary>
+''' <para name="subFolder"> Specifies the sub-folder were the files are to be stopred. </param>
+Public Sub ExportCodeFiles(Optional subFolder As String = "code")
+
+    Dim component As VBIDE.VBComponent
+    Dim extension As String
+    Dim fileCount As Integer
+    
+    ' set and, optionally, create the folder.
+    Dim path As String
+    path = ActiveWorkbook.path & "\" & subFolder & "\"
+    Dim fso As FileSystemObject
+    Set fso = New FileSystemObject
+    If Not fso.FolderExists(path) Then
+        fso.CreateFolder (path)
+    End If
+    
+    For Each component In ActiveWorkbook.VBProject.VBComponents
+        extension = GetFileExtension(component)
+        If extension <> "" Then
+            fileCount = fileCount + 1
+            component.Export Filename:=path & component.name & extension
+        End If
+    Next component
+    
+    Debug.Print "Exported " & CStr(fileCount) & " files to " & path
+    
+End Sub
+
+''' <summary> Get the extension if the component is a file </summary>
+''' <param name="component"> The <see cref="VBComponent"/> </param>
+''' <returns> The file extension or an empty string if not a file. </returns>
+Public Function GetFileExtension(component As VBComponent)
+    Select Case component.Type
+        Case vbext_ct_ClassModule, vbext_ct_Document
+            GetFileExtension = ".cls"
+        Case vbext_ct_MSForm
+            GetFileExtension = ".frm"
+        Case vbext_ct_StdModule
+            GetFileExtension = ".bas"
+        Case Else
+            GetFileExtension = ""
+    End Select
+End Function
 
 ''' <summary> List all test modules that start with the 'Test' prefix and
 ''' contain methods that start with the test prefix. <summary>
-Function ListTestModules() As Collection
+''' <param name="macroNamePrefix"> Optional maxro name prefix. </param>
+''' <param name="moduleNameSuffix"> Optional module name suffix </param>
+Public Function ListTestModules(Optional ByVal macroNamePrefix = "Test", _
+                                Optional ByVal moduleNameSuffix = "Tests") As Collection
 
     Dim pj As VBProject
     Dim component As VBComponent
@@ -143,70 +199,4 @@ Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As Stri
 
 End Function
 
-''' <summary> Execture all test macros in the module specified in the test sheet. </summary>
-Public Sub Execute()
-    
-    Dim moduleName As String
-    Dim messages As New Collection
-    Dim passedCount As Integer
-    Dim failedCount As Integer
-    Dim row As Integer
-    row = 1
-    ' Set TestSheet = Sheets("TestSheet")
-    TestSheet.Rows("2:" & TestSheet.Rows.count).ClearContents
-    moduleName = TestSheet.Range("B" & row).Value
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Testing"
-    TestSheet.Range("B" & row).Value = moduleName
-   
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Test Name"
-    TestSheet.Range("B" & row).Value = "Outcome"
-    
-    Dim AppArray() As String
-    
-    Dim delimiter As String
-    delimiter = " "
-    AppArray() = Split(ListAllMacroNames(moduleName, delimiter), delimiter)
-    
-    Dim sw As StopWatch
-    Set sw = New StopWatch
-    For i = 0 To UBound(AppArray)
-    
-        temp = AppArray(i)
-        
-        If temp <> "" Then
-        
-            If temp <> "execute" And temp <> "ListAllMacroNames" Then
-        
-                Set Assert = Application.Run(temp)
-        
-                row = row + 1
-                TestSheet.Range("A" & row).Value = temp
-                If Assert.AssertSuccessful Then
-                    passedCount = passedCount + 1
-                    TestSheet.Range("B" & row).Value = "passed"
-                Else
-                    failedCount = failedCount + 1
-                    TestSheet.Range("B" & row).Value = Assert.AssertMessage
-                End If
-            End If
-        
-        End If
-    
-    Next i
-    sw.StopCounter
-    row = row + 1
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Summary:"
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Passed"
-    TestSheet.Range("B" & row).Value = passedCount
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Failed"
-    TestSheet.Range("B" & row).Value = failedCount
-    row = row + 1
-    TestSheet.Range("A" & row).Value = "Duration"
-    TestSheet.Range("B" & row).Value = CStr(sw.ElapsedMilliseconds) & " ms"
 
-End Sub

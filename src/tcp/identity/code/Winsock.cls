@@ -20,6 +20,27 @@ Private m_disposed As Boolean
 ' counts the number of sockets
 Private m_socketCount As Integer
 
+''' <summary> Initiates use of the Winsock DLL by a process. </summary>
+''' <param name="was"> A pointer to the WSADATA data structure that is to receive
+''' details of the Windows Sockets implementation. </para>
+''' <returns> If successful, the WSAStartup function returns zero. Otherwise, it returns one of
+''' the error codes listed below. The WSAStartup function directly returns the extended error code
+''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
+''' </returns>
+Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" (ByVal versionRequired As Long, wsa As WSADATA) As Long
+
+Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
+
+''' <summary> terminates use of the Winsock dll. </summary>
+''' <remarks> In a multithreaded environment, WSACleanup terminates Windows Sockets operations
+'''   for all threads. </remarks>
+''' <param name=""> </para>
+''' <returns>
+'''   The return value is zero if the operation was successful. Otherwise, the value
+'''   SOCKET_ERROR is returned, and a specific error number can be retrieved by calling WSAGetLastError.
+''' <returns>
+Private Declare PtrSafe Function WSACleanup Lib "wsock32.dll" () As Long
+
 ''' <summary> Initializes winsock. </summary>
 '''< remarks> This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
@@ -30,17 +51,23 @@ Private Sub Class_Initialize()
     Debug.Print "initializing winsock"
 End Sub
 
-
 ''' <summary> Initializes winsock. </summary>
 '''< remarks> This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
 ''' <see href="https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton"/>
 ''' </remarks>
-Public Sub Initialize()
+''' <returns> If successful, returns zero. Otherwise, it returns the extended error code
+''' in the return value for this function.
+''' </returns>
+Public Function Initialize()
+
+    Dim result As Long
+    result = 0
 
     ' skip if the class was already initialized.
     If m_initiated Then
-        Exit Sub
+        Initialize = result
+        Exit Function
     End If
     
     On Error GoTo ErrorHandler
@@ -48,8 +75,8 @@ Public Sub Initialize()
     Dim startUpInfo As WSADATA
     
     ' Initialize Winsock DLL
-    Dim result As Long
-    result = wsock32.WSAStartup(wsock32.WINSOCK_VERSION, startUpInfo)
+    
+    result = WSAStartup(wsock32.WINSOCK_VERSION, startUpInfo)
     
     If result <> 0 Then
         MsgBox ("ERROR starting winsock " & CStr(result))
@@ -57,13 +84,13 @@ Public Sub Initialize()
     m_initiated = (result = 0)
     m_disposed = False
     m_socketCount = 0
-    
-    Exit Sub
+    Initialize = result
+    Exit Function
     
 ErrorHandler:
    MsgBox ("ERROR starting winsock class (" & CStr(err.Number) & "): " & err.Description)
 
-End Sub
+End Function
 
 ''' <summary> Registers this socket with the Winsock class. </summary>
 ''' <remarks> Call this method to register the socket with Winsock thus managing when
@@ -98,6 +125,23 @@ Public Property Get Disposed() As Boolean
     Disposed = m_disposed
 End Property
 
+''' <summary> returns the last Winsock 32 error . </summary>
+Public Property Get LastError() As Long
+    LastError = WSAGetLastError()
+End Property
+
+''' <summary> Terminates use of the Winsock dll. </summary>
+Public Function Cleanup()
+    ' Shutdown Winsock DLL
+    Dim result As Long
+    result = WSACleanup()
+    If result <> 0 Then
+        err.Raise vbObjectError + 513, "IdentityReader.Winsock.Dispose", _
+                  "ERROR disposing winsock. Winsock.WSACleanup() returned " & CStr(result)
+    End If
+    Cleanup = result
+End Function
+
 ''' <summary> Returns the number of sockets associated with this Winsock instance. </summary>
 Public Property Get SocketCount() As Integer
     SocketCount = m_socketCount
@@ -111,7 +155,7 @@ Public Sub Dispose()
         m_initiated = False
         ' Shutdown Winsock DLL
         Dim result As Long
-        result = wsock32.WSACleanup()
+        result = WSACleanup()
         If result <> 0 Then
             err.Raise vbObjectError + 513, "IdentityReader.Winsock.Dispose", _
                       "ERROR disposing winsock. Winsock.WSACleanup() returned " & CStr(result)

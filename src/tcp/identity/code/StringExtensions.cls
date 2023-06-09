@@ -1,4 +1,13 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
 Attribute VB_Name = "StringExtensions"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+
 ' Trims the given character from the given text starting from the left.
 ' Arguments:
 ' - text The text to trim
@@ -128,4 +137,5 @@ Public Function IsNullOrEmpty(ByVal text As String) As Boolean
         IsNullOrWhiteSpace = True
     End If
 End Function
+
 

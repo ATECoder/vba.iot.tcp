@@ -23,24 +23,25 @@ End Sub
 Sub EndIt()
 
     ' Shutdown Winsock DLL
-    x = wsock32.WSACleanup()
+    x = Winsock.Cleanup()
 
 End Sub
 
 Function StartIt() As Boolean
 
-    Dim startUpInfo As WSADATA
+    ' Initialize Winsock DLL
+    x = Winsock.Initialize()
+    
+    ' Dim startUpInfo As WSADATA
     
     ' Version 1.1 (1*256 + 1) = 257
     ' version 2.0 (2*256 + 0) = 512
     
     ' Get WinSock version
-    Sheets(sheet).Select
-    Range(versionCell).Select
-    Version = ActiveCell.FormulaR1C1
-    
-    ' Initialize Winsock DLL
-    x = wsock32.WSAStartup(Version, startUpInfo)
+    ' Sheets(sheet).Select
+    ' Range(versionCell).Select
+    ' Version = ActiveCell.FormulaR1C1
+    ' x = wsock32.WSAStartup(Version, startUpInfo)
     
     If x <> 0 Then
         MsgBox ("ERROR starting winsock")

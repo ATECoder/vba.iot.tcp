@@ -7,7 +7,7 @@ Public Function TestElapsedTime() As Assert
     Set sw = New StopWatch
     Dim sleepTime As Long
     sleepTime = 100
-    Sleep sleepTime + 50
+    sw.Sleep sleepTime + 50
     sw.StopCounter
     Set TestElapsedTime = Assert.IsTrue(sw.ElapsedMilliseconds > sleepTime, _
         "elapsed time " & CStr(sw.ElapsedMilliseconds) & " must exceed sleep time " & CStr(sleepTime))

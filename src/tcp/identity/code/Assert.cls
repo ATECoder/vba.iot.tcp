@@ -34,7 +34,7 @@ End Function
 ''' <param name="message"> A message to show in case the assertion failed. </param
 ''' <returns> True if values are not equal; otherwise, false. </returns>
 Public Function AreNotEqual(ByRef expected, ByRef actual, ByRef message As String) As Assert
-    Set AreEqual = IsTrue(expected <> actual, message)
+    Set AreNotEqual = IsTrue(expected <> actual, message)
     
     If Not AreNotEqual.AssertSuccessful Then
         AreNotEqual.AssertMessage = AreNotEqual.AssertMessage & vbCrLf & _

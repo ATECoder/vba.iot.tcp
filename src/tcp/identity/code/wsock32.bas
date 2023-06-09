@@ -30,8 +30,19 @@ Public Const AF_UNIX = 1               ' local to host (pipes, portals)
 Public Const AF_INET = 2               ' The Internet Protocol version 4 (IPv4) address family.
 
 ' Define socket types
-Public Const SOCK_STREAM = 1           ' Stream socket
-Public Const SOCK_DGRAM = 2            ' Datagram socket
+
+''' <summar> A socket type that provides sequenced, reliable, two-way, connection-based byte streams with an
+''' OOB data transmission mechanism. This socket type uses the Transmission Control Protocol (TCP) for the
+''' Internet address family (AF_INET or AF_INET6). </summary>
+Public Const SOCK_STREAM = 1
+
+''' <summary>
+''' A socket type that supports datagrams, which are connectionless, unreliable buffers of a fixed (typically
+''' small) maximum length. This socket type uses the User Datagram Protocol (UDP) for the Internet address family
+''' (AF_INET or AF_INET6).
+''' </summary>
+Public Const SOCK_DGRAM = 2
+
 Public Const SOCK_RAW = 3              ' Raw data socket
 Public Const SOCK_RDM = 4              ' Reliable Delivery socket
 Public Const SOCK_SEQPACKET = 5        ' Sequenced Packet socket
@@ -76,31 +87,22 @@ Public Const SOCKET_ERROR = -1
 Public Const SOL_SOCKET = 65535
 Public Const SO_RCVTIMEO = &H1006
 
-''' <summary> Initiates use of the Winsock DLL by a process. </summary>
-''' <param name="was"> A pointer to the WSADATA data structure that is to receive
-''' details of the Windows Sockets implementation. </para>
-''' <returns> If successful, the WSAStartup function returns zero. Otherwise, it returns one of
-''' the error codes listed below. The WSAStartup function directly returns the extended error code
-''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
-''' </returns>
-Public Declare PtrSafe Function WSAStartup Lib "wsock32.dll" (ByVal versionRequired As Long, wsa As WSADATA) As Long
-
-Public Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
-
-''' <summary> terminates use of the Winsock dll. </summary>
-''' <remarks> In a multithreaded environment, WSACleanup terminates Windows Sockets operations
-'''   for all threads. </remarks>
-''' <param name=""> </para>
-''' <returns>
-'''   The return value is zero if the operation was successful. Otherwise, the value
-'''   SOCKET_ERROR is returned, and a specific error number can be retrieved by calling WSAGetLastError.
-''' <returns>
-Public Declare PtrSafe Function WSACleanup Lib "wsock32.dll" () As Long
-
-''' <summary> </summary>
+''' <summary> Creates a socket that is bound to a specific transport service provider. </summary>
 ''' <remarks> </remarks>
-''' <param name=""> </para>
-''' <returns> <returns>
+''' <param name="addressFamily"> [in] The address family specification.
+''' The values currently supported are <see cref="AF_INET"/> or <see cref="AF_INET6"/>, which are the Internet
+''' address family formats for IPv4 and IPv6. Other options for address family (AF_NETBIOS for use with NetBIOS,
+''' for example) are supported if a Windows Sockets service provider for the address family is installed.
+''' Note that the values for the AF_ address family and PF_ protocol family constants are identical
+''' (for example, AF_INET and PF_INET), so either constant can be used.
+''' </para>
+''' <param name="socketType">    [in] The type specification for the new socket.
+''' In Windows Sockets 1.1, the only possible socket types are SOCK_DGRAM and SOCK_STREAM. </para>
+''' <param name="protocol"> The protocol to be used. The possible options for the protocol parameter are specific
+''' to the address family and socket type specified. </para>
+''' <returns> If no error occurs, socket returns a descriptor referencing the new socket.
+''' Otherwise, a value of INVALID_SOCKET is returned, and a specific error code can be retrieved by
+''' calling WSAGetLastError. <returns>
 Public Declare PtrSafe Function CreateSocket Lib "wsock32.dll" Alias "socket" (ByVal addressFamily As Long, ByVal socketType As Long, ByVal protocol As Long) As Long
 
 ''' <summary> </summary>

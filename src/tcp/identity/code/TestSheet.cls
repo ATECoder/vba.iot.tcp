@@ -11,11 +11,11 @@ Attribute VB_Exposed = True
 Private Sub ListTestsButton_Click()
     Dim moduleName As Variant
     testNamesCombo.Clear
-    For Each moduleName In TestRunner.ListTestModules
+    For Each moduleName In WorkbookUtilities.ListTestModules
         testNamesCombo.AddItem moduleName
     Next moduleName
 End Sub
 
 Private Sub RunTestsButton_Click()
-    TestRunner.Execute
+    My.ExecuteTestSheetTests
 End Sub
