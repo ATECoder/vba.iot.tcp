@@ -55,12 +55,18 @@ Public Type IN_ADDR
     s_addr As Long
 End Type
 
-''' <summary> Sets the socket address  </summary>
+''' <summary> Sets the socket IPv4 address expressed in network byte order. </summary>
+Public Type sockaddr
+    sa_family As Integer
+    sa_data As String * 14
+End Type
+
+''' <summary> Sets the socket IPv4 address expressed in network byte order. </summary>
 Public Type sockaddr_in
-    sin_family As Integer
-    sin_port As Integer
-    sin_addr As IN_ADDR
-    sin_zero As String * 8
+    sin_family As Integer  ' Address family of the socket, such as AF_INET.
+    sin_port As Integer    ' sock address port number, e.g.,  htons(5150);
+    sin_addr As IN_ADDR    ' the internet address as a long integer type.
+    sin_zero As String * 8 '
 End Type
 
 Public Const FD_SETSIZE = 64
@@ -73,12 +79,6 @@ End Type
 Public Type timeval
     tv_sec As Long
     tv_usec As Long
-End Type
-
-''' <summary> A data type to store Internet addresses. </summary>
-Public Type sockaddr
-    sa_family As Integer
-    sa_data As String * 14
 End Type
 
 ' Define socket return codes
@@ -238,20 +238,24 @@ Public Declare PtrSafe Function send Lib "wsock32.dll" (ByVal s As Long, buffer 
 ''' <param name="buffer">       [out] A pointer to the buffer to receive the incomming data. </param>
 ''' <param name="bufferLength"> [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
 ''' <param name="flags">        [in] A set of flags that influences the behavior of this function. </param>
-''' <returns> <returns>
+''' <returns>
+''' If no error occurs, recv returns the number of bytes received and the buffer pointed to by the buffre parameter will
+''' contain this data received. If the connection has been gracefully closed, the return value is zero.
+''' Otherwise, a value of SOCKET_ERROR is returned, and a specific error code can be retrieved by calling WSAGetLastError.
+''' <returns>
 Public Declare PtrSafe Function recv Lib "wsock32.dll" (ByVal s As Long, ByVal buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
 ''' <summary> The inet_addr function converts a string containing an IPv4 dotted-decimal address into a
 ''' proper address for the IN_ADDR structure. </summary>
 ''' <remarks> </remarks>
-''' <param name="hostname"> [in] An IPv4 dotted-decimal address </param>
+''' <param name="hostname"> [in] An IPv4 dotted-decimal address. </param>
 ''' <returns> If no error occurs, the inet_addr function returns an unsigned long value containing a suitable binary
 ''' representation of the Internet address given. If the string in the hostname parameter does not contain a legitimate
 ''' Internet address, for example if a portion of an "a.b.c.d" address exceeds 255, then inet_addr returns the value
 ''' INADDR_NONE. <returns>
 Public Declare PtrSafe Function inet_addr Lib "wsock32.dll" (ByVal hostname As String) As Long
 
-''' <summary> closes an existing socket. </summary>
+''' <summary> Closes an existing socket. </summary>
 ''' <remarks> </remarks>
 ''' <param name="s"> [in] A descriptor identifying the socket to close. </param>
 ''' <returns> If no error occurs, closesocket returns zero. Otherwise, a value of SOCKET_ERROR is returned.

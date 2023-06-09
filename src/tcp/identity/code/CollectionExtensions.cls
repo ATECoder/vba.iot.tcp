@@ -8,23 +8,21 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-''' <summary> returns true if the object is contained in the collection. </summary>
-Public Function Contains(col As Collection, key As Variant) As Boolean
-    On Error GoTo ErrorHandler
-    Contains = True
-    IsObject (col.Item(key))
-    Exit Function
-ErrorHandler:
-    Contains = False
+''' <summary> Returns true if the collection contains the specified key. </summary>
+Public Function ContainsKey(col As Collection, ByVal key As Object) As Boolean
+    On Error Resume Next
+    col (key) ' Just try it. If it fails, Err.Number will be nonzero.
+    Contains = (err.Number = 0)
+    err.Clear
 End Function
 
 ''' <summary> returns true if the object is containd in the collection. </summary>
 Public Function ContainsAll(col As Collection, contained As Collection) As Boolean
     
     Dim result As Boolean
-    Dim key As Variant
+    Dim key As Object
     For Each key In contained
-        If Not Contains(col, key) Then
+        If Not ContainsKey(col, key) Then
             ContainsAll = False
             Exit Function
         End If

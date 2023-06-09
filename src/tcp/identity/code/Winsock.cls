@@ -70,8 +70,6 @@ Public Function Initialize()
         Exit Function
     End If
     
-    On Error GoTo ErrorHandler
-    
     Dim startUpInfo As WSADATA
     
     ' Initialize Winsock DLL
@@ -79,16 +77,13 @@ Public Function Initialize()
     result = WSAStartup(wsock32.WINSOCK_VERSION, startUpInfo)
     
     If result <> 0 Then
-        MsgBox ("ERROR starting winsock " & CStr(result))
+        err.Raise ErrorCodes.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
+                  ErrorCodes.WinsockStartingError.Description & " Last error: " & CStr(result)
     End If
     m_initiated = (result = 0)
     m_disposed = False
     m_socketCount = 0
     Initialize = result
-    Exit Function
-    
-ErrorHandler:
-   MsgBox ("ERROR starting winsock class (" & CStr(err.Number) & "): " & err.Description)
 
 End Function
 
@@ -135,9 +130,9 @@ Public Function Cleanup()
     ' Shutdown Winsock DLL
     Dim result As Long
     result = WSACleanup()
-    If result <> 0 Then
-        err.Raise vbObjectError + 513, "IdentityReader.Winsock.Dispose", _
-                  "ERROR disposing winsock. Winsock.WSACleanup() returned " & CStr(result)
+    If result = wsock32.SOCKET_ERROR Then
+        err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                  ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
     End If
     Cleanup = result
 End Function
@@ -157,8 +152,8 @@ Public Sub Dispose()
         Dim result As Long
         result = WSACleanup()
         If result <> 0 Then
-            err.Raise vbObjectError + 513, "IdentityReader.Winsock.Dispose", _
-                      "ERROR disposing winsock. Winsock.WSACleanup() returned " & CStr(result)
+            err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
+                      ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
         End If
     End If
 End Sub

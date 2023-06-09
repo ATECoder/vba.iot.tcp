@@ -1,5 +1,4 @@
 Attribute VB_Name = "TestExecutiveTests"
-
 ''' <summary> Defines a test file handle. </summary>
 Public Type TestFileHandle
     TestFilename As String

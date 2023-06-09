@@ -1,9 +1,10 @@
 ### TODO
 
 #### Updates
+* Add user error test for getting error fromt he collection.
 * Add socket methods and test.
 * Add tests for the identity sheet.
-* Create Session Classes
-  * IEEE488
-* Integrate classes with the Identity workbook.
-* Add unit testing code.
+* Add TCP Client
+* Add IEEE488 Session
+* Use IEEE488 Session with the Identity sheet.
+  * read and get average time for reading the identity.
