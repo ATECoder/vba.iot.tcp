@@ -6,6 +6,6 @@ End Sub
 
 ''' <summary> Execute the tests defined in the TestSheet. </summary>
 Public Sub ExecuteTestSheetTests()
-    TestExecutive.Execute (TestSheet)
+    TestExecutive.Execute TestSheet
 End Sub
 

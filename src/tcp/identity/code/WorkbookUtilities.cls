@@ -76,8 +76,10 @@ Public Function ListTestModules(Optional ByVal macroNamePrefix = "Test", _
                 newModuleName = component.CodeModule
                 If Not StringExtensions.IsNullOrEmpty(newModuleName) And currentModuleName <> newModuleName Then
                     currentModuleName = newModuleName
-                    If StringExtensions.EndsWith(currentModuleName, "Tests") And HasMacros(component) Then
-                        moduleNames.Add currentModuleName
+                    If StringExtensions.EndsWith(currentModuleName, "Tests") Then
+                        If HasMacros(component) Then
+                            moduleNames.Add currentModuleName
+                        End If
                     End If
                 End If
             End If
@@ -142,18 +144,16 @@ Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As Stri
     curMacro = ""
     
     If Not component Is Nothing Then
-        If component.CodeModule = moduleName Then
-            For i = 1 To component.CodeModule.CountOfLines
-                newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
-                If curMacro <> newMacro Then
-                    curMacro = newMacro
-                    If StringExtensions.StartsWith(curMacro, prefix) Then
-                       HasMacros = True
-                       Exit Function
-                    End If
+        For i = 1 To component.CodeModule.CountOfLines
+            newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+            If curMacro <> newMacro Then
+                curMacro = newMacro
+                If StringExtensions.StartsWith(curMacro, prefix) Then
+                   HasMacros = True
+                   Exit Function
                 End If
-            Next
-        End If
+            End If
+        Next
     End If
     HasMacros = False
 

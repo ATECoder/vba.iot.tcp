@@ -121,9 +121,9 @@ Public Function Repeat(ByVal text As String, ByVal count As Long) As String
 End Function
 
 
-' Converts a regular string "foo" to a L"foo" string.
-' Arguments:
-' - text The string to convert
+''' <summary> Converts a regular string to a unicode string,
+''' e.g., "foo" to a L"foo" string.. </summary>
+''' <param name="text"> The string to convert. </param>
 Public Function StringToWideString(ByVal text As String) As String
     StringToWideString = StrConv(text, vbUnicode)
 End Function
@@ -131,11 +131,7 @@ End Function
 ''' <summary> Returns true if the value is null or empty. </summary>
 ''' <returns> true if the value is null or empty. </returns>
 Public Function IsNullOrEmpty(ByVal text As String) As Boolean
-    If IsObject(text) Then
-        IsNullOrWhiteSpace = (text = "")
-    Else
-        IsNullOrWhiteSpace = True
-    End If
+    IsNullOrWhiteSpace = (text = "")
 End Function
 
 
