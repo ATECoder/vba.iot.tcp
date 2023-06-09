@@ -22,7 +22,7 @@ Private m_socketCount As Integer
 
 ''' <summary> Initiates use of the Winsock DLL by a process. </summary>
 ''' <param name="was"> A pointer to the WSADATA data structure that is to receive
-''' details of the Windows Sockets implementation. </para>
+''' details of the Windows Sockets implementation. </param>
 ''' <returns> If successful, the WSAStartup function returns zero. Otherwise, it returns one of
 ''' the error codes listed below. The WSAStartup function directly returns the extended error code
 ''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
@@ -34,7 +34,7 @@ Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
 ''' <summary> terminates use of the Winsock dll. </summary>
 ''' <remarks> In a multithreaded environment, WSACleanup terminates Windows Sockets operations
 '''   for all threads. </remarks>
-''' <param name=""> </para>
+''' <param name=""> </param>
 ''' <returns>
 '''   The return value is zero if the operation was successful. Otherwise, the value
 '''   SOCKET_ERROR is returned, and a specific error number can be retrieved by calling WSAGetLastError.

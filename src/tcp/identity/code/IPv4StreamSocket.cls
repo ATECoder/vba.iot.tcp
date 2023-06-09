@@ -19,11 +19,11 @@ Private Const NO_ERROR = 0
 ''' for example) are supported if a Windows Sockets service provider for the address family is installed.
 ''' Note that the values for the AF_ address family and PF_ protocol family constants are identical
 ''' (for example, AF_INET and PF_INET), so either constant can be used.
-''' </para>
+''' </param>
 ''' <param name="socketType">    [in] The type specification for the new socket.
-''' In Windows Sockets 1.1, the only possible socket types are SOCK_DGRAM and SOCK_STREAM. </para>
+''' In Windows Sockets 1.1, the only possible socket types are SOCK_DGRAM and SOCK_STREAM. </param>
 ''' <param name="protocol"> The protocol to be used. The possible options for the protocol parameter are specific
-''' to the address family and socket type specified. </para>
+''' to the address family and socket type specified. </param>
 ''' <returns> If no error occurs, socket returns a descriptor referencing the new socket.
 ''' Otherwise, a value of INVALID_SOCKET is returned, and a specific error code can be retrieved by
 ''' calling WSAGetLastError. <returns>
@@ -46,9 +46,9 @@ Private Sub Class_Initialize()
     
     m_socketId = WinsockApi.CreateIPv4StreamSocket()
     If m_socketId = wsock32.INVALID_SOCKET Then
-        MsgBox ("ERROR: wsock32.CreateSocket returned " + Str$(m_socketId))
+        MsgBox "ERROR: wsock32.CreateSocket returned " + Str$(m_socketId)
     Else
-        wnsock.Register Me
+        Winsock.Register Me
     End If
 End Sub
 
@@ -113,4 +113,16 @@ Function CloseConnection() As Long
     CloseConnection = result
 
 End Function
+
+Public Sub SetTimeout(ByVal timeout As Long)
+
+    Dim result As Long
+    result = wsock32.setsockopt(m_socketId, wsock32.SOL_SOCKET, wsock32.SO_RCVTIMEO, timeout, 4)
+
+    If result = wnsock32.SOCKET_ERROR Then
+        err.Raise 513, "IPv4StreamSocket", "ERROR: failed setting timeout. Last error = " + Str$(Winsock.LastError())
+    End If
+    
+End Sub
+
 

@@ -31,7 +31,7 @@ Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
 End Sub
 
 ''' <summary> Execture all test macros in the module specified in the test sheet. </summary>
-''' <para name="testDataSheet"> Specifies the work sheet were test data are set and logged. </para>
+''' <para name="testDataSheet"> Specifies the work sheet were test data are set and logged. </param>
 Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     Dim moduleName As String
