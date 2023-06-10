@@ -29,7 +29,7 @@ Public Sub ExportCodeFiles(Optional subFolder As String = "code")
         extension = GetFileExtension(component)
         If extension <> "" Then
             fileCount = fileCount + 1
-            component.Export Filename:=path & component.name & extension
+            component.Export Filename:=path & component.Name & extension
         End If
     Next component
     
