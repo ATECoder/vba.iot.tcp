@@ -23,9 +23,9 @@ Private Sub ReadIdentityButton_Click()
     Range("C2").Value = host
     Range("D2").Value = port
     
-    scpi.preset
+    ' scpi.preset
     
-    ' ReadIdentity host, port, repeatCount
+    ReadIdentity host, port, repeatCount
     
 End Sub
 
