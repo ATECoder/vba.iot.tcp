@@ -30,6 +30,8 @@ Private Const NO_ERROR = 0
 Private Declare PtrSafe Function CreateSocket Lib "wsock32.dll" Alias "socket" (ByVal addressFamily As Long, ByVal socketType As Long, ByVal protocol As Long) As Long
 
 Private m_socketId As Long
+Private m_connected As Boolean
+Private m_timeout As Integer
 
 ''' <summary> Initializes an internet protocol Stream Socket with a socket id. </summary>
 Private Sub Class_Initialize()
@@ -46,10 +48,13 @@ Private Sub Class_Initialize()
     
     m_socketId = WinsockApi.CreateIPv4StreamSocket()
     If m_socketId = wsock32.INVALID_SOCKET Then
-        err.Raise ErrorCodes.SocketCreationError.Code, "IdentityReader.IPv4StreamSocket.Class_Initialize", _
-                  ErrorCodes.SocketCreationError.Description & " Last error: " & CStr(Winsock.LastError)
+        Err.Raise ErrorCodes.SocketCreationError.Code, "IdentityReader.IPv4StreamSocket.Class_Initialize", _
+                  ErrorCodes.SocketCreationError.Description & " Last error: " & CStr(Winsock.lastError)
     Else
         Winsock.Register Me
+        
+        ' set the default timeout
+        SetTimeout 500
     End If
     
 End Sub
@@ -69,16 +74,23 @@ End Sub
 
 ''' <summary> Returns the socket id. </summary>
 ''' <returns> The socket identity. </returns>
-Public Property Get SocketId() As Long
-    SocketId = m_socketId
+Public Property Get socketId() As Long
+    socketId = m_socketId
+End Property
+
+''' <summary> Returns the connection state of the socket. </summary>
+''' <returns> True if the socket is connected; otherwise, False. </returns>
+Public Property Get Connected() As Boolean
+    Connected = m_connected
 End Property
 
 ''' <summary> Opens a socket connection and sets and returns the socket id. </summary>
 ''' <param name="host"> An IPv4 dotted-decimal host address. </param>
 ''' <param name="port"> The port that the server is listening on. </param>
-''' <returns> The socket identity. </returns>
-Function OpenConnection(ByVal host As String, ByVal port As Integer) As Integer
+''' <returns> True if the socket is connected. </returns>
+Public Function OpenConnection(ByVal host As String, ByVal port As Integer) As Boolean
    
+    m_connected = False
     If host = "localhost" Then
         host = "127.0.0.1"
     End If
@@ -99,28 +111,31 @@ Function OpenConnection(ByVal host As String, ByVal port As Integer) As Integer
     Dim connectResult As Long
     connectResult = wsock32.connect(m_socketId, address, Len(address))
     If connectResult = wsock32.SOCKET_ERROR Then
-        err.Raise ErrorCodes.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
-                  ErrorCodes.SocketConnectionError.Description & " Last error: " & CStr(Winsock.LastError)
-        OpenConnection = COMMAND_ERROR
+        Err.Raise ErrorCodes.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
+                  ErrorCodes.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+        m_connected = False
     Else
-        OpenConnection = m_socketId
+        m_connected = True
     End If
+    
+    OpenConnection = m_connected
 
 End Function
 
 ''' <summary> Closes the socket connection and zeros the socket id. </summary>
-''' <returns> Zero if no error occurred. </returns>
-Public Function CloseConnection() As Long
+''' <returns> True if socket disconnection succeeded; otherwise, false. </returns>
+Public Function CloseConnection() As Boolean
 
     Dim result As Long
     result = wsock32.closesocket(m_socketId)
     m_socketId = 0
     If result = wsock32.SOCKET_ERROR Then
-        err.Raise ErrorCodes.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                  ErrorCodes.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.LastError)
-        CloseConnection = COMMAND_ERROR
+        Err.Raise ErrorCodes.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
+                  ErrorCodes.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+        CloseConnection = False
     Else
-        CloseConnection = result
+        m_connected = False
+        CloseConnection = True
     End If
 
 End Function
@@ -133,11 +148,11 @@ Public Function SendCommand(ByVal command As String) As Integer
     If StringExtensions.IsNullOrEmpty(command) Then
         SendCommand = 0
     Else
-        count = wsock32.send(Me.SocketId, ByVal command, Len(strSend), 0)
+        count = wsock32.send(Me.socketId, ByVal command, Len(command), 0)
         
         If count < 0 Then
-            err.Raise ErrorCodes.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                      ErrorCodes.SocketSendError.Description & " Last error: " & CStr(Winsock.LastError)
+            Err.Raise ErrorCodes.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
+                      ErrorCodes.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
             SendCommand = COMMAND_ERROR
         Else
             SendCommand = count
@@ -158,6 +173,7 @@ Public Function Receive(buffer As String, ByVal maxLength As Integer, _
 
     Dim c As String * 1
     Dim length As Integer
+    Dim count As Integer
     
     buffer = ""
     While length < maxLength
@@ -167,7 +183,7 @@ Public Function Receive(buffer As String, ByVal maxLength As Integer, _
         c = ""
         Dim l As Long
         l = Len(c)
-        count = wsoc32.recv(SocketId, c, l, 0)
+        count = wsock32.recv(socketId, c, l, 0)
         
         If count < 1 Then
             Receive = RECV_ERROR
@@ -192,16 +208,21 @@ End Function
 
 ''' <summary> Sets the socket timeout. </summary>
 ''' <param name="timeout"> The timeout interval in milliseconds. </param>
-Public Sub SetTimeout(ByVal timeout As Long)
+Public Sub SetTimeout(ByVal interval As Long)
 
     Dim result As Long
-    result = wsock32.setsockopt(m_socketId, wsock32.SOL_SOCKET, wsock32.SO_RCVTIMEO, timeout, 4)
+    result = wsock32.setsockopt(m_socketId, wsock32.SOL_SOCKET, wsock32.SO_RCVTIMEO, interval, 4)
 
-    If result = wnsock32.SOCKET_ERROR Then
-        err.Raise ErrorCodes.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetTimeout", _
-                  ErrorCodes.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.LastError)
+    If result = wsock32.SOCKET_ERROR Then
+        Err.Raise ErrorCodes.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetTimeout", _
+                  ErrorCodes.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
+    Else
+        m_timeout = interval
     End If
     
 End Sub
 
-
+''' <summary> Gets the socket timeout in milliseconds. </summary>
+Public Property Get Timeout() As Long
+    Timeout = m_timeout
+End Property

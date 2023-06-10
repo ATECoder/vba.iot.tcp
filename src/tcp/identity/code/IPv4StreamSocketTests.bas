@@ -8,8 +8,8 @@ Public Function TestCreateSocket() As Assert
     Set sock = New IPv4StreamSocket
     
     ' check if socket has a valid id
-    Set TestCreateSocket = Assert.IsTrue(sock.SocketId <> wsock32.INVALID_SOCKET, _
-        "Failed creating socket; socket id " & Str$(sock.SocketId) & _
+    Set TestCreateSocket = Assert.IsTrue(sock.socketId <> wsock32.INVALID_SOCKET, _
+        "Failed creating socket; socket id " & Str$(sock.socketId) & _
         " must not equal to wsock32.INVALID_SOCKET=" & wsock32.INVALID_SOCKET)
     
     If Not TestCreateSocket.AssertSuccessful Then

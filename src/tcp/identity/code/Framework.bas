@@ -6,12 +6,12 @@ Public Const NO_ERROR = 0
 Private Const sheet = "IdentitySheet"
 Private Const versionCell = "B1"
 
-Public SocketId As Long
+Public socketId As Long
 
 Sub CloseConnection()
 
     Dim result As Long
-    result = closesocket(SocketId)
+    result = closesocket(socketId)
     
     If result < 0 Then
         MsgBox ("ERROR: closing connection = " + Str$(result))
@@ -58,9 +58,9 @@ Function OpenSocket(ByVal host As String, ByVal port As Integer) As Integer
 
     ' Create a new socket
     
-    SocketId = wsock32.CreateSocket(AF_INET, SOCK_STREAM, 0)
-    If SocketId < 0 Then
-        MsgBox ("ERROR: open socket = " + Str$(SocketId))
+    socketId = wsock32.CreateSocket(AF_INET, SOCK_STREAM, 0)
+    If socketId < 0 Then
+        MsgBox ("ERROR: open socket = " + Str$(socketId))
         OpenSocket = Framework.COMMAND_ERROR
         Exit Function
     End If
@@ -73,14 +73,14 @@ Function OpenSocket(ByVal host As String, ByVal port As Integer) As Integer
     address.sin_port = wsock32.htons(port)
     
     Dim connectResult As Long
-    connectResult = wsock32.connect(SocketId, address, Len(address))
+    connectResult = wsock32.connect(socketId, address, Len(address))
     If connectResult < 0 Then
         MsgBox ("ERROR: connection failed = " + Str$(connectResult))
         OpenSocket = Framework.COMMAND_ERROR
         Exit Function
     End If
     
-    OpenSocket = SocketId
+    OpenSocket = socketId
 
 End Function
 
@@ -90,7 +90,7 @@ Function SendCommand(ByVal command As String) As Integer
     
     strSend = command + vbCrLf
     
-    count = send(SocketId, ByVal strSend, Len(strSend), 0)
+    count = send(socketId, ByVal strSend, Len(strSend), 0)
     
     If count < 0 Then
         MsgBox ("ERROR: sending command = " + Str$(count))
@@ -114,7 +114,7 @@ Function Receive(dataBuf As String, ByVal maxLength As Integer) As Integer
         c = ""
         Dim l As Long
         l = Len(c)
-        count = recv(SocketId, c, l, 0)
+        count = recv(socketId, c, l, 0)
         
         If count < 1 Then
             Receive = RECV_ERROR

@@ -114,7 +114,7 @@ Public Declare PtrSafe Function CreateSocket Lib "wsock32.dll" Alias "socket" (B
 ''' <summary> Establishes a connection to a specified socket. </summary>
 ''' <remarks> </remarks>
 ''' <param name="s">          [in] A descriptor identifying an unconnected socket. </param>
-''' <param name="address">    [in] A pointer to the <see cref="wnsoc32.sockaddr_in"/> structure to which the
+''' <param name="address">    [in] A pointer to the <see cref="wsock32.sockaddr_in"/> structure to which the
 '''                           connection should be established. </param>
 ''' <param name="addressLen"> [in] The length, in bytes, of the sockaddr structure pointed to by the
 '''                           <paramref name="address"/> parameter. </param>
@@ -173,7 +173,7 @@ Public Declare PtrSafe Function listen Lib "wsock32.dll" (ByVal s As Long, ByVal
 ''' or SOCKET_ERROR if an error occurred. If the return value is SOCKET_ERROR, WSAGetLastError can be used to retrieve
 ''' a specific error code.
 ''' <returns>
-Public Declare PtrSafe Function SelectSockets Lib "wsock32.dll" Alias "select" (ByVal nfds As Integer, readfds As fd_set, writefds As fd_set, exceptfds As fd_set, timeout As timeval) As Integer
+Public Declare PtrSafe Function SelectSockets Lib "wsock32.dll" Alias "select" (ByVal nfds As Integer, readfds As fd_set, writefds As fd_set, exceptfds As fd_set, Timeout As timeval) As Integer
 
 ''' <summary> Permits an incoming connection attempt on a socket. </summary>
 ''' <remarks> </remarks>

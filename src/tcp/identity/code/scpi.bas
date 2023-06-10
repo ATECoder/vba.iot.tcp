@@ -1,13 +1,13 @@
 Attribute VB_Name = "scpi"
 Private hostname$
 Private PortNumber As Integer
-Private Const sheet = "IdentitySheet"
+Private Const sheet = "Identity"
 Private Const hostCell = "B2"
 Private Const portCell = "B3"
 
 Sub GetHostName()
     
-    Sheets("IdentitySheet").Select
+    Sheets(sheet).Select
     
     Range("B2").Select
     hostname$ = ActiveCell.FormulaR1C1
@@ -41,11 +41,11 @@ Sub preset()
     Range("C2").Value = hostname$
     Range("D2").Value = PortNumber
     
-    Dim SocketId As Long
+    Dim socketId As Long
     
-    SocketId = OpenSocket(hostname$, PortNumber)
+    socketId = OpenSocket(hostname$, PortNumber)
 
-    Range("E2").Value = SocketId
+    Range("E2").Value = socketId
 
     ' by sending a bad command, such as %IDNX we
     ' verified that the instrument is getting the command.

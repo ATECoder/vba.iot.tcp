@@ -77,7 +77,7 @@ Public Function Initialize()
     result = WSAStartup(wsock32.WINSOCK_VERSION, startUpInfo)
     
     If result <> 0 Then
-        err.Raise ErrorCodes.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
+        Err.Raise ErrorCodes.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
                   ErrorCodes.WinsockStartingError.Description & " Last error: " & CStr(result)
     End If
     m_initiated = (result = 0)
@@ -121,8 +121,8 @@ Public Property Get Disposed() As Boolean
 End Property
 
 ''' <summary> returns the last Winsock 32 error . </summary>
-Public Property Get LastError() As Long
-    LastError = WSAGetLastError()
+Public Property Get lastError() As Long
+    lastError = WSAGetLastError()
 End Property
 
 ''' <summary> Terminates use of the Winsock dll. </summary>
@@ -131,8 +131,8 @@ Public Function Cleanup()
     Dim result As Long
     result = WSACleanup()
     If result = wsock32.SOCKET_ERROR Then
-        err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                  ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
+        Err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                  ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
     End If
     Cleanup = result
 End Function
@@ -152,8 +152,8 @@ Public Sub Dispose()
         Dim result As Long
         result = WSACleanup()
         If result <> 0 Then
-            err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
-                      ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
+            Err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
+                      ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
         End If
     End If
 End Sub

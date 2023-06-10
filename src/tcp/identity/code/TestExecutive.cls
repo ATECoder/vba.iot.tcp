@@ -34,6 +34,8 @@ End Sub
 ''' <para name="testDataSheet"> Specifies the work sheet were test data are set and logged. </param>
 Public Sub Execute(ByRef testDataSheet As Worksheet)
     
+    On Error GoTo Finally
+    
     Dim moduleName As String
     Dim messages As New Collection
     Dim passedCount As Integer
@@ -96,7 +98,12 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     row = row + 1
     testDataSheet.Range("A" & row).Value = "Duration"
     testDataSheet.Range("B" & row).Value = CStr(sw.ElapsedMilliseconds) & " ms"
+    
+    Exit Sub
 
+Finally:
+    MsgBox "Test execution failed at " & Err.source & " with error number (0x" _
+           & Hex(Err.Number) & ") " & Err.Description & " Last DLL error = 0x" & Hex(Err.LastDllError)
 End Sub
 
 
