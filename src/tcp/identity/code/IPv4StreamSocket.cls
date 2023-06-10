@@ -11,23 +11,51 @@ Private Const COMMAND_ERROR = -1
 Private Const RECV_ERROR = -1
 Private Const NO_ERROR = 0
 
-''' <summary> Creates a socket that is bound to a specific transport service provider. </summary>
+''' <summary> Establishes a connection to a specified socket. </summary>
 ''' <remarks> </remarks>
-''' <param name="addressFamily"> [in] The address family specification.
-''' The values currently supported are <see cref="AF_INET"/> or <see cref="AF_INET6"/>, which are the Internet
-''' address family formats for IPv4 and IPv6. Other options for address family (AF_NETBIOS for use with NetBIOS,
-''' for example) are supported if a Windows Sockets service provider for the address family is installed.
-''' Note that the values for the AF_ address family and PF_ protocol family constants are identical
-''' (for example, AF_INET and PF_INET), so either constant can be used.
+''' <param name="s">          [in] A descriptor identifying an unconnected socket. </param>
+''' <param name="address">    [in] A pointer to the <see cref="wsock32.sockaddr_in"/> structure to which the
+'''                           connection should be established. </param>
+''' <param name="addressLen"> [in] The length, in bytes, of the sockaddr structure pointed to by the
+'''                           <paramref name="address"/> parameter. </param>
+''' <returns> If no error occurs, connect returns zero. Otherwise, it returns SOCKET_ERROR.
+''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
+Private Declare PtrSafe Function connect_ Lib "wsock32.dll" Alias "connect" ( _
+        ByVal s As Long, ByRef address As sockaddr_in, ByVal addressLen As Long) As Long
+
+''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
+''' <remarks> winsock2 only? </remarks>
+''' <param name="s">       [in] A descriptor identifying a bound, unconnected socket. </param>
+''' <param name="backlog"> [in] The maximum length of the queue of pending connections. If set to SOMAXCONN,
+'''                         the underlying service provider responsible for socket s will set the backlog to a
+'''                         maximum reasonable value. If set to SOMAXCONN_HINT(N) (where N is a number), the
+'''                         backlog value will be N, adjusted to be within the range (200, 65535). Note that
+'''                         SOMAXCONN_HINT can be used to set the backlog to a larger value than possible with SOMAXCONN.
+'''                         SOMAXCONN_HINT is only supported by the Microsoft TCP/IP service provider. There is no
+'''                         standard provision to obtain the actual backlog value.
 ''' </param>
-''' <param name="socketType">    [in] The type specification for the new socket.
-''' In Windows Sockets 1.1, the only possible socket types are SOCK_DGRAM and SOCK_STREAM. </param>
-''' <param name="protocol"> The protocol to be used. The possible options for the protocol parameter are specific
-''' to the address family and socket type specified. </param>
-''' <returns> If no error occurs, socket returns a descriptor referencing the new socket.
-''' Otherwise, a value of INVALID_SOCKET is returned, and a specific error code can be retrieved by
-''' calling WSAGetLastError. <returns>
-Private Declare PtrSafe Function CreateSocket Lib "wsock32.dll" Alias "socket" (ByVal addressFamily As Long, ByVal socketType As Long, ByVal protocol As Long) As Long
+''' <returns> If no error occurs, listen returns zero. Otherwise, a value of SOCKET_ERROR is returned, and a specific error code can be retrieved by calling WSAGetLastError. <returns>
+Private Declare PtrSafe Function listen_ Lib "wsock32.dll" Alias "listen" ( _
+        ByVal s As Long, ByVal backlog As Integer) As Long
+
+''' <summary> Sends data on a connected socket. </summary>
+''' <remarks> </remarks>
+''' <param name="s">            [in] A descriptor identifying a connected socket. </param>
+''' <param name="buffer">       [in] A pointer to a buffer containing the data to be transmitted. </param>
+''' <param name="bufferLength"> [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
+''' <param name="flags">        [in] A set of flags that specify the way in which the call is made. This parameter is
+'''                             constructed by using the bitwise OR operator with any of the following values:
+'''                             MSG_DONTROUTE: Specifies that the data should not be subject to routing. A Windows Sockets
+'''                                            service provider can choose to ignore this flag.
+'''                             MSG_OOB: Sends OOB data (stream-style socket such as SOCK_STREAM only).
+'''                             </param>
+''' <returns>
+''' If no error occurs, send returns the total number of bytes sent, which can be less than the number requested to be sent
+''' in the len parameter. Otherwise, a value of SOCKET_ERROR is returned, and a specific error code can be retrieved by calling
+''' WSAGetLastError.
+''' <returns>
+Private Declare PtrSafe Function send_ Lib "wsock32.dll" Alias "send" ( _
+        ByVal s As Long, buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
 Private m_socketId As Long
 Private m_connected As Boolean
@@ -101,15 +129,15 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Integer) As B
     Dim address As wsock32.sockaddr_in
     
     ' set the binary address
-    address.sin_addr.s_addr = wsock32.inet_addr(host)
+    address.sin_addr.s_addr = WinsockApi.ToInetAddress(host)
     
     address.sin_family = wsock32.AF_INET
     
     ' set the port in network byte order
-    address.sin_port = wsock32.htons(port)
+    address.sin_port = WinsockApi.ToInetByteOrder(port)
     
     Dim connectResult As Long
-    connectResult = wsock32.connect(m_socketId, address, Len(address))
+    connectResult = connect_(m_socketId, address, Len(address))
     If connectResult = wsock32.SOCKET_ERROR Then
         Err.Raise ErrorCodes.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
                   ErrorCodes.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
@@ -143,19 +171,24 @@ End Function
 ''' <summary> Sends a terminated message to the server. </summary>
 ''' <param name="command"> The message. </param>
 ''' <returns> The number of bytes that were sent to the server. </returns>
-Public Function SendCommand(ByVal command As String) As Integer
+Public Function SendMessage(ByVal command As String) As Integer
 
     If StringExtensions.IsNullOrEmpty(command) Then
-        SendCommand = 0
+        SendMessage = 0
     Else
-        count = wsock32.send(Me.socketId, ByVal command, Len(command), 0)
+        Dim commandLength As Integer
+        commandLength = Len(command)
+        Dim sentLength As Integer
+        sentLength = send_(Me.socketId, ByVal command, Len(command), 0)
         
-        If count < 0 Then
+        If sentLength < 0 Then
+            ' if the sent length is negative, we have an API error.
             Err.Raise ErrorCodes.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
                       ErrorCodes.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
-            SendCommand = COMMAND_ERROR
+            SendMessage = COMMAND_ERROR
+        ElseIf sentLength <> commandLength Then
         Else
-            SendCommand = count
+            SendMessage = count
         End If
     End If
 

@@ -16,12 +16,12 @@ Private Sub ReadIdentityButton_Click()
     Dim port As Integer
     Dim repeatCount As Integer
     
-    repeatCount = Range("B1").Value
-    host = Range("B2").Value
-    port = Range("B3").Value
+    repeatCount = Range("B1").value
+    host = Range("B2").value
+    port = Range("B3").value
     
-    Range("C2").Value = host
-    Range("D2").Value = port
+    Range("C2").value = host
+    Range("D2").value = port
     
     ' scpi.preset
     
@@ -33,11 +33,11 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
 
     On Error GoTo Finally
     
-    Range("E2").Value = ""
-    Range("F2").Value = ""
-    Range("G2").Value = ""
-    Range("H2").Value = ""
-    Range("I2").Value = ""
+    Range("E2").value = ""
+    Range("F2").value = ""
+    Range("G2").value = ""
+    Range("H2").value = ""
+    Range("I2").value = ""
 
     Dim maximumLength As Integer
     maximumLength = 1024
@@ -50,18 +50,18 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
     Dim totalMilliseconds As Double
     
     ' report the socket number
-    Range("E2").Value = socket.socketId
+    Range("E2").value = socket.socketId
     
     socket.OpenConnection host, port
     
     ' report the connection state
-    Range("F2").Value = socket.Connected
+    Range("F2").value = socket.Connected
     
     If socket.Connected Then
     
         Dim command As String
         command = "*IDN?"
-        Range("G2").Value = command
+        Range("G2").value = command
         
         Dim loopCount As Integer
         Do While loopCount < repeatCount
@@ -70,24 +70,24 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
             sw.Restart
             
             ' send the command
-            socket.SendCommand (command & vbCrLf)
+            socket.SendMessage command & vbLf
         
             ' receive the reading
             readCount = socket.Receive(buffer, maximumLength)
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").Value = readCount
-            Range("I2").Value = buffer
+            Range("H2").value = readCount
+            Range("I2").value = buffer
     
         Loop
   
         ' command = ":SYST:PRES"
-        ' count = SendCommand(command)
+        ' count = SendMessage(command)
         ' Call opc
         
-        Range("I3").Value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
-        Range("I4").Value = CStr(totalMilliseconds) + " ms"
+        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
+        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
     
     Else
         MsgBox "connection failed without reporting an exception"

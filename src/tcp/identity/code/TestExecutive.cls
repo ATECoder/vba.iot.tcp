@@ -44,14 +44,14 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     row = 1
     
     testDataSheet.Rows("2:" & testDataSheet.Rows.count).ClearContents
-    moduleName = testDataSheet.Range("B" & row).Value
+    moduleName = testDataSheet.Range("B" & row).value
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Testing"
-    testDataSheet.Range("B" & row).Value = moduleName
+    testDataSheet.Range("A" & row).value = "Testing"
+    testDataSheet.Range("B" & row).value = moduleName
    
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Test Name"
-    testDataSheet.Range("B" & row).Value = "Outcome"
+    testDataSheet.Range("A" & row).value = "Test Name"
+    testDataSheet.Range("B" & row).value = "Outcome"
     
     Dim AppArray() As String
     
@@ -72,13 +72,13 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
                 Set Assert = Application.Run(temp)
         
                 row = row + 1
-                testDataSheet.Range("A" & row).Value = temp
+                testDataSheet.Range("A" & row).value = temp
                 If Assert.AssertSuccessful Then
                     passedCount = passedCount + 1
-                    testDataSheet.Range("B" & row).Value = "passed"
+                    testDataSheet.Range("B" & row).value = "passed"
                 Else
                     failedCount = failedCount + 1
-                    testDataSheet.Range("B" & row).Value = Assert.AssertMessage
+                    testDataSheet.Range("B" & row).value = Assert.AssertMessage
                 End If
             End If
         
@@ -88,16 +88,16 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     sw.StopCounter
     row = row + 1
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Summary:"
+    testDataSheet.Range("A" & row).value = "Summary:"
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Passed"
-    testDataSheet.Range("B" & row).Value = passedCount
+    testDataSheet.Range("A" & row).value = "Passed"
+    testDataSheet.Range("B" & row).value = passedCount
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Failed"
-    testDataSheet.Range("B" & row).Value = failedCount
+    testDataSheet.Range("A" & row).value = "Failed"
+    testDataSheet.Range("B" & row).value = failedCount
     row = row + 1
-    testDataSheet.Range("A" & row).Value = "Duration"
-    testDataSheet.Range("B" & row).Value = CStr(sw.ElapsedMilliseconds) & " ms"
+    testDataSheet.Range("A" & row).value = "Duration"
+    testDataSheet.Range("B" & row).value = CStr(sw.ElapsedMilliseconds) & " ms"
     
     Exit Sub
 

@@ -40,7 +40,7 @@ Private Sub Class_Initialize()
     errorCode = errorCode + 1
     Set m_socketCreationError = New UserDefinedError
     m_socketCreationError.InitiateProperties errorCode, "SocketCreationError", _
-        "Failed creating socket using winsock CreateSocket() alias socket."
+        "Failed creating socket using winsock socket()."
     AddUserDefinedError Me.SocketCreationError
     
     errorCode = errorCode + 1
