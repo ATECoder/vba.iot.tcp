@@ -1,16 +1,16 @@
 Attribute VB_Name = "IPv4StreamSocketTests"
 
-''' <summary> Tests creating a socket. </summary>
-''' <returns> An instance of the <see cref="Assert"/> class. </returns>
+''' <summary> Unit test. Asserts creating a socket. </summary>
+''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
 Public Function TestCreateSocket() As Assert
 
     Dim sock As IPv4StreamSocket
     Set sock = New IPv4StreamSocket
     
     ' check if socket has a valid id
-    Set TestCreateSocket = Assert.IsTrue(sock.socketId <> wsock32.INVALID_SOCKET, _
-        "Failed creating socket; socket id " & Str$(sock.socketId) & _
-        " must not equal to wsock32.INVALID_SOCKET=" & wsock32.INVALID_SOCKET)
+    Set TestCreateSocket = Assert.IsTrue(sock.SocketId <> wsock32.ws32_INVALID_SOCKET, _
+        "Failed creating socket; socket id " & Str$(sock.SocketId) & _
+        " must not equal to wsock32.INVALID_SOCKET=" & wsock32.ws32_INVALID_SOCKET)
     
     If Not TestCreateSocket.AssertSuccessful Then
         Set sock = Nothing

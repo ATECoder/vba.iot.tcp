@@ -17,7 +17,7 @@ Public AssertMessage As String
 ''' <param name="expected"> The value the caller expects to have. </param
 ''' <param name="actual"> The actual value. </param
 ''' <param name="message"> A message to show in case the assertion failed. </param
-''' <returns> True if values are equal; otherwise, false. </returns>
+''' <returns> An <see cref="Assert"/> instant of True if values are equal; otherwise, False. </returns>
 Public Function AreEqual(ByRef expected, ByRef actual, ByRef message As String) As Assert
     Set AreEqual = IsTrue(Not expected <> actual, message)
     

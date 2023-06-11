@@ -7,8 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-' Creates a temporary test file.
+''' <summary> Creates a temporary test file. </summary>
+''' <returns> A <see cref="TestFileHandle"/>. <returns>
 Public Function CreateTestFile() As TestFileHandle
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -19,10 +19,8 @@ Public Function CreateTestFile() As TestFileHandle
     Set CreateTestFile.TestFileStream = fso.CreateTextFile(CreateTestFile.TestFilename, True)
 End Function
 
-
-' Deletes the given test file.
-' Arguments:
-' - fileHandle The file handle to delete
+''' <summary> Deletes the given test file. </summary>
+''' <param name="fileHandle"> The <see cref="TestFileHandle"/> to delete. </param>
 Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -70,17 +68,23 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
             If temp <> "execute" And temp <> "ListAllMacroNames" Then
         
                 Set Assert = Application.Run(temp)
-        
+                
                 row = row + 1
-                testDataSheet.Range("A" & row).value = temp
-                If Assert.AssertSuccessful Then
-                    passedCount = passedCount + 1
-                    testDataSheet.Range("B" & row).value = "passed"
+                
+                If IsObject(Assert) Then
+                    testDataSheet.Range("A" & row).value = temp
+                    If Assert.AssertSuccessful Then
+                        passedCount = passedCount + 1
+                        testDataSheet.Range("B" & row).value = "passed"
+                    Else
+                        failedCount = failedCount + 1
+                        testDataSheet.Range("B" & row).value = Assert.AssertMessage
+                    End If
                 Else
-                    failedCount = failedCount + 1
-                    testDataSheet.Range("B" & row).value = Assert.AssertMessage
+                    testDataSheet.Range("B" & row).value = "assert not defined"
                 End If
-            End If
+        
+           End If
         
         End If
     
@@ -102,8 +106,8 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     Exit Sub
 
 Finally:
-    MsgBox "Test execution failed at " & Err.source & " with error number (0x" _
-           & Hex(Err.Number) & ") " & Err.Description & " Last DLL error = 0x" & Hex(Err.LastDllError)
+    MsgBox "Test execution failed " & UserDefinedErrors.FormattedErr & _
+           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
 End Sub
 
 

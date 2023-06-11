@@ -7,11 +7,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-' Trims the given character from the given text starting from the left.
-' Arguments:
-' - text The text to trim
-' - c The character to trim
+''' <remarks> Trims the given character from the given text starting from the left. </remarks>
+''' <param name="text"> The text to trim. </param>
+''' <param name="c">    The character to trim. </param>
+''' <returns> A string. <returns>
 Public Function TrimLeft(ByVal text As String, c As String) As String
     Dim textLength As Long
     textLength = Len(text)
@@ -32,11 +31,11 @@ Public Function TrimLeft(ByVal text As String, c As String) As String
     TrimLeft = text
 End Function
 
-
-' Trims the given character from the given text starting from the right.
-' Arguments:
-' - text The text to trim
-' - c The character to trim
+''' <summary> Trims the given character from the given text starting from the right. </summary>
+''' <remarks> </remarks>
+''' <param name="text"> The text to trim. </param>
+''' <param name="c">    The character to trim. </param>
+''' <returns> A string. <returns>
 Public Function TrimRight(ByVal text As String, c As String) As String
     Dim textLength As Long
     textLength = Len(text)
@@ -57,12 +56,12 @@ Public Function TrimRight(ByVal text As String, c As String) As String
     TrimRight = text
 End Function
 
-
-' Gets the substring from the given text.
-' Arguments:
-' - text The text to get the substring from
-' - startIndex The index of the first character of the substring
-' - [length] The amount of characters to take from the original string
+''' <summary> Gets the substring from the given text. </summary>
+''' <remarks> </remarks>
+''' <param name="text">       The text to get the substring from. </param>
+''' <param name="startIndex"> The index of the first character of the substring. </param>
+''' <param name="length">     The number of characters to take from the original string. </param>
+''' <returns> A string. <returns>
 Public Function Substring(ByVal text As String, ByVal startIndex As Integer, Optional ByVal length As Variant) As String
     If startIndex > Len(text) Then
         startIndex = Len(text)
@@ -79,38 +78,38 @@ Public Function Substring(ByVal text As String, ByVal startIndex As Integer, Opt
     Substring = Left(Right(text, Len(text) - startIndex), length)
 End Function
 
-
-' Checks whether the given text starts with the given sequence.
-' Arguments:
-' - text The text to check for the sequence
-' - startText The text to be located at the start
+''' <summary> Checks whether the given text starts with the given sequence. </summary>
+''' <remarks> </remarks>
+''' <param name="text">      The text to check for the sequence. </param>
+''' <param name="startText"> The text to be located at the start. </param>
+''' <returns> A Boolean <returns>
 Public Function StartsWith(ByVal text As String, ByVal startText As String) As Boolean
     StartsWith = InStr(text, startText) = 1
 End Function
 
-
-' Checks whether the given text ends with the given sequence.
-' Arguments:
-' - text The text to check for the sequence
-' - endText The text to be located at the end
+''' <summary> Checks whether the given text ends with the given sequence. </summary>
+''' <remarks> </remarks>
+''' <param name="text">    The text to check for the sequence. </param>
+''' <param name="endText"> The text to be located at the end. </param>
+''' <returns> A Boolean. <returns>
 Public Function EndsWith(ByVal text As String, ByVal endText As String) As Boolean
     EndsWith = Right(text, Len(endText)) = endText
 End Function
 
-
-' Gets the character at the given index from the given string.
-' Arguments:
-' - text The text to get the character from
-' - index The index of the character to get
+''' <summary> Gets the character at the given index from the given string. </summary>
+''' <remarks> </remarks>
+''' <param name="text">  The text to get the character from. </param>
+''' <param name="index"> The index of the character to get. </param>
+''' <returns> A string. <returns>
 Public Function CharAt(ByVal text As String, ByVal index As Integer) As String
     CharAt = Mid(text, index, 1)
 End Function
 
-
-' Repeats the given string the given amount of times.
-' Arguments:
-' - text The text to repeat
-' - count The amount of times to repeat the given string
+''' <summary> Repeats the given string the given amount of times. </summary>
+''' <remarks> </remarks>
+''' <param name="text">  The text to repeat. </param>
+''' <param name="count"> The amount of times to repeat the given string. </param>
+''' <returns> A string. <returns>
 Public Function Repeat(ByVal text As String, ByVal count As Long) As String
     Repeat = ""
     
@@ -120,10 +119,10 @@ Public Function Repeat(ByVal text As String, ByVal count As Long) As String
     Next
 End Function
 
-
 ''' <summary> Converts a regular string to a unicode string,
 ''' e.g., "foo" to a L"foo" string.. </summary>
 ''' <param name="text"> The string to convert. </param>
+''' <returns> A string. <returns>
 Public Function StringToWideString(ByVal text As String) As String
     StringToWideString = StrConv(text, vbUnicode)
 End Function

@@ -5,8 +5,8 @@ Public Type TestFileHandle
     TestFileStream As TextStream
 End Type
 
-''' <summary> Tests listing the module tests. </summary>
-''' <returns> An instance of the <see cref="Assert"/> class. </returns>
+''' <summary> Unit test. Asserts creating a list of test modules. </summary>
+''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
 Public Function TestModuleList() As Assert
     Dim modules As Collection
     Set modules = WorkbookUtilities.ListTestModules
@@ -30,6 +30,8 @@ Public Function TestModuleList() As Assert
   
 End Function
 
+''' <summary> Unit test. Asserts creating a list of test macros. </summary>
+''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
 Public Function TestMacroList() As Assert
     Dim modules As Collection
     Set modules = WorkbookUtilities.ListTestModules()

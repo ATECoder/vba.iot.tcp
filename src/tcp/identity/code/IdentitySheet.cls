@@ -29,6 +29,10 @@ Private Sub ReadIdentityButton_Click()
     
 End Sub
 
+''' <summary> Sends the identity query and reads back the identity from the instrument. </summary>
+''' <param name="host"> The host IPv4 dotted address. </param>
+''' <param name="port"> the host port number. </param>
+''' <param name="repeatCount"> The number of time to repeat the query. </param>
 Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
@@ -50,7 +54,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
     Dim totalMilliseconds As Double
     
     ' report the socket number
-    Range("E2").value = socket.socketId
+    Range("E2").value = socket.SocketId
     
     socket.OpenConnection host, port
     
@@ -97,8 +101,8 @@ Finally:
 
     Dim errorMessage As String
     If Not Err Is Nothing And Err.Number <> 0 Then
-        errorMessage = "Reading identity failed at " & Err.source & " with error number (0x" _
-           & Hex(Err.Number) & "=" & CStr(Err.Number) & ") " & Err.Description & " Last DLL error = 0x" & Hex(Err.LastDllError)
+        errorMessage = "Reading identity failed" & UserDefinedErrors.FormattedErr & _
+                       " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
     End If
     
     On Error Resume Next

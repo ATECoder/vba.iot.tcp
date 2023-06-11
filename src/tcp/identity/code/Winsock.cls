@@ -21,23 +21,28 @@ Private m_disposed As Boolean
 Private m_socketCount As Integer
 
 ''' <summary> Initiates use of the Winsock DLL by a process. </summary>
-''' <param name="was"> A pointer to the WSADATA data structure that is to receive
+''' <param name="was"> A pointer to the ws32_WSADATA data structure that is to receive
 ''' details of the Windows Sockets implementation. </param>
 ''' <returns> If successful, the WSAStartup function returns zero. Otherwise, it returns one of
 ''' the error codes listed below. The WSAStartup function directly returns the extended error code
 ''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
 ''' </returns>
-Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" (ByVal versionRequired As Long, wsa As WSADATA) As Long
+Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" ( _
+        ByVal versionRequired As Long, wsa As wsock32.ws32_WSADATA) As Long
 
+''' <summary> Returns the error status for the last Windows Sockets operation that failed. </summary>
+''' <remarks> WSAGetLastError should be called immediately. This is necessary because some functions may reset
+''' the last extended error code to 0 if they succeed. </remarks>
+''' <returns> The return value indicates the error code for this thread's last Windows Sockets
+''' operation that failed. <returns>
 Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
 
 ''' <summary> terminates use of the Winsock dll. </summary>
 ''' <remarks> In a multithreaded environment, WSACleanup terminates Windows Sockets operations
 '''   for all threads. </remarks>
-''' <param name=""> </param>
 ''' <returns>
 '''   The return value is zero if the operation was successful. Otherwise, the value
-'''   SOCKET_ERROR is returned, and a specific error number can be retrieved by calling WSAGetLastError.
+'''   ws32_SOCKET_ERROR is returned, and a specific error number can be retrieved by calling WSAGetLastError.
 ''' <returns>
 Private Declare PtrSafe Function WSACleanup Lib "wsock32.dll" () As Long
 
@@ -70,11 +75,11 @@ Public Function Initialize()
         Exit Function
     End If
     
-    Dim startUpInfo As WSADATA
+    Dim startUpInfo As wsock32.ws32_WSADATA
     
     ' Initialize Winsock DLL
     
-    result = WSAStartup(wsock32.WINSOCK_VERSION, startUpInfo)
+    result = WSAStartup(wsock32.ws32_VERSION, startUpInfo)
     
     If result <> 0 Then
         Err.Raise ErrorCodes.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
@@ -130,7 +135,7 @@ Public Function Cleanup()
     ' Shutdown Winsock DLL
     Dim result As Long
     result = WSACleanup()
-    If result = wsock32.SOCKET_ERROR Then
+    If result = wsock32.ws32_SOCKET_ERROR Then
         Err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
                   ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
     End If
