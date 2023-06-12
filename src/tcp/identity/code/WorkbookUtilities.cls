@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
 
 ''' <summary> Exports all code files to the active workbook path. </summary>
 ''' <para name="subFolder"> Specifies the sub-folder were the files are to be stopred. </param>
@@ -58,13 +59,13 @@ End Function
 ''' <param name="macroNamePrefix"> Optional maxro name prefix. </param>
 ''' <param name="moduleNameSuffix"> Optional module name suffix </param>
 Public Function ListTestModules(Optional ByVal macroNamePrefix = "Test", _
-                                Optional ByVal moduleNameSuffix = "Tests") As Collection
+                                Optional ByVal moduleNameSuffix = "Tests") As VBA.collection
 
     Dim pj As VBProject
     Dim component As VBComponent
     On Error Resume Next
-    Dim moduleNames As Collection
-    Set moduleNames = New Collection
+    Dim moduleNames As VBA.collection
+    Set moduleNames = New VBA.collection
     Dim currentModuleName As String
     Dim newModuleName As String
     newModuleName = ""
@@ -106,12 +107,12 @@ Function ListAllMacroNames(moduleName As String, Optional ByVal delimiter As Str
     
     On Error Resume Next
     curMacro = ""
-    Documents.Add
     
     For Each pj In Application.VBE.VBProjects
         For Each component In pj.VBComponents
             If Not component Is Nothing Then
                 If component.CodeModule = moduleName Then
+                    Dim i As Integer
                     For i = 1 To component.CodeModule.CountOfLines
                        newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
 
@@ -144,6 +145,7 @@ Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As Stri
     curMacro = ""
     
     If Not component Is Nothing Then
+        Dim i As Integer
         For i = 1 To component.CodeModule.CountOfLines
             newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
             If curMacro <> newMacro Then
@@ -166,14 +168,14 @@ End Function
 ''' <remarks>
 ''' <param name="moduleName"> The module name where the macros reside. </param>
 ''' <param name="previx"> optional prefix </param>
-''' <returns> A collection of macro names. </returns>
-Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As String = "Test") As Collection
+''' <returns> A Collection of macro names. </returns>
+Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As String = "Test") As VBA.collection
 
     Dim pj As VBProject
     Dim component As VBComponent
     Dim curMacro As String, newMacro As String
-    Dim macros As Collection
-    Set macros = New Collection
+    Dim macros As VBA.collection
+    Set macros = New VBA.collection
     
     On Error Resume Next
     curMacro = ""
@@ -182,6 +184,7 @@ Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As Stri
         For Each component In pj.VBComponents
             If Not component Is Nothing Then
                 If component.CodeModule = moduleName Then
+                    Dim i As Integer
                     For i = 1 To component.CodeModule.CountOfLines
                         newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
                         If curMacro <> newMacro Then

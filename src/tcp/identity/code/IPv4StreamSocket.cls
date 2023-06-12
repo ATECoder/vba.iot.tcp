@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+Option Explicit
+
 Private Const COMMAND_ERROR = -1
 Private Const RECV_ERROR = -1
 Private Const NO_ERROR = 0
@@ -155,8 +157,8 @@ Private Sub Class_Initialize()
     
     m_socketId = WinsockApi.CreateIPv4StreamSocket()
     If m_socketId = wsock32.ws32_INVALID_SOCKET Then
-        Err.Raise ErrorCodes.SocketCreationError.Code, "IdentityReader.IPv4StreamSocket.Class_Initialize", _
-                  ErrorCodes.SocketCreationError.Description & " Last error: " & CStr(Winsock.lastError)
+        Err.Raise UserDefinedErrors.SocketCreationError.Code, "IdentityReader.IPv4StreamSocket.Initialize", _
+                  UserDefinedErrors.SocketCreationError.Description & " Last error: " & CStr(Winsock.lastError)
     Else
         Winsock.Register Me
         
@@ -218,8 +220,8 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Integer) As B
     Dim connectResult As Long
     connectResult = connect_(m_socketId, address, Len(address))
     If connectResult = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise ErrorCodes.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
-                  ErrorCodes.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+        Err.Raise UserDefinedErrors.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
+                  UserDefinedErrors.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
         m_connected = False
     Else
         m_connected = True
@@ -237,8 +239,8 @@ Public Function CloseConnection() As Boolean
     result = closesocket_(m_socketId)
     m_socketId = 0
     If result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise ErrorCodes.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                  ErrorCodes.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+        Err.Raise UserDefinedErrors.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
+                  UserDefinedErrors.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.lastError)
         CloseConnection = False
     Else
         m_connected = False
@@ -262,12 +264,12 @@ Public Function SendMessage(ByVal command As String) As Integer
         
         If sentLength < 0 Then
             ' if the sent length is negative, we have an API error.
-            Err.Raise ErrorCodes.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                      ErrorCodes.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
+            Err.Raise UserDefinedErrors.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
+                      UserDefinedErrors.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
             SendMessage = COMMAND_ERROR
         ElseIf sentLength <> commandLength Then
         Else
-            SendMessage = count
+            SendMessage = sentLength
         End If
     End If
 
@@ -326,8 +328,8 @@ Public Sub SetTimeout(ByVal interval As Long)
     result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, interval, 4)
 
     If result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise ErrorCodes.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetTimeout", _
-                  ErrorCodes.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
+        Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetTimeout", _
+                  UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
     Else
         m_timeout = interval
     End If

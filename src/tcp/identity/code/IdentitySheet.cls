@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+Option Explicit
 
 ''' <summary> Reads the identity form the instrument with the
 ''' IP address and port defined in the parent sheet. </summary>

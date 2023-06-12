@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 Private Const COMMAND_ERROR = -1
 Private Const RECV_ERROR = -1
 Private Const NO_ERROR = 0
@@ -82,8 +84,8 @@ Public Function Initialize()
     result = WSAStartup(wsock32.ws32_VERSION, startUpInfo)
     
     If result <> 0 Then
-        Err.Raise ErrorCodes.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
-                  ErrorCodes.WinsockStartingError.Description & " Last error: " & CStr(result)
+        Err.Raise UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
+                  UserDefinedErrors.WinsockStartingError.Description & " Last error: " & CStr(result)
     End If
     m_initiated = (result = 0)
     m_disposed = False
@@ -136,8 +138,8 @@ Public Function Cleanup()
     Dim result As Long
     result = WSACleanup()
     If result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                  ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
+        Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                  UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
     End If
     Cleanup = result
 End Function
@@ -157,8 +159,8 @@ Public Sub Dispose()
         Dim result As Long
         result = WSACleanup()
         If result <> 0 Then
-            Err.Raise ErrorCodes.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
-                      ErrorCodes.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
+            Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
+                      UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
         End If
     End If
 End Sub

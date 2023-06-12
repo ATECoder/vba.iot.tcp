@@ -1,4 +1,6 @@
 Attribute VB_Name = "StringExtensionsTests"
+Option Explicit
+
 ''' <summary> Unit test. Asserts trim left. </summary>
 ''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
 Public Function TestTrimLeft() As Assert

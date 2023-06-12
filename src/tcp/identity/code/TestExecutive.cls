@@ -7,13 +7,15 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 ''' <summary> Creates a temporary test file. </summary>
 ''' <returns> A <see cref="TestFileHandle"/>. <returns>
 Public Function CreateTestFile() As TestFileHandle
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
     
-    CreateTestFile.TestFilename = fso.BuildPath(ActiveDocument.path, fso.GetTempName())
+    CreateTestFile.TestFilename = fso.BuildPath(ActiveWorkbook.path, fso.GetTempName())
     
     ' Creates a specified file name and returns a TextStream object that can be used to read from or write to the file.
     Set CreateTestFile.TestFileStream = fso.CreateTextFile(CreateTestFile.TestFilename, True)
@@ -35,7 +37,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     On Error GoTo Finally
     
     Dim moduleName As String
-    Dim messages As New Collection
+    Dim messages As New VBA.collection
     Dim passedCount As Integer
     Dim failedCount As Integer
     Dim row As Integer
@@ -59,13 +61,15 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     Dim sw As StopWatch
     Set sw = New StopWatch
-    For i = 0 To UBound(AppArray)
+    Dim temp As String
+    Dim i As Integer
+    For i = LBound(AppArray) To UBound(AppArray)
     
         temp = AppArray(i)
         
         If temp <> "" Then
         
-            If temp <> "execute" And temp <> "ListAllMacroNames" Then
+            If temp <> "execute" And temp <> "ListAllMacroNames" And temp <> "AddTestModules" Then
         
                 Set Assert = Application.Run(temp)
                 

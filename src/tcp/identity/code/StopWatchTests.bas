@@ -1,4 +1,5 @@
 Attribute VB_Name = "StopWatchTests"
+Option Explicit
 
 ''' <summary> Unit test. Asserts that the <see cref="StopWatch"/>.<see cref="StopWatch.ElapedMilliseconds"/>
 ''' exceeds the thread sleep time. </summary>

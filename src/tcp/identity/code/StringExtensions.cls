@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 ''' <remarks> Trims the given character from the given text starting from the left. </remarks>
 ''' <param name="text"> The text to trim. </param>
 ''' <param name="c">    The character to trim. </param>
@@ -130,7 +132,7 @@ End Function
 ''' <summary> Returns true if the value is null or empty. </summary>
 ''' <returns> true if the value is null or empty. </returns>
 Public Function IsNullOrEmpty(ByVal text As String) As Boolean
-    IsNullOrWhiteSpace = (text = "")
+    IsNullOrEmpty = (text = "")
 End Function
 
 

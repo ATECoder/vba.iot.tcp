@@ -1,4 +1,6 @@
 Attribute VB_Name = "wsock32"
+Option Explicit
+
 ''' <summary> The winsock implementation version </summary.
 ''' <remarks>
 ''' Version 1.1 (1*256 + 1) = 257

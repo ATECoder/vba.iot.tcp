@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 ''' <summary> Creates a socket that is bound to a specific transport service provider. </summary>
 ''' <remarks> </remarks>
 ''' <param name="addressFamily"> [in] The address family specification.
@@ -103,7 +105,7 @@ End Sub
 ''' <summary> Removes socket s from set. </summary>
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
-Public Sub FD_SET_REMOVE(ByVal s As Long, ByRef socketSet As wsock32.ws32_fd_set)
+Public Sub FD_SET_REMOVE(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_fd_set)
     Dim i As Integer
     i = 0
     Do While i < socketSet.fd_count
@@ -120,19 +122,19 @@ End Sub
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
 Public Function FD_SET_CONTAINS(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_fd_set) As Boolean
-    Dim isSet As Boolean
-    isSet = False
+    Dim isFound As Boolean
+    isFound = False
     Dim i As Integer
     i = 0
     
     Do While i < socketSet.fd_count
         If socketSet.fd_array(i) = socket_Id Then
-            isSet = True
+            isFound = True
             Exit Do
         End If
         i = i + 1
     Loop
-    FD_ISSET = isSet
+    FD_SET_CONTAINS = isFound
    
 End Function
 

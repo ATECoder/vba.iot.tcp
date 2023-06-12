@@ -1,4 +1,6 @@
 Attribute VB_Name = "My"
+Option Explicit
+
 ''' <summary> Exports all code files to the active workbook path. </summary>
 Public Sub ExportCodeFiles()
     WorkbookUtilities.ExportCodeFiles

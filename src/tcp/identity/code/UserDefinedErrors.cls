@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+
 Private m_errorsDix As Dictionary
 Private m_winsockStartingError As UserDefinedError
 Private m_winsockCleanupError As UserDefinedError

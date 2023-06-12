@@ -7,6 +7,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
 
 ''' <summary> Copies the contents of a source memory block to a destination memory block,
 ''' and supports overlapping source and destination memory blocks. </summary>

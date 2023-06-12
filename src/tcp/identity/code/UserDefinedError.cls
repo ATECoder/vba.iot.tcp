@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+Option Explicit
+
 Private m_code As Long
 Private m_name As String
 Private m_description As String
@@ -55,7 +57,7 @@ End Property
 ''' <summary> Returns a string representation of the error. </summary>
 ''' <param name="additionaInfo"> [optional] additional information to append to the error message. </param>
 ''' <returns> A String representation of the error. </returns>
-Public Function ToString(Optional ByVal additionaInfo As String = "") As String
+Public Function ToString(Optional ByVal additionalInfo As String = "") As String
     ToString = "User Error " & Me.Name & " (0x" & VBA.LCase$(VBA.Hex$(Me.Code)) & " 0x" & VBA.LCase$(VBA.Hex$(Me.UserErrorNumber)) & "): " & _
                 Me.Description & additionalInfo
 End Function
