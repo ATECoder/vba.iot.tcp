@@ -10,7 +10,9 @@ End Type
 ''' <summary> Adds the test modules. </summary>
 Private Sub AddTestModules(knownTestModules As VBA.collection)
     knownTestModules.Add "IPv4StreamSocketTests"
+    knownTestModules.Add "MarshalTests"
     knownTestModules.Add "StopWatchTests"
+    knownTestModules.Add "StringBuilderTests"
     knownTestModules.Add "StringExtensionsTests"
     knownTestModules.Add "TestExecutiveTests"
     knownTestModules.Add "UserDefinedErrorsTests"

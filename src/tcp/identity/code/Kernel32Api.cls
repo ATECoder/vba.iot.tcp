@@ -24,8 +24,8 @@ Private Declare PtrSafe Sub SleepMilliseconds Lib "kernel32" Alias "Sleep" (ByVa
 ''' <param name="source">      The start of the soruce block. </param>
 ''' <param name="destination"> The start of the destination block. </param>
 ''' <param name="length">      The number of bytes which to copy. </param>
-Public Sub CopyMemory(ByRef source() As Double, ByRef destination() As Double, ByVal length As Long)
-    RtlMoveMemory destination(LBound(source)), destination(LBound(source)), length
+Public Sub CopyMemory(ByRef source() As Double, ByRef destination() As Double, ByVal Length As Long)
+    RtlMoveMemory destination(LBound(source)), destination(LBound(source)), Length
 End Sub
 
 ''' <summary> Suspends the thread for the spefified duration in milleseconds. </summary>

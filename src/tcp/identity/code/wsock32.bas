@@ -49,8 +49,8 @@ Public Const ws32_SOCK_RAW = 3              ' Raw data socket
 Public Const ws32_SOCK_RDM = 4              ' Reliable Delivery socket
 Public Const ws32_SOCK_SEQPACKET = 5        ' Sequenced Packet socket
 
-Public Const ws32_INADDR_ANY = 0
-Public Const ws32_INADDR_NONE = &HFFFFFFFF
+Public Const ws32_INADDR_ANY As Long = 0
+Public Const ws32_INADDR_NONE As Long = &HFFFFFFFF
 
 ''' <summary> Sets the Internet address type as a long integer (32-bit) </summary>
 Public Type ws32_IN_ADDR
@@ -62,6 +62,8 @@ Public Type ws32_SocketAddress
     sa_family As Integer
     sa_data As String * 14
 End Type
+
+Public Const ws32_SocketAddressLen = 16
 
 ''' <summary> Sets the socket IPv4 address expressed in network byte order. </summary>
 Public Type ws32_SocketAddress_in

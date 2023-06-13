@@ -9,10 +9,6 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Const COMMAND_ERROR = -1
-Private Const RECV_ERROR = -1
-Private Const NO_ERROR = 0
-
 ' true if winsock was initiated
 Private m_initiated As Boolean
 

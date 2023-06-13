@@ -10,7 +10,6 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ''' <summary> Creates a socket that is bound to a specific transport service provider. </summary>
-''' <remarks> </remarks>
 ''' <param name="addressFamily"> [in] The address family specification.
 ''' The values currently supported are <see cref="ws32_AF_INET"/> or <see cref="ws32_AF_INET6"/>, which are the Internet
 ''' address family formats for IPv4 and IPv6. Other options for address family (ws32_AF_NETBIOS for use with NetBIOS,
@@ -45,7 +44,6 @@ Private Declare PtrSafe Function toInetByteOrder_ Lib "wsock32.dll" Alias "htons
         ByVal hostshort As Long) As Integer
         
 ''' <summary> Converts an IPv4 dotted-decimal address into a binary address value for the ws32_IN_ADDR structure. </summary>
-''' <remarks> </remarks>
 ''' <param name="hostname"> [in] An IPv4 dotted-decimal address. </param>
 ''' <returns> If no error occurs, returns an unsigned long value containing a suitable binary
 ''' representation of the Internet address given. If the string in the hostname parameter does not contain a legitimate
@@ -55,7 +53,6 @@ Private Declare PtrSafe Function toInetAddress_ Lib "wsock32.dll" Alias "inet_ad
         ByVal hostname As String) As Long
         
 ''' <summary> Determines the status of one or more sockets, waiting if necessary, to perform synchronous I/O. </summary>
-''' <remarks> winsock2  only? </remarks>
 ''' <param name="nfds">      [in] Ignored. The nfds parameter is included only for compatibility with Berkeley sockets.</param>
 ''' <param name="readfds">   [in, out] An optional pointer to a set of sockets to be checked for readability. </param>
 ''' <param name="writefds">  [in, out] An optional pointer to a set of sockets to be checked for writability. </param>
@@ -69,7 +66,7 @@ Private Declare PtrSafe Function toInetAddress_ Lib "wsock32.dll" Alias "inet_ad
 ''' <returns>
 Private Declare PtrSafe Function select_ Lib "wsock32.dll" Alias "select" ( _
         ByVal nfds As Integer, readfds As wsock32.ws32_fd_set, writefds As wsock32.ws32_fd_set, _
-        exceptfds As wsock32.ws32_fd_set, Timeout As wsock32.ws32_Time_Value) As Integer
+        exceptfds As wsock32.ws32_fd_set, timeout As wsock32.ws32_Time_Value) As Integer
 
 ''' <summary> Creates a socket that is bound to a IPv4 transport service. </summary>
 ''' <returns> If no error occurs, socket returns a descriptor referencing the new socket.
@@ -78,7 +75,6 @@ Private Declare PtrSafe Function select_ Lib "wsock32.dll" Alias "select" ( _
 Public Function CreateIPv4StreamSocket() As Long
     CreateIPv4StreamSocket = createSocket_(wsock32.ws32_AF_INET, wsock32.ws32_SOCK_STREAM, 0)
 End Function
-
 
 ''' <summary> Converts an unsigned short value from host to TCP/IP network byte order (which is big-endian). </summary>
 ''' <param name="value"> [in] A 16-bit number in host byte order. </param>
@@ -105,11 +101,11 @@ End Sub
 ''' <summary> Removes socket s from set. </summary>
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
-Public Sub FD_SET_REMOVE(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_fd_set)
+Public Sub FD_SET_REMOVE(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set)
     Dim i As Integer
     i = 0
     Do While i < socketSet.fd_count
-        If socketSet.fd_array(i) = socket_Id Then
+        If socketSet.fd_array(i) = socket_id Then
             socketSet.fd_array(i) = 0
             socketSet.fd_count = socketSet.fd_count - 1
             Exit Do
@@ -121,14 +117,14 @@ End Sub
 ''' <summary> Checks to see if s is a member of set and returns TRUE if so.. </summary>
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
-Public Function FD_SET_CONTAINS(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_fd_set) As Boolean
+Public Function FD_SET_CONTAINS(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set) As Boolean
     Dim isFound As Boolean
     isFound = False
     Dim i As Integer
     i = 0
     
     Do While i < socketSet.fd_count
-        If socketSet.fd_array(i) = socket_Id Then
+        If socketSet.fd_array(i) = socket_id Then
             isFound = True
             Exit Do
         End If
@@ -141,12 +137,12 @@ End Function
 ''' <summary> Adds a socket to the set. </summary>
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
-Public Sub FD_SET_ADD(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_fd_set)
+Public Sub FD_SET_ADD(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set)
     Dim i As Integer
     i = 0
     
     Do While i < socketSet.fd_count
-        If socketSet.fd_array(i) = socket_Id Then
+        If socketSet.fd_array(i) = socket_id Then
             Exit Do
         End If
         i = i + 1
@@ -154,11 +150,37 @@ Public Sub FD_SET_ADD(ByVal socket_Id As Long, ByRef socketSet As wsock32.ws32_f
     
     If i = socketSet.fd_count Then
         If socketSet.fd_count < wsock32.ws32_FD_SETSIZE Then
-            socketSet.fd_array(i) = socket_Id
+            socketSet.fd_array(i) = socket_id
             socketSet.fd_count = socketSet.fd_count + 1
         End If
     End If
 End Sub
 
+''' <summary> Determines the readability status of one or more sockets, waiting if necessary, to perform synchronous I/O. </summary>
+''' <param name="readSocketSet"> [in, out] A pointer to a set of sockets to be checked for readability. </param>
+''' <param name="timeout">       [in] The maximum milliseconds time for select to wait. </param>
+''' <returns>
+''' The total number of socket handles that are ready and contained in the ws32_fd_set structures, zero if the time limit expired,
+''' or ws32_SOCKET_ERROR if an error occurred. If the return value is ws32_SOCKET_ERROR, WSAGetLastError can be used to retrieve
+''' a specific error code.
+''' <returns>
+Public Function DetermineReadability(ByRef readSocketSet As wsock32.ws32_fd_set, _
+                                     Optional ByVal timeoutMs As Long = 500) As Integer
 
+    Dim time As wsock32.ws32_Time_Value
+    time.tv_sec = timeoutMs / 1000
+    time.tv_usec = 1000 * (timeoutMs Mod 1000)
+    
+    Dim emptyFdSet As wsock32.ws32_fd_set
+    
+    Dim selectResult As Integer
+    selectResult = select_(0, readSocketSet, emptyFdSet, emptyFdSet, time)
+
+    If selectResult = wsock32.ws32_SOCKET_ERROR Then
+        Err.Raise UserDefinedErrors.SocketSetStatusError.Code, "IdentityReader.WinsockApi.DetermineReadability", _
+                  UserDefinedErrors.SocketSetStatusError.Description & " Last error: " & CStr(Winsock.lastError)
+    End If
+    DetermineReadability = selectResult
+
+End Function
 

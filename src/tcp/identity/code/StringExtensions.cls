@@ -64,20 +64,20 @@ End Function
 ''' <param name="startIndex"> The index of the first character of the substring. </param>
 ''' <param name="length">     The number of characters to take from the original string. </param>
 ''' <returns> A string. <returns>
-Public Function Substring(ByVal text As String, ByVal startIndex As Integer, Optional ByVal length As Variant) As String
+Public Function Substring(ByVal text As String, ByVal startIndex As Integer, Optional ByVal Length As Variant) As String
     If startIndex > Len(text) Then
         startIndex = Len(text)
     End If
 
-    If IsMissing(length) Then
-        length = Len(text) - startIndex
+    If IsMissing(Length) Then
+        Length = Len(text) - startIndex
     End If
     
-    If length > Len(text) Then
-        length = Len(text) - startIndex
+    If Length > Len(text) Then
+        Length = Len(text) - startIndex
     End If
 
-    Substring = Left(Right(text, Len(text) - startIndex), length)
+    Substring = Left(Right(text, Len(text) - startIndex), Length)
 End Function
 
 ''' <summary> Checks whether the given text starts with the given sequence. </summary>

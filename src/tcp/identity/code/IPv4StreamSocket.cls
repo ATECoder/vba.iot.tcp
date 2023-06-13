@@ -9,12 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private Const COMMAND_ERROR = -1
-Private Const RECV_ERROR = -1
-Private Const NO_ERROR = 0
+Private Const SEND_MESSAGE_ERROR = -1
+Private Const SEND_PARTIAL_MESSAGE_ERROR = -2
+Private Const RECEIVE_ERROR = -1
+Private Const DefaultTimeoutMs = 500
 
 ''' <summary> Permits an incoming connection attempt on a socket. </summary>
-''' <remarks> </remarks>
 ''' <param name="s">                   [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
 '''                                    The connection is actually made with the socket that is returned by accept.</param>
 ''' <param name="clientAddress">       [out] An optional pointer to a buffer that receives the address of the connecting entity,
@@ -31,7 +31,6 @@ Private Declare PtrSafe Function accept_ Lib "wsock32.dll" Alias "accept" ( _
         ByVal s As Long, clientAddress As wsock32.ws32_SocketAddress, clientAddressLength As Integer) As Long
 
 ''' <summary> Associates a local address with a socket. </summary>
-''' <remarks> </remarks>
 ''' <param name="s">             [in] A descriptor identifying an unbound socket. </param>
 ''' <param name="address">       [in] A pointer to a ws32_SocketAddress_in structure of the local address
 '''                              to assign to the bound socket . </param>
@@ -42,7 +41,6 @@ Private Declare PtrSafe Function bind_ Lib "wsock32.dll" Alias "bind" ( _
         ByVal s As Long, address As wsock32.ws32_SocketAddress_in, ByVal addressLength As Integer) As Long
 
 ''' <summary> Closes an existing socket. </summary>
-''' <remarks> </remarks>
 ''' <param name="s"> [in] A descriptor identifying the socket to close. </param>
 ''' <returns> If no error occurs, closesocket returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
@@ -50,7 +48,6 @@ Private Declare PtrSafe Function closesocket_ Lib "wsock32.dll" Alias "closesock
         ByVal s As Long) As Long
 
 ''' <summary> Establishes a connection to a specified socket. </summary>
-''' <remarks> </remarks>
 ''' <param name="s">          [in] A descriptor identifying an unconnected socket. </param>
 ''' <param name="address">    [in] A pointer to the <see cref="ws32_SocketAddress_in"/> structure to which the
 '''                           connection should be established. </param>
@@ -62,7 +59,6 @@ Private Declare PtrSafe Function connect_ Lib "wsock32.dll" Alias "connect" ( _
         ByVal s As Long, ByRef address As wsock32.ws32_SocketAddress_in, ByVal addressLen As Long) As Long
 
 ''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
-''' <remarks> winsock2 only? </remarks>
 ''' <param name="s">       [in] A descriptor identifying a bound, unconnected socket. </param>
 ''' <param name="backlog"> [in] The maximum length of the queue of pending connections. If set to SOMAXCONN,
 '''                         the underlying service provider responsible for socket s will set the backlog to a
@@ -78,7 +74,6 @@ Private Declare PtrSafe Function listen_ Lib "wsock32.dll" Alias "listen" ( _
         ByVal s As Long, ByVal backlog As Integer) As Long
 
 ''' <summary> Sends data on a connected socket. </summary>
-''' <remarks> </remarks>
 ''' <param name="s">            [in] A descriptor identifying a connected socket. </param>
 ''' <param name="buffer">       [in] A pointer to a buffer containing the data to be transmitted. </param>
 ''' <param name="bufferLength"> [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
@@ -96,7 +91,6 @@ Private Declare PtrSafe Function send_ Lib "wsock32.dll" Alias "send" ( _
         ByVal s As Long, buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
 ''' <summary> Sets a socket option. </summary>
-''' <remarks> </remarks>
 ''' <param name="s">       [in] A descriptor that identifies a socket. </param>
 ''' <param name="level">   [in] The level at which the option is defined (for example, ws32_SOL_SOCKET). </param>
 ''' <param name="optname"> [in] The socket option for which the value is to be set (for example, ws32_SO_BROADCAST).
@@ -140,7 +134,9 @@ Private Declare PtrSafe Function recv_ Lib "wsock32.dll" Alias "recv" ( _
 
 Private m_socketId As Long
 Private m_connected As Boolean
+Private m_listening As Boolean
 Private m_timeout As Integer
+Private m_fdSet As wsock32.ws32_fd_set
 
 ''' <summary> Initializes an internet protocol Stream Socket with a socket id. </summary>
 Private Sub Class_Initialize()
@@ -163,7 +159,7 @@ Private Sub Class_Initialize()
         Winsock.Register Me
         
         ' set the default timeout
-        SetTimeout 500
+        SetTimeout DefaultTimeoutMs
     End If
     
 End Sub
@@ -192,6 +188,15 @@ End Property
 Public Property Get Connected() As Boolean
     Connected = m_connected
 End Property
+
+''' <summary> Intializes an Inet stream socket using the provided socket id. </summary>
+''' <param name="connectedSocketId"> The ID of a connected socket. </param>
+''' <param name="timeout"> [Optional] The timeout interval in milliseconds. </param>
+Public Sub Initialize(ByVal connectedSocketId As Long, Optional timeoutMs As Long = 500)
+    m_socketId = connectedSocketId
+    m_connected = True
+    Me.SetTimeout (timeoutMs)
+End Sub
 
 ''' <summary> Opens a socket connection and sets and returns the socket id. </summary>
 ''' <param name="host"> An IPv4 dotted-decimal host address. </param>
@@ -249,25 +254,120 @@ Public Function CloseConnection() As Boolean
 
 End Function
 
-''' <summary> Sends a terminated message to the server. </summary>
-''' <param name="command"> The message. </param>
-''' <returns> The number of bytes that were sent to the server. </returns>
-Public Function SendMessage(ByVal command As String) As Integer
+''' <summary> Associates a local address with a socket. </summary>
+''' <param name="address"> The INet address to bind to. </param>
+''' <param name="port">    The port that the server is listening on. </param>
+''' <returns> True if the socket is bound. </returns>
+Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
 
-    If StringExtensions.IsNullOrEmpty(command) Then
+    Dim endpoint As wsock32.ws32_SocketAddress_in
+    endpoint.sin_family = wsock32.ws32_AF_INET
+    endpoint.sin_addr.s_addr = address
+    endpoint.sin_port = WinsockApi.ToInetByteOrder(port)
+    
+    Dim bindResult As Long
+    bindResult = bind_(Me.SocketId, endpoint, 16)
+    
+    If bindResult = wsock32.ws32_SOCKET_ERROR Then
+        Err.Raise UserDefinedErrors.SocketBindError.Code, "IdentityReader.IPv4StreamSocket.BindTo", _
+                  UserDefinedErrors.SocketBindError.Description & " Last error: " & CStr(Winsock.lastError)
+        m_connected = False
+    Else
+        m_connected = True
+    End If
+    BindTo = Me.Connected
+   
+End Function
+
+''' <summary> Returns the listening state of the socket. </summary>
+''' <value> True if the socket is Listening; otherwise, False. </value>
+Public Property Get Listening() As Boolean
+    Listening = m_listening
+End Property
+
+
+''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
+''' <param name="backlog"> [optional] [in] The maximum length of the queue of pending connections. </para>
+''' <returns> True if the socket is Listening; otherwise, False. </returns>
+Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolean
+
+    Dim listenResult As Long
+    listenResult = listen_(Me.SocketId, backlog)
+    If listenResult = wsock32.ws32_SOCKET_ERROR Then
+        Err.Raise UserDefinedErrors.SocketListenError.Code, "IdentityReader.IPv4StreamSocket.Listen", _
+                  UserDefinedErrors.SocketListenError.Description & " Last error: " & CStr(Winsock.lastError)
+        m_listening = False
+    Else
+        m_listening = True
+    End If
+    StartListening = Me.Listening
+
+End Function
+
+''' <summary> Permits an incoming connection attempt on a socket. </summary>
+''' <param name="serverSocket">  [in] Reference to the server socket. </param>
+''' <param name="timeout">       [in] The maximum milliseconds time for select to wait. </param>
+''' <returns> the connected socket. </returns>
+Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
+        Optional ByVal timeoutMs As Long = 500) As IPv4StreamSocket
+
+    ' add this socket to a socket set.
+    WinsockApi.FD_SET_INIT m_fdSet
+    WinsockApi.FD_SET_ADD m_socketId, m_fdSet
+    
+    ' check if we have available socket for readability
+    
+    Dim readableSocketCount As Integer
+    readableSocketCount = WinsockApi.DetermineReadability(m_fdSet, timeoutMs)
+    
+    If readableSocketCount = 0 Then
+        Set AcceptTcpClient = Nothing
+        Exit Function
+    End If
+    
+    Dim socket_id As Long
+    Dim socketAddress As wsock32.ws32_SocketAddress
+    
+    ' get a connected socket id
+    
+    socket_id = accept_(serverSocket.SocketId, socketAddress, wsock32.ws32_SocketAddressLen)
+    
+    If socket_id = wsock32.ws32_INVALID_SOCKET Then
+        Err.Raise UserDefinedErrors.SocketAcceptError.Code, "IdentityReader.IPv4StreamSocket.AcceptTcpClient", _
+                  UserDefinedErrors.SocketAcceptError.Description & " Last error: " & CStr(Winsock.lastError)
+        Exit Function
+    End If
+    
+    Dim clientSocket As IPv4StreamSocket
+    Set clientSocket = New IPv4StreamSocket
+    clientSocket.Initialize socket_id, timeoutMs
+    
+    Set AcceptTcpClient = clientSocket
+End Function
+
+''' <summary> Sends a terminated message to the server. </summary>
+''' <param name="message"> The terminated message. </param>
+''' <returns> The number of bytes that were sent to the server. </returns>
+Public Function SendMessage(ByVal message As String) As Integer
+
+    If StringExtensions.IsNullOrEmpty(message) Then
         SendMessage = 0
     Else
-        Dim commandLength As Integer
-        commandLength = Len(command)
+        Dim messageLength As Integer
+        messageLength = Len(message)
         Dim sentLength As Integer
-        sentLength = send_(Me.SocketId, ByVal command, Len(command), 0)
+        sentLength = send_(Me.SocketId, ByVal message, Len(message), 0)
         
         If sentLength < 0 Then
             ' if the sent length is negative, we have an API error.
             Err.Raise UserDefinedErrors.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
                       UserDefinedErrors.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
-            SendMessage = COMMAND_ERROR
-        ElseIf sentLength <> commandLength Then
+            SendMessage = SEND_MESSAGE_ERROR
+        ElseIf sentLength <> messageLength Then
+            Err.Raise UserDefinedErrors.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
+                      UserDefinedErrors.SocketSendError.Description & _
+                      " A partial message was sent: " & CStr(sentLength) & " out of " & CStr(messageLength)
+            SendMessage = SEND_PARTIAL_MESSAGE_ERROR
         Else
             SendMessage = sentLength
         End If
@@ -275,22 +375,23 @@ Public Function SendMessage(ByVal command As String) As Integer
 
 End Function
 
-''' <summary> Receives a message from the server. </summary>
+''' <summary> Receives a message from the server untill reaching
+''' the specified termiantion. </summary>
 ''' <param name="buffer"> Where the message will go. </param>
 ''' <param name="maxLength"> The maximum number of bytes to read. </param>
 ''' <param name="termination"> [Optional] The character the signifies the end of the stream. </param>
 ''' <returns> If no error, the number of byte that were sent to the server.
-''' Otherwise, RECV_ERROR.
+''' Otherwise, RECEIVE_ERROR.
 ''' </returns>
-Public Function Receive(buffer As String, ByVal maxLength As Integer, _
-                        Optional ByVal termination As String = vbLf) As Integer
+Public Function ReceiveTerminatedMessage(buffer As String, ByVal maxLength As Integer, _
+                                         Optional ByVal termination As String = vbLf) As Integer
 
     Dim c As String * 1
-    Dim length As Integer
+    Dim Length As Integer
     Dim count As Integer
     
     buffer = ""
-    While length < maxLength
+    While Length < maxLength
     
         DoEvents
         
@@ -300,25 +401,105 @@ Public Function Receive(buffer As String, ByVal maxLength As Integer, _
         count = recv_(Me.SocketId, c, l, 0)
         
         If count < 1 Then
-            Receive = RECV_ERROR
+            ReceiveTerminatedMessage = RECEIVE_ERROR
             buffer = Chr$(0)
             Exit Function
         End If
         
         If c = termination Then
            buffer = buffer + Chr$(0)
-           Receive = length
+           ReceiveTerminatedMessage = Length
            Exit Function
         End If
         
-        length = length + count
+        Length = Length + count
         buffer = buffer + c
         
     Wend
     
-    Receive = RECV_ERROR
+    ReceiveTerminatedMessage = RECEIVE_ERROR
     
 End Function
+
+
+''' <summary> Receives a message from the server untill reaching the specified termiantion
+''' or reading the specified number of characters. </summary>
+''' <param name="maxLength"> The maximum number of bytes to read. </param>
+''' <param name="termination"> [Optional] The character the signifies the end of the stream. </param>
+''' <returns> The received string. </returns>
+Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFFFFF, _
+                           Optional ByVal termination As String = vbLf) As Integer
+
+    Dim c As String * 1
+    Dim count As Integer
+    
+    Dim builder As StringBuilder
+    Set builder = New StringBuilder
+    Dim currentLength As Long
+    currentLength = 0
+    Do While currentLength < maxLength
+    
+        DoEvents
+        
+        c = ""
+        count = recv_(Me.SocketId, c, 1, 0)
+        
+        If count < 1 Then
+            Err.Raise UserDefinedErrors.SocketReceiveError.Code, "IdentityReader.IPV4StreamSocket.receiveRaw", _
+                      UserDefinedErrors.SocketReceiveError.Description & " Last error: " & CStr(Winsock.lastError)
+            Exit Do
+        ElseIf c = termination Then
+            builder.Append c
+            Exit Do
+        Else
+            currentLength = currentLength + count
+            builder.Append c
+        End If
+    Loop
+    ReceiveRaw = builder.ToString
+    
+End Function
+
+''' <summary> Receives a message from the server. </summary>
+''' <param name="maxLength"> The maximum number of maxLength to read. </param>
+''' <returns> The received characters. </returns>
+Public Function ReceiveBytes(ByVal maxLength As Long) As String
+    
+    Dim buffer As String
+    buffer = StringExtensions.Repeat(Chr(0), maxLength)
+    
+    Dim actualLength As Long
+    actualLength = recv_(Me.SocketId, buffer, maxLength, 0)
+    
+    If actualLength > 0 Then
+        ReceiveBytes = StringExtensions.Substring(buffer, 0, actualLength)
+    Else
+        ReceiveBytes = ""
+    End If
+    
+End Function
+
+''' <summary> Receives a message from the server. </summary>
+''' <remarks> Data is read until exhausted. </remarks>
+''' <param name="bufferSize"> The number of character to read on each trial. </param>
+''' <returns> The received characters. </returns>
+Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
+    
+    Dim buffer As String
+    Dim message As String
+    message = ""
+    
+    Do
+        buffer = Trim(Me.ReceiveBytes(bufferSize))
+
+        If Len(buffer) > 0 Then
+            message = message & buffer
+        End If
+    Loop While Len(buffer) > 0
+    
+    ReceiveString = Trim(message)
+End Function
+
 
 ''' <summary> Sets the socket timeout. </summary>
 ''' <param name="timeout"> The timeout interval in milliseconds. </param>
@@ -337,6 +518,6 @@ Public Sub SetTimeout(ByVal interval As Long)
 End Sub
 
 ''' <summary> Gets the socket timeout in milliseconds. </summary>
-Public Property Get Timeout() As Long
-    Timeout = m_timeout
+Public Property Get timeout() As Long
+    timeout = m_timeout
 End Property

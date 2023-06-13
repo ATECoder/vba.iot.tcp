@@ -9,10 +9,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-''' <summary> Initializes a VI Session. </summary>
+''' <summary> Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
 End Sub
 
-''' <summary> Termiantes a VI Session. </summary>
+''' <summary> Termiantes an IEEE488 Session. </summary>
 Private Sub Class_Terminate()
 End Sub

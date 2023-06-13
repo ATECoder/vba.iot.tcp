@@ -78,7 +78,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
             socket.SendMessage command & vbLf
         
             ' receive the reading
-            readCount = socket.Receive(buffer, maximumLength)
+            readCount = socket.ReceiveTerminatedMessage(buffer, maximumLength, vbLf)
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             

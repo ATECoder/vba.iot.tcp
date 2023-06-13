@@ -9,54 +9,49 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private m_clientSocket As Long
+Private m_tcpClientSocket As IPv4StreamSocket
 
+''' <summary> Gets the Tcp Client socket. </summary>
+''' <value> A IPv4StreamSocket. </value>
+Public Property Get TcpClientSocket() As IPv4StreamSocket
+    Set TcpClientSocket = m_tcpClientSocket
+End Property
 
-Public Sub ConnectTo(host As String, port As Long)
+''' <summary> Opens a socket connection and sets and returns the socket id. </summary>
+''' <param name="host"> An IPv4 dotted-decimal host address. </param>
+''' <param name="port"> The port that the server is listening on. </param>
+''' <returns> True if the socket is connected. </returns>
+Public Function ConnectTo(host As String, port As Long) As Boolean
+    
     If host = "localhost" Then
         host = "127.0.0.1"
     End If
 
-    Dim address As wsock32.sockaddr_in
-    address.sin_addr.s_addr = wsock32.inet_addr(host)
-    address.sin_family = wsock32.AF_INET
-    address.sin_port = wsock32.htons(port)
+    Set m_tcpClientSocket = New IPv4StreamSocket
+
+    m_tcpClientSocket.OpenConnection host, port
     
-    m_clientSocket = wsock32.socket(wsock32.AF_INET, wsock32.SOCK_STREAM, 0)
-
-    Dim connectResult As Long
-    connectResult = wsock32.connect(m_clientSocket, address, 16)
-End Sub
-
-
-Public Sub Initialize(ByVal socket As Long)
-    Dim timeout As Long
-    timeout = 500
-    
-    Dim result As Long
-    result = wsock32.setsockopt(socket, wsock32.SOL_SOCKET, wsock32.SO_RCVTIMEO, timeout, 4)
-    
-    m_clientSocket = socket
-End Sub
-
-
-Public Function SendString(ByVal message As String) As Long
-    SendString = wsock32.send(m_clientSocket, ByVal message, Len(message), 0)
 End Function
 
+''' <summary> Initializes this TCP Client using the provided connected socket. </summary>
+''' <param name="connectedSocket "> A connected Inte stream socket. </param>
+Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
+    Set m_tcpClientSocket = connectedSocket
+End Sub
 
-Public Function ReceiveBytes(ByVal bytes As Long) As String
-    Dim buffer As String
-    buffer = StringExtensions.Repeat(Chr(0), bytes)
-    
-    Dim readBytes As Long
-    readBytes = wsock32.recv(m_clientSocket, buffer, bytes, 0)
-    
-    If readBytes <> -1 Then
-        ReceiveBytes = StringExtensions.Substring(buffer, 0, readBytes)
-    End If
+''' <summary> Sends a terminated message to the server. </summary>
+''' <param name="command"> The message. </param>
+''' <returns> The number of bytes that were sent to the server. </returns>
+Public Function SendMessage(ByVal message As String) As Integer
+    SendMessage = Me.TcpClientSocket.SendMessage(message)
 End Function
 
+''' <summary> Receives a message from the server. </summary>
+''' <param name="maxLength"> The maximum number of maxLength to read. </param>
+''' <returns> The received characters. </returns>
+Public Function ReceiveBytes(ByVal maxLength As Long) As String
+    ReceiveBytes = Me.TcpClientSocket.ReceiveBytes(maxLength)
+End Function
 
 Public Function ReceiveString() As String
     Dim buffer As String
@@ -75,6 +70,11 @@ Public Function ReceiveString() As String
 End Function
 
 
+''' <summary> Closese and releases the socket. </summary>
 Public Sub Dispose()
-    wsock32.closesocket m_clientSocket
+    If Not m_tcpClientSocket Is Nothing And m_tcpClientSocket.Connected Then
+        m_tcpClientSocket.CloseConnection
+    End If
+    m_tcpClientSocket = Nothing
 End Sub
+

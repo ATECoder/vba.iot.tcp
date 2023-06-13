@@ -18,6 +18,10 @@ Private m_socketDisconnectionError As UserDefinedError
 Private m_socketOptionSettingError As UserDefinedError
 Private m_socketSendError As UserDefinedError
 Private m_socketReceiveError As UserDefinedError
+Private m_socketBindError As UserDefinedError
+Private m_socketListenError As UserDefinedError
+Private m_socketAcceptError As UserDefinedError
+Private m_socketSetStatusError As UserDefinedError
 
 ''' <summary> Initializes the user defined errors. </summary>
 Private Sub Class_Initialize()
@@ -75,6 +79,30 @@ Private Sub Class_Initialize()
     m_socketReceiveError.InitiateProperties errorCode, "SocketReceiveError", _
         "Failed send a socket message using winsock send()."
     AddUserDefinedError Me.SocketReceiveError
+
+    errorCode = errorCode + 1
+    Set m_socketBindError = New UserDefinedError
+    m_socketBindError.InitiateProperties errorCode, "SocketBindError", _
+        "Failed send a socket message using winsock send()."
+    AddUserDefinedError Me.SocketBindError
+
+    errorCode = errorCode + 1
+    Set m_socketListenError = New UserDefinedError
+    m_socketListenError.InitiateProperties errorCode, "SocketListenError", _
+        "Failed send a socket message using winsock send()."
+    AddUserDefinedError Me.SocketListenError
+
+    errorCode = errorCode + 1
+    Set m_socketAcceptError = New UserDefinedError
+    m_socketAcceptError.InitiateProperties errorCode, "SocketAcceptError", _
+        "Failed send a socket message using winsock send()."
+    AddUserDefinedError Me.SocketAcceptError
+
+    errorCode = errorCode + 1
+    Set m_socketSetStatusError = New UserDefinedError
+    m_socketSetStatusError.InitiateProperties errorCode, "SocketSetStatusError", _
+        "Failed send a socket message using winsock send()."
+    AddUserDefinedError Me.SocketSetStatusError
 
 End Sub
 
@@ -167,4 +195,30 @@ End Property
 Public Property Get SocketReceiveError() As UserDefinedError
     Set SocketReceiveError = m_socketReceiveError
 End Property
+
+''' <summary> Get the error that occured binding a socket to an address. </summary>
+''' <values> Returns a user defined error. </value>
+Public Property Get SocketBindError() As UserDefinedError
+    Set SocketBindError = m_socketBindError
+End Property
+
+''' <summary> Get the error that occured starting to listen on a socket. </summary>
+''' <values> Returns a user defined error. </value>
+Public Property Get SocketListenError() As UserDefinedError
+    Set SocketListenError = m_socketListenError
+End Property
+
+''' <summary> Get the error that occured accepting an incomming connection. </summary>
+''' <values> Returns a user defined error. </value>
+Public Property Get SocketAcceptError() As UserDefinedError
+    Set SocketAcceptError = m_socketAcceptError
+End Property
+
+''' <summary> Get the error that occured determining the status of a socket set. </summary>
+''' <values> Returns a user defined error. </value>
+Public Property Get SocketSetStatusError() As UserDefinedError
+    Set SocketSetStatusError = m_socketSetStatusError
+End Property
+
+
 
