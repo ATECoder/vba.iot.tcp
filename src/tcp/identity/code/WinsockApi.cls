@@ -38,7 +38,7 @@ Private Declare PtrSafe Function createSocket_ Lib "wsock32.dll" Alias "socket" 
 ''' The htons function does not require that the Winsock DLL has previously been loaded with a successful call
 ''' to the WSAStartup function.
 ''' </remarks>
-''' <param name="hostshort"> [in] A 16-bit number in host byte order. </param>
+''' <param name="hostshort"> [in] A 16-bit unsigned number (represented as long) in host byte order. </param>
 ''' <returns>  the value in TCP/IP network byte order. <returns>
 Private Declare PtrSafe Function toInetByteOrder_ Lib "wsock32.dll" Alias "htons" ( _
         ByVal hostshort As Long) As Integer
@@ -158,7 +158,7 @@ End Sub
 
 ''' <summary> Determines the readability status of one or more sockets, waiting if necessary, to perform synchronous I/O. </summary>
 ''' <param name="readSocketSet"> [in, out] A pointer to a set of sockets to be checked for readability. </param>
-''' <param name="timeout">       [in] The maximum milliseconds time for select to wait. </param>
+''' <param name="timeout">       [Optional, 500] [in] The maximum milliseconds time for select to wait. </param>
 ''' <returns>
 ''' The total number of socket handles that are ready and contained in the ws32_fd_set structures, zero if the time limit expired,
 ''' or ws32_SOCKET_ERROR if an error occurred. If the return value is ws32_SOCKET_ERROR, WSAGetLastError can be used to retrieve

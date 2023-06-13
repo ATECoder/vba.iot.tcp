@@ -19,6 +19,7 @@ End Property
 
 ''' <summary> Associates any local address with a socket and start listening. </summary>
 ''' <param name="port">    The port that the server is listening on. </param>
+''' <param name="backlog"> [Optional, 10] The maximum length of the queue of pending connections. </para>
 ''' <returns> True if the socket is bound. </returns>
 Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10) As Boolean
 
@@ -36,8 +37,8 @@ Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 1
     
 Finally:
 
-    If Not m_tcpServerSocket Is Nothing And m_tcpServerSocket.Connected Then
-        m_tcpServerSocket.CloseConnection
+    If Me.Connected Then
+        Me.TcpServerSocket.CloseConnection
     End If
     m_tcpServerSocket = Nothing
     
@@ -45,9 +46,18 @@ Finally:
 
 End Function
 
+''' <summary> Returns the connection state of the client. </summary>
+''' <returns> True if the socket is connected; otherwise, False. </returns>
+Public Property Get Connected() As Boolean
+    If m_tcpServerSocket Is Nothing Then
+        Connected = False
+    Else
+        Connected = m_tcpServerSocket.Connected
+    End If
+End Property
+
 ''' <summary> Permits an incoming connection attempt on a socket. </summary>
-''' <param name="serverSocket">  [in] Reference to the server socket. </param>
-''' <param name="timeout">       [in] The maximum milliseconds time for select to wait. </param>
+''' <param name="timeout"> [Optional, 500] The maximum milliseconds time for select to wait. </param>
 ''' <returns> the connected tcp client. </returns>
 Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
 
@@ -63,7 +73,7 @@ End Function
 
 ''' <summary> Closes and releases the socket. </summary>
 Public Sub Dispose()
-    If Not m_tcpServerSocket Is Nothing And m_tcpServerSocket.Connected Then
+    If Me.Connected Then
         m_tcpServerSocket.CloseConnection
     End If
     m_tcpServerSocket = Nothing

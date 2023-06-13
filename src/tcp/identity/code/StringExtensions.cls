@@ -62,9 +62,10 @@ End Function
 ''' <remarks> </remarks>
 ''' <param name="text">       The text to get the substring from. </param>
 ''' <param name="startIndex"> The index of the first character of the substring. </param>
-''' <param name="length">     The number of characters to take from the original string. </param>
+''' <param name="length">     [Optional, null] The number of characters to take from the original string. </param>
 ''' <returns> A string. <returns>
-Public Function Substring(ByVal text As String, ByVal startIndex As Integer, Optional ByVal Length As Variant) As String
+Public Function Substring(ByVal text As String, ByVal startIndex As Integer, _
+        Optional ByVal Length As Variant) As String
     If startIndex > Len(text) Then
         startIndex = Len(text)
     End If

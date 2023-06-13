@@ -26,7 +26,12 @@ Private Sub ReadIdentityButton_Click()
     
     ' scpi.preset
     
+#If False Then
     ReadIdentity host, port, repeatCount
+#Else
+    TcpClientReadIdentity host, port, repeatCount
+#End If
+    
     
 End Sub
 
@@ -34,7 +39,7 @@ End Sub
 ''' <param name="host"> The host IPv4 dotted address. </param>
 ''' <param name="port"> the host port number. </param>
 ''' <param name="repeatCount"> The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repeatCount As Integer)
+Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
     
@@ -112,9 +117,11 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
 Finally:
 
     Dim errorMessage As String
-    If Not Err Is Nothing And Err.Number <> 0 Then
-        errorMessage = "Reading identity failed" & UserDefinedErrors.FormattedErr & _
-                       " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+    If Not Err Is Nothing Then
+        If Err.Number <> 0 Then
+            errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
+                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+        End If
     End If
     
     On Error Resume Next
@@ -130,4 +137,97 @@ Finally:
     End If
 
 End Sub
+
+''' <summary> Sends the identity query and reads back the identity from the instrument. </summary>
+''' <param name="host"> The host IPv4 dotted address. </param>
+''' <param name="port"> the host port number. </param>
+''' <param name="repeatCount"> The number of time to repeat the query. </param>
+Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+
+    On Error GoTo Finally
+    
+    Range("E2").value = ""
+    Range("F2").value = ""
+    Range("G2").value = ""
+    Range("H2").value = ""
+    Range("I2").value = ""
+
+    Dim sw As New StopWatch
+    Dim totalMilliseconds As Double
+    
+    Dim client As TcpClient
+    Set client = New TcpClient
+    
+    client.ConnectTo host, port
+    
+    ' report the socket number
+    Range("E2").value = client.TcpClientSocket.SocketId
+   
+    ' report the connection state
+    Range("F2").value = client.TcpClientSocket.Connected
+    
+    If client.TcpClientSocket.Connected Then
+    
+        Dim command As String
+        command = "*IDN?"
+        Range("G2").value = command
+        
+        Dim loopCount As Integer
+        Do While loopCount < repeatCount
+            
+            loopCount = loopCount + 1
+            sw.Restart
+            
+            ' send the command
+            client.SendMessage command & vbLf
+        
+            ' receive the reading
+            Dim identity As String
+            identity = client.ReceiveRaw()
+    
+            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            
+            Range("H2").value = Len(identity)
+            Range("I2").value = identity
+    
+        Loop
+  
+        ' command = ":SYST:PRES"
+        ' count = SendMessage(command)
+        ' Call opc
+        
+        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
+        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+    
+    Else
+        MsgBox "connection failed without reporting an exception"
+    End If
+    
+Finally:
+
+    Dim errorMessage As String
+    If Not Err Is Nothing Then
+        If Err.Number <> 0 Then
+            errorMessage = "Reading identity failed using Tcp Client " & UserDefinedErrors.FormattedErr & _
+                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+        End If
+    End If
+    
+    On Error Resume Next
+    If Not client Is Nothing Then
+        If client.Connected Then
+            client.Disconnect
+        End If
+    End If
+    
+    ' terminate the client
+    Set client = Nothing
+    
+    If Len(errorMessage) > 0 Then
+        MsgBox errorMessage
+    End If
+
+End Sub
+
+
 

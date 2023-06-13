@@ -191,7 +191,7 @@ End Property
 
 ''' <summary> Intializes an Inet stream socket using the provided socket id. </summary>
 ''' <param name="connectedSocketId"> The ID of a connected socket. </param>
-''' <param name="timeout"> [Optional] The timeout interval in milliseconds. </param>
+''' <param name="timeoutMs">         [Optional, 500] The timeout interval in milliseconds. </param>
 Public Sub Initialize(ByVal connectedSocketId As Long, Optional timeoutMs As Long = 500)
     m_socketId = connectedSocketId
     m_connected = True
@@ -202,7 +202,7 @@ End Sub
 ''' <param name="host"> An IPv4 dotted-decimal host address. </param>
 ''' <param name="port"> The port that the server is listening on. </param>
 ''' <returns> True if the socket is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Integer) As Boolean
+Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Boolean
    
     m_connected = False
     If host = "localhost" Then
@@ -287,7 +287,7 @@ End Property
 
 
 ''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
-''' <param name="backlog"> [optional] [in] The maximum length of the queue of pending connections. </para>
+''' <param name="backlog"> [Optional, 10] [in] The maximum length of the queue of pending connections. </para>
 ''' <returns> True if the socket is Listening; otherwise, False. </returns>
 Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolean
 
@@ -306,7 +306,7 @@ End Function
 
 ''' <summary> Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="serverSocket">  [in] Reference to the server socket. </param>
-''' <param name="timeout">       [in] The maximum milliseconds time for select to wait. </param>
+''' <param name="timeoutMs">     [Optional, 500] The maximum milliseconds time for select to wait. </param>
 ''' <returns> the connected socket. </returns>
 Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
         Optional ByVal timeoutMs As Long = 500) As IPv4StreamSocket
@@ -377,9 +377,9 @@ End Function
 
 ''' <summary> Receives a message from the server untill reaching
 ''' the specified termiantion. </summary>
-''' <param name="buffer"> Where the message will go. </param>
-''' <param name="maxLength"> The maximum number of bytes to read. </param>
-''' <param name="termination"> [Optional] The character the signifies the end of the stream. </param>
+''' <param name="buffer">      Where the message will go. </param>
+''' <param name="maxLength">   The maximum number of bytes to read. </param>
+''' <param name="termination"> [Optional, vbLf] The character that signifies the end of the stream. </param>
 ''' <returns> If no error, the number of byte that were sent to the server.
 ''' Otherwise, RECEIVE_ERROR.
 ''' </returns>
@@ -425,7 +425,7 @@ End Function
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">   [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">     [Optional, True] True to return the string without the termination. </param>
-''' <param name="termination"> [Optional, 10 ASCII] The character the signifies the end of the stream. </param>
+''' <param name="termination"> [Optional, 10 ASCII] The character that signifies the end of the stream. </param>
 ''' <returns> The received string. </returns>
 Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
                            Optional ByVal trimEnd As Boolean = True, _
@@ -484,7 +484,7 @@ End Function
 
 ''' <summary> Receives a message from the server. </summary>
 ''' <remarks> Data is read until exhausted. </remarks>
-''' <param name="bufferSize"> The number of character to read on each trial. </param>
+''' <param name="bufferSize"> [Optional, 1024] The number of character to read on each trial. </param>
 ''' <returns> The received characters. </returns>
 Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
     

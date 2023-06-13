@@ -47,7 +47,7 @@ Public Property Get Length() As Long
 End Property
 
 ''' <summary> Returns the text in this StringBuilder. </summary>
-''' <param name="separator"> [Optional] separator (default vbNullString) used in joining components. </param>
+''' <param name="separator"> [Optional, Null string] The separator to use in joining components. </param>
 Public Function ToString(Optional separator As String = vbNullString) As String
 
     If m_currentIndex > 0 Then

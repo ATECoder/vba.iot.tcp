@@ -1,6 +1,7 @@
 ### TODO
 
 #### Updates
+
 * Add code from the Tcp Session to the VI Session.
 	* Write. WriteLine, Read, Query, QueryLine
 * Add Socket Query with termination.

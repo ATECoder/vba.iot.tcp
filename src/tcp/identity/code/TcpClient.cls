@@ -33,6 +33,28 @@ Public Function ConnectTo(host As String, port As Long) As Boolean
     
 End Function
 
+''' <summary> Returns the connection state of the client. </summary>
+''' <returns> True if the socket is connected; otherwise, False. </returns>
+Public Property Get Connected() As Boolean
+    If m_tcpClientSocket Is Nothing Then
+        Connected = False
+    Else
+        Connected = Me.TcpClientSocket.Connected
+    End If
+End Property
+
+''' <summary> Closes the connection. </summary>
+''' <returns> True if disconnection succeeded; otherwise, false. </returns>
+Public Function Disconnect() As Boolean
+
+    Me.TcpClientSocket.CloseConnection
+    
+    m_tcpClientSocket = Nothing
+        
+    Disconnect = True
+
+End Function
+
 ''' <summary> Initializes this TCP Client using the provided connected socket. </summary>
 ''' <param name="connectedSocket "> A connected Inte stream socket. </param>
 Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
@@ -47,32 +69,41 @@ Public Function SendMessage(ByVal message As String) As Integer
 End Function
 
 ''' <summary> Receives a message from the server. </summary>
-''' <param name="maxLength"> The maximum number of maxLength to read. </param>
+''' <param name="maxLength"> The maximum number of characters to read. </param>
 ''' <returns> The received characters. </returns>
 Public Function ReceiveBytes(ByVal maxLength As Long) As String
+    
     ReceiveBytes = Me.TcpClientSocket.ReceiveBytes(maxLength)
+
 End Function
 
-Public Function ReceiveString() As String
-    Dim buffer As String
-    Dim message As String
-    message = ""
+''' <summary> Receives a message from the server. </summary>
+''' <remarks> Data is read until exhausted. </remarks>
+''' <param name="bufferSize"> [Optional, 1024] The number of character to read on each trial. </param>
+''' <returns> The received characters. </returns>
+Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
     
-    Do
-        buffer = Trim(ReceiveBytes(1024))
+    ReceiveString = Me.TcpClientSocket.ReceiveString(bufferSize)
 
-        If Len(buffer) > 0 Then
-            message = message & buffer
-        End If
-    Loop While Len(buffer) > 0
-    
-    ReceiveString = Trim(message)
 End Function
 
+''' <summary> Receives a message from the server untill reaching the specified termiantion
+''' or reading the specified number of characters. </summary>
+''' <param name="maxLength">   [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">     [Optional, True] True to return the string without the termination. </param>
+''' <param name="termination"> [Optional, 10 ASCII] The character the signifies the end of the stream. </param>
+''' <returns> The received string. </returns>
+Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
+                           Optional ByVal trimEnd As Boolean = True, _
+                           Optional ByVal termination As String = vbLf) As String
+    
+    ReceiveRaw = Me.TcpClientSocket.ReceiveRaw(maxLength, trimEnd, termination)
+  
+End Function
 
 ''' <summary> Closese and releases the socket. </summary>
 Public Sub Dispose()
-    If Not m_tcpClientSocket Is Nothing And m_tcpClientSocket.Connected Then
+    If Me.Connected Then
         m_tcpClientSocket.CloseConnection
     End If
     m_tcpClientSocket = Nothing
