@@ -77,6 +77,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
             ' send the command
             socket.SendMessage command & vbLf
         
+#If False Then
             ' receive the reading
             readCount = socket.ReceiveTerminatedMessage(buffer, maximumLength, vbLf)
     
@@ -84,6 +85,16 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Integer, ByVal repe
             
             Range("H2").value = readCount
             Range("I2").value = buffer
+#Else
+            ' receive the reading
+            Dim identity As String
+            identity = socket.ReceiveRaw()
+    
+            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            
+            Range("H2").value = Len(identity)
+            Range("I2").value = identity
+#End If
     
         Loop
   

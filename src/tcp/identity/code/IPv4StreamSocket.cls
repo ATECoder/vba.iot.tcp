@@ -421,14 +421,15 @@ Public Function ReceiveTerminatedMessage(buffer As String, ByVal maxLength As In
     
 End Function
 
-
 ''' <summary> Receives a message from the server untill reaching the specified termiantion
 ''' or reading the specified number of characters. </summary>
-''' <param name="maxLength"> The maximum number of bytes to read. </param>
-''' <param name="termination"> [Optional] The character the signifies the end of the stream. </param>
+''' <param name="maxLength">   [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">     [Optional, True] True to return the string without the termination. </param>
+''' <param name="termination"> [Optional, 10 ASCII] The character the signifies the end of the stream. </param>
 ''' <returns> The received string. </returns>
-Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFFFFF, _
-                           Optional ByVal termination As String = vbLf) As Integer
+Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
+                           Optional ByVal trimEnd As Boolean = True, _
+                           Optional ByVal termination As String = vbLf) As String
 
     Dim c As String * 1
     Dim count As Integer
@@ -449,7 +450,9 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFFFFF, _
                       UserDefinedErrors.SocketReceiveError.Description & " Last error: " & CStr(Winsock.lastError)
             Exit Do
         ElseIf c = termination Then
-            builder.Append c
+            If Not trimEnd Then
+                builder.Append c
+            End If
             Exit Do
         Else
             currentLength = currentLength + count

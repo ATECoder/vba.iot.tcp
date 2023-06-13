@@ -1,8 +1,8 @@
 ### TODO
 
 #### Updates
-* Test using RecevieRaw.
-* Add code fromt he Tcp Session to the VI Session.
+* Add code from the Tcp Session to the VI Session.
+	* Write. WriteLine, Read, Query, QueryLine
 * Add Socket Query with termination.
 * Add Tcp Client and VI query.
 * finish studying vba_test
