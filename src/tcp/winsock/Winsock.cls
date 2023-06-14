@@ -26,7 +26,7 @@ Private m_socketCount As Integer
 ''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
 ''' </returns>
 Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" ( _
-        ByVal versionRequired As Long, wsa As wsock32.ws32_WSADATA) As Long
+        ByVal versionRequired As Long, ByRef wsa As wsock32.ws32_WSADATA) As Long
 
 ''' <summary>   Returns the error status for the last Windows Sockets operation that failed. </summary>
 ''' <remarks>   WSAGetLastError should be called immediately. This is necessary because some functions may reset
@@ -94,7 +94,7 @@ End Function
 ''' <remarks>   Call this method to register the socket with Winsock thus managing when
 ''' Winsock can be disposed.</remarks>
 ''' <param name="activeSocket">   The socket that is registring. </param>
-Public Sub Register(activeSocket As IPv4StreamSocket)
+Public Sub Register(ByVal activeSocket As IPv4StreamSocket)
     If IsObject(activeSocket) Then
         m_socketCount = m_socketCount + 1
     End If
@@ -104,7 +104,7 @@ End Sub
 ''' <remarks>   Call this method to remove the socket from the class so it can be disposed when having
 ''' no registered sockets.</remarks>
 ''' <param name="activeSocket">   The socket that is unregistring. </param>
-Public Sub UnRegister(activeSocket As IPv4StreamSocket)
+Public Sub UnRegister(ByVal activeSocket As IPv4StreamSocket)
     If IsObject(activeSocket) And (Me.SocketCount > 0) Then
         m_socketCount = m_socketCount - 1
         If Me.SocketCount = 0 Then

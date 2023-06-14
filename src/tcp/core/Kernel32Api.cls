@@ -14,7 +14,7 @@ Option Explicit
 ''' <param name="hpvDest">   [out] A pointer to the destination memory block to copy the bytes to.. </param>
 ''' <param name="hpvSource">   [in] A pointer to the source memory block to copy the bytes from.. </param>
 ''' <param name="length">   [in] The number of bytes to copy from the source to the destination. </param>
-Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
+Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (ByRef hpvDest As Any, ByRef hpvSource As Any, ByVal cbCopy As Long)
 
 ''' <summary>   Suspends the thread for the spefified duration in milleseconds. </summary>
 ''' <param name="dwMilliseconds">   Sleep time in milliseconds. </param>

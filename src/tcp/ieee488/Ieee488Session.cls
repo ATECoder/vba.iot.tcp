@@ -57,10 +57,11 @@ Public Property Get CanConnect() As Boolean
 End Property
 
 ''' <summary>   Opens a TCP Client connection. </summary>
-''' <param name="host">   An IPv4 dotted-decimal host address. </param>
-''' <param name="port">   The port that the server is listening on. </param>
+''' <param name="host">        An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional timeoutMs As Long) As Boolean
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
     OpenConnection = m_viSession.OpenConnection(host, port, timeoutMs)
    

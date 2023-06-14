@@ -65,8 +65,8 @@ Private Declare PtrSafe Function toInetAddress_ Lib "wsock32.dll" Alias "inet_ad
 ''' a specific error code.
 ''' <returns>
 Private Declare PtrSafe Function select_ Lib "wsock32.dll" Alias "select" ( _
-        ByVal nfds As Integer, readfds As wsock32.ws32_fd_set, writefds As wsock32.ws32_fd_set, _
-        exceptfds As wsock32.ws32_fd_set, Timeout As wsock32.ws32_Time_Value) As Integer
+        ByVal nfds As Integer, ByRef readfds As wsock32.ws32_fd_set, ByRef writefds As wsock32.ws32_fd_set, _
+        ByRef exceptfds As wsock32.ws32_fd_set, ByRef timeout As wsock32.ws32_Time_Value) As Integer
 
 ''' <summary>   Creates a socket that is bound to a IPv4 transport service. </summary>
 ''' <returns>   If no error occurs, socket returns a descriptor referencing the new socket.
@@ -158,7 +158,7 @@ End Sub
 
 ''' <summary>   Determines the readability status of one or more sockets, waiting if necessary, to perform synchronous I/O. </summary>
 ''' <param name="readSocketSet">   [in, out] A pointer to a set of sockets to be checked for readability. </param>
-''' <param name="timeout">         [Optional, 500] [in] The maximum milliseconds time for select to wait. </param>
+''' <param name="timeoutMs">       [Optional, 500] [in] The maximum milliseconds time for select to wait. </param>
 ''' <returns>
 ''' The total number of socket handles that are ready and contained in the ws32_fd_set structures, zero if the time limit expired,
 ''' or ws32_SOCKET_ERROR if an error occurred. If the return value is ws32_SOCKET_ERROR, WSAGetLastError can be used to retrieve

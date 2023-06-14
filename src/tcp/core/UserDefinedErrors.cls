@@ -120,15 +120,16 @@ End Sub
 
 ''' <summary>   Builds a an error message from the VBA <see cref="Err"/>. </summary>
 Public Function FormattedErr() As String
-    Dim ErrNumberDetails As String
     
-    ErrNumberDetails = IIf(Err.Number < 0, " (" & (Err.Number - VBA.vbObjectError) & " / 0x" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "")
+    Dim ErrNumberDetails As String
+    ErrNumberDetails = " (" & (Err.Number - VBA.vbObjectError) & " / 0x" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")"
     FormattedErr = "[Error Number=" & Err.Number & ErrNumberDetails & ", Source=" & Err.source & ", Description=" & Err.Description & "]"
+
 End Function
 
 ''' <summary>   Adds a user defined error to the error dictionary. </summary>
 ''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
-Private Sub AddUserDefinedError(userError As UserDefinedError)
+Private Sub AddUserDefinedError(ByRef userError As UserDefinedError)
     m_errorsDix.Add userError.Code, userError
 End Sub
 

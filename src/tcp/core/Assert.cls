@@ -20,7 +20,7 @@ Public AssertMessage As String
 ''' <param name="actual">   The actual value. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   An <see cref="Assert"/>   instant of True if values are equal; otherwise, False. </returns>
-Public Function AreEqual(ByRef expected, ByRef actual, ByRef message As String) As Assert
+Public Function AreEqual(ByRef expected As Variant, ByRef actual As Variant, ByRef message As String) As Assert
     Set AreEqual = IsTrue(Not expected <> actual, message)
     
     If Not AreEqual.AssertSuccessful Then
@@ -35,7 +35,7 @@ End Function
 ''' <param name="actual">   The actual value. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   True if values are not equal; otherwise, false. </returns>
-Public Function AreNotEqual(ByRef expected, ByRef actual, ByRef message As String) As Assert
+Public Function AreNotEqual(ByRef expected As Variant, ByRef actual As Variant, ByRef message As String) As Assert
     Set AreNotEqual = IsTrue(expected <> actual, message)
     
     If Not AreNotEqual.AssertSuccessful Then
@@ -49,7 +49,7 @@ End Function
 ''' <param name="actual">   The actual value. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="actual"/>   is null; otherwise, false. </returns>
-Public Function IsNull(ByRef actual, ByRef message As String) As Assert
+Public Function IsNull(ByRef actual As Variant, ByRef message As String) As Assert
     Set IsNull = IsFalse(IsObject(actual), message)
 End Function
 
@@ -57,7 +57,7 @@ End Function
 ''' <param name="actual">   The actual value. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="actual"/>   is not null; otherwise, false. </returns>
-Public Function IsNotNull(ByRef actual, ByRef message As String) As Assert
+Public Function IsNotNull(ByRef actual As Variant, ByRef message As String) As Assert
     Set IsNotNull = IsTrue(IsObject(actual), message)
 End Function
 
@@ -66,7 +66,7 @@ End Function
 '''                       but maybe you like to live dangerously. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="truthy"/>   is true; otherwise, false. </returns>
-Public Function IsTrue(ByRef truthy, ByRef message As String) As Assert
+Public Function IsTrue(ByRef truthy As Variant, ByRef message As String) As Assert
     Set IsTrue = New Assert
     IsTrue.AssertSuccessful = True
     IsTrue.AssertMessage = message
@@ -82,7 +82,7 @@ End Function
 '''                       but maybe you like to live dangerously. </param
 ''' <param name="message">   A message to show in case the assertion failed. </param
 ''' <returns>   False if <paramref name="falsy"/>   is False; otherwise, false. </returns>
-Public Function IsFalse(ByRef falsy, ByRef message As String) As Assert
+Public Function IsFalse(ByRef falsy As Variant, ByRef message As String) As Assert
     Set IsFalse = New Assert
     IsFalse.AssertSuccessful = True
     IsFalse.AssertMessage = message

@@ -11,7 +11,7 @@ Option Explicit
 
 ''' <summary>   Exports all code files to the active workbook path. </summary>
 ''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stopred. </param>
-Public Sub ExportCodeFiles(Optional subFolder As String = "code")
+Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
 
     Dim component As VBIDE.VBComponent
     Dim extension As String
@@ -19,7 +19,7 @@ Public Sub ExportCodeFiles(Optional subFolder As String = "code")
     
     ' set and, optionally, create the folder.
     Dim path As String
-    path = ActiveWorkbook.path & "\" & subFolder & "\"
+    path = PathExtensions.PathJoin(ActiveWorkbook.path, subFolder) & "\"
     Dim fso As FileSystemObject
     Set fso = New FileSystemObject
     If Not fso.FolderExists(path) Then
@@ -41,7 +41,7 @@ End Sub
 ''' <summary>   Get the extension if the component is a file </summary>
 ''' <param name="component">   The <see cref="VBComponent"/>   </param>
 ''' <returns>   The file extension or an empty string if not a file. </returns>
-Public Function GetFileExtension(component As VBComponent)
+Public Function GetFileExtension(ByVal component As VBComponent)
     Select Case component.Type
         Case vbext_ct_ClassModule, vbext_ct_Document
             GetFileExtension = ".cls"
@@ -58,8 +58,8 @@ End Function
 ''' contain methods that start with the test prefix. <summary>
 ''' <param name="macroNamePrefix">   [Optional, 'Test'] The macro name prefix. </param>
 ''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
-Public Function ListTestModules(Optional ByVal macroNamePrefix = "Test", _
-                                Optional ByVal moduleNameSuffix = "Tests") As VBA.collection
+Public Function ListTestModules(Optional ByVal macroNamePrefix As String = "Test", _
+                                Optional ByVal moduleNameSuffix As String = "Tests") As VBA.collection
 
     Dim pj As VBProject
     Dim component As VBComponent
