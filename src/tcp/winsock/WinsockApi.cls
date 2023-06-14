@@ -57,7 +57,7 @@ Private Declare PtrSafe Function toInetAddress_ Lib "wsock32.dll" Alias "inet_ad
 ''' <param name="readfds">     [in, out] An optional pointer to a set of sockets to be checked for readability. </param>
 ''' <param name="writefds">    [in, out] An optional pointer to a set of sockets to be checked for writability. </param>
 ''' <param name="exceptfds">   [in, out] An optional pointer to a set of sockets to be checked for errors. </param>
-''' <param name="timeout">     [in] const The maximum time for select to wait, provided in the form of a TIMEVAL structure.
+''' <param name="timeout">     [in] The maximum time for select to wait, provided in the form of a TIMEVAL structure.
 '''                            Set the timeout parameter to null for blocking operations. </param>
 ''' <returns>
 ''' The total number of socket handles that are ready and contained in the ws32_fd_set structures, zero if the time limit expired,

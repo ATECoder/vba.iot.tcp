@@ -122,7 +122,7 @@ Public Function Repeat(ByVal text As String, ByVal count As Long) As String
     Next
 End Function
 
-''' <summary>   Converts a regular string to a unicode string,
+''' <summary>   Converts a regular string to a Unicode string,
 ''' e.g., "foo" to a L"foo" string.. </summary>
 ''' <param name="text">   The string to convert. </param>
 ''' <returns>   A string. <returns>

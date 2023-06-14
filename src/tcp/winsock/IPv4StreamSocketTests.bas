@@ -40,7 +40,7 @@ Public Function TestCreateSocket() As Assert
         Exit Function
     End If
 
-    ' test terminating the socket, which should dispose of the winsock class.
+    ' test terminating the socket, which should dispose of the Winsock class.
     Set sock = Nothing
     
     Set TestCreateSocket = Assert.AreEqual(Winsock.SocketCount, 0, _

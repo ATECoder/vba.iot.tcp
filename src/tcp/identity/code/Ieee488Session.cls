@@ -94,7 +94,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
 
 End Function
 
-''' <summary>   Receives a message from the server untill reaching the specified termiantion
+''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>

@@ -9,10 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-' true if winsock was initiated
+' true if Winsock was initiated
 Private m_initiated As Boolean
 
-' true if winsock was disposed
+' true if Winsock was disposed
 Private m_disposed As Boolean
 
 ' counts the number of sockets
@@ -36,7 +36,7 @@ Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" ( _
 Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
 
 ''' <summary>   terminates use of the Winsock dll. </summary>
-''' <remarks>   In a multithreaded environment, WSACleanup terminates Windows Sockets operations
+''' <remarks>   In a multi-threaded environment, WSACleanup terminates Windows Sockets operations
 '''   for all threads. </remarks>
 ''' <returns>
 '''   The return value is zero if the operation was successful. Otherwise, the value
@@ -44,17 +44,17 @@ Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
 ''' <returns>
 Private Declare PtrSafe Function WSACleanup Lib "wsock32.dll" () As Long
 
-''' <summary>   Initializes winsock. </summary>
+''' <summary>   Initializes Winsock. </summary>
 '''< remarks>   This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
 ''' <see href="https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton"/>
 ''' This method is call on the first method (not property) access of this class.
 ''' </remarks>
 Private Sub Class_Initialize()
-    Debug.Print "initializing winsock"
+    Debug.Print "initializing Winsock"
 End Sub
 
-''' <summary>   Initializes winsock. </summary>
+''' <summary>   Initializes Winsock. </summary>
 '''< remarks>   This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
 ''' <see href="https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton"/>
@@ -93,7 +93,7 @@ End Function
 ''' <summary>   Registers this socket with the Winsock class. </summary>
 ''' <remarks>   Call this method to register the socket with Winsock thus managing when
 ''' Winsock can be disposed.</remarks>
-''' <param name="activeSocket">   The socket that is registring. </param>
+''' <param name="activeSocket">   The socket that is registering. </param>
 Public Sub Register(ByVal activeSocket As IPv4StreamSocket)
     If IsObject(activeSocket) Then
         m_socketCount = m_socketCount + 1
@@ -103,7 +103,7 @@ End Sub
 ''' <summary>   Un-Registers this socket from the Winsock class. </summary>
 ''' <remarks>   Call this method to remove the socket from the class so it can be disposed when having
 ''' no registered sockets.</remarks>
-''' <param name="activeSocket">   The socket that is unregistring. </param>
+''' <param name="activeSocket">   The socket that is unregistering. </param>
 Public Sub UnRegister(ByVal activeSocket As IPv4StreamSocket)
     If IsObject(activeSocket) And (Me.SocketCount > 0) Then
         m_socketCount = m_socketCount - 1

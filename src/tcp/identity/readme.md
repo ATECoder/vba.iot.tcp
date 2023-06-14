@@ -9,14 +9,14 @@
 * Enter the instrument IP address.
 * Enter the instrument port
   * 5025 for an LXI instrument or
-  * 1234 for a GOPIB instrument connected via a Prologix controller.
+  * 1234 for a GPIB instrument connected via a Prologix controller.
 * Click _Read Identity_ to read the instrument identity.  
 
 
 ### Key Features
 
 * Provides rudimentary SCPI methods for reading the instrument identity.
-* Using WIndows Winsock32 calls to constrack sockets for communicating witht he instrument.
+* Using Windows Winsock32 calls to construct sockets for communicating with the instrument.
 
 ### Main Types
 

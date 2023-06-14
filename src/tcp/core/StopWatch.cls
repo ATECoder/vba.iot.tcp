@@ -33,7 +33,7 @@ Private Declare PtrSafe Function QueryPerformanceCounter Lib "kernel32" (ByRef c
 ''' <returns>
 Private Declare PtrSafe Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequency As Currency) As Byte
    
-''' <summary>   Suspends the thread for the spefified duration in milleseconds. </summary>
+''' <summary>   Suspends the thread for the specified duration in milliseconds. </summary>
 ''' <param name="dwMilliseconds">   Sleep time in milliseconds. </param>
 Private Declare PtrSafe Sub SleepMilliseconds Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
    
@@ -61,7 +61,7 @@ Public Sub Restart()
     m_counting = True
 End Sub
 
-''' <summary>   Stopes the stopwatch counter. </summary>
+''' <summary>   Stops the stopwatch counter. </summary>
 ''' <remarks>   Fixes the stop watch end time and marks it as not counting.
 ''' </remarks>
 Public Sub StopCounter()
@@ -87,7 +87,7 @@ Property Get ElapsedMilliseconds() As Double
     ElapsedMilliseconds = 1000# * ElapsedSeconds
 End Property
 
-''' <summary>   Suspends the thread for the spefified duration in milleseconds. </summary>
+''' <summary>   Suspends the thread for the specified duration in milliseconds. </summary>
 ''' <param name="duration">   Sleep time in milliseconds. </param>
 Public Sub Sleep(ByVal duration As Long)
     SleepMilliseconds duration

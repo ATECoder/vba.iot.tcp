@@ -1,7 +1,7 @@
 Attribute VB_Name = "wsock32"
 Option Explicit
 
-''' <summary>   The winsock implementation version </summary.
+''' <summary>   The Winsock implementation version </summary.
 ''' <remarks>
 ''' Version 1.1 (1*256 + 1) = 257
 ''' version 2.0 (2*256 + 0) = 512
@@ -33,7 +33,7 @@ Public Const ws32_AF_INET = 2               ' The Internet Protocol version 4 (I
 
 ' Define socket types
 
-''' <summar>   A socket type that provides sequenced, reliable, two-way, connection-based byte streams with an
+''' <summary>   A socket type that provides sequenced, reliable, two-way, connection-based byte streams with an
 ''' OOB data transmission mechanism. This socket type uses the Transmission Control Protocol (TCP) for the
 ''' Internet address family (ws32_AF_INET or ws32_AF_INET6). </summary>
 Public Const ws32_SOCK_STREAM = 1
@@ -92,8 +92,8 @@ Public Const ws32_MSG_WAITALL = &H8   ' do not complete until packet is complete
 
 Public Const ws32_FD_SETSIZE = 64
 
-''' <summary>   Defines a set of scokets returned from the <see cref="SelectSockets"/>   alias select
-''' winsock Api call. </summary>
+''' <summary>   Defines a set of sokkets returned from the <see cref="SelectSockets"/>   alias select
+''' Winsock API call. </summary>
 ''' <remarks>
 ''' Four macros are defined in the header file Winsock2.h for manipulating and checking the descriptor sets.
 ''' The variable ws32_FD_SETSIZE determines the maximum number of descriptors in a set.

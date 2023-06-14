@@ -30,7 +30,7 @@ Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
     fso.DeleteFile fileHandle.TestFilename
 End Sub
 
-''' <summary>   Execture all test macros in the module specified in the test sheet. </summary>
+''' <summary>   Executes all test macros in the module specified in the test sheet. </summary>
 ''' <para name="testDataSheet">   Specifies the work sheet were test data are set and logged. </param>
 Public Sub Execute(ByRef testDataSheet As Worksheet)
     

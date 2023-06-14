@@ -132,7 +132,7 @@ Finally:
         socket.CloseConnection
     End If
     
-    ' terminate the socket, which should release the winsock dll.
+    ' terminate the socket, which should release the Winsock dll.
     Set socket = Nothing
     
     If Len(errorMessage) > 0 Then

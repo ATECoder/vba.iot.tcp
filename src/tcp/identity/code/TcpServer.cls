@@ -58,7 +58,7 @@ End Property
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="timeoutMs">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
-''' <returns>   the connected tcp client. </returns>
+''' <returns>   the connected Tcp client. </returns>
 Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
 
     Dim connectedTcpClientSocket As IPv4StreamSocket

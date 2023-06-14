@@ -21,7 +21,7 @@ Private Sub Class_Initialize()
     m_receiveTimeout = 500
 End Sub
 
-''' <summary>   Termiantes an IEEE488 Session. </summary>
+''' <summary>   Terminates an IEEE488 Session. </summary>
 Private Sub Class_Terminate()
     Me.Dispose
 End Sub
@@ -67,7 +67,7 @@ Public Property Get ReadTermination() As String
 End Property
 
 ''' <summary>   Sets the read termination. </summary>
-''' <param name="value">   The read termiantion. </param>
+''' <param name="value">   The read termination. </param>
 Public Property Let ReadTermination(value As String)
     m_readTermination = value
 End Property
@@ -79,7 +79,7 @@ Public Property Get WriteTermination() As String
 End Property
 
 ''' <summary>   Sets the Write termination. </summary>
-''' <param name="value">   The Write termiantion. </param>
+''' <param name="value">   The Write termination. </param>
 Public Property Let WriteTermination(value As String)
     m_writeTermination = value
 End Property
@@ -139,7 +139,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     WriteLine = m_tcpClient.SendMessage(message)
 End Function
 
-''' <summary>   Receives a message from the server untill reaching the specified termiantion
+''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>

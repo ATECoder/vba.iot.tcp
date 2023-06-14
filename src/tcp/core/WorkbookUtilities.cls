@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 ''' <summary>   Exports all code files to the active workbook path. </summary>
-''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stopred. </param>
+''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
 Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
 
     Dim component As VBIDE.VBComponent
@@ -136,7 +136,7 @@ End Function
 
 ''' <summary>   Checks if the Lists all macros in the specified module. <summary>
 ''' <param name="component">   The component to check for macro methods. </param>
-''' <param name="previx">   [Optional, 'Test'] The prefix of the macro method name. </param>
+''' <param name="prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
 Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
 
     Dim curMacro As String, newMacro As String
@@ -167,7 +167,7 @@ End Function
 ''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
 ''' <remarks>
 ''' <param name="moduleName">   The module name where the macros reside. </param>
-''' <param name="previx">   [Optional, 'Test'] The prefix of the macro name. </param>
+''' <param name="prefix">       [Optional, 'Test'] The prefix of the macro name. </param>
 ''' <returns>   A Collection of macro names. </returns>
 Function EnumerateMacroNames(moduleName As String, Optional ByVal prefix As String = "Test") As VBA.collection
 

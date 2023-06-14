@@ -60,7 +60,7 @@ Public Function Disconnect() As Boolean
 End Function
 
 ''' <summary>   Initializes this TCP Client using the provided connected socket. </summary>
-''' <param name="connectedSocket ">   A connected Inte stream socket. </param>
+''' <param name="connectedSocket ">   A connected INET stream socket. </param>
 Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
     Set m_tcpClientSocket = connectedSocket
 End Sub
@@ -91,7 +91,7 @@ Public Function ReceiveString(Optional ByVal bufferSize As Integer = 1024) As St
 
 End Function
 
-''' <summary>   Receives a message from the server untill reaching the specified termiantion
+''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
