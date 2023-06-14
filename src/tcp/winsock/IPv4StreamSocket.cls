@@ -28,7 +28,7 @@ Private Const DefaultTimeoutMs = 500
 ''' The integer referred to by clientAddressLength initially contains the amount of space pointed to by clientAddress. On return it
 ''' will contain the actual length in bytes of the address returned. <returns>
 Private Declare PtrSafe Function accept_ Lib "wsock32.dll" Alias "accept" ( _
-        ByVal s As Long, ByRef clientAddress As wsock32.ws32_SocketAddress, ByVal clientAddressLength As Integer) As Long
+        ByVal s As Long, clientAddress As wsock32.ws32_SocketAddress, clientAddressLength As Integer) As Long
 
 ''' <summary>   Associates a local address with a socket. </summary>
 ''' <param name="s">               [in] A descriptor identifying an unbound socket. </param>
@@ -38,7 +38,7 @@ Private Declare PtrSafe Function accept_ Lib "wsock32.dll" Alias "accept" ( _
 ''' <returns>   Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function bind_ Lib "wsock32.dll" Alias "bind" ( _
-        ByVal s As Long, ByRef address As wsock32.ws32_SocketAddress_in, ByVal addressLength As Integer) As Long
+        ByVal s As Long, address As wsock32.ws32_SocketAddress_in, ByVal addressLength As Integer) As Long
 
 ''' <summary>   Closes an existing socket. </summary>
 ''' <param name="s">   [in] A descriptor identifying the socket to close. </param>
@@ -88,7 +88,7 @@ Private Declare PtrSafe Function listen_ Lib "wsock32.dll" Alias "listen" ( _
 ''' can be retrieved by calling WSAGetLastError.
 ''' <returns>
 Private Declare PtrSafe Function send_ Lib "wsock32.dll" Alias "send" ( _
-        ByVal s As Long, ByRef buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
+        ByVal s As Long, buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
 ''' <summary>   Sets a socket option. </summary>
 ''' <param name="s">         [in] A descriptor that identifies a socket. </param>
@@ -135,7 +135,7 @@ Private Declare PtrSafe Function recv_ Lib "wsock32.dll" Alias "recv" ( _
 Private m_socketId As Long
 Private m_connected As Boolean
 Private m_listening As Boolean
-Private m_receiveTimeout As Long
+Private m_timeout As Integer
 Private m_fdSet As wsock32.ws32_fd_set
 
 ''' <summary>   Initializes an internet protocol Stream Socket with a socket id. </summary>
@@ -158,9 +158,8 @@ Private Sub Class_Initialize()
     Else
         Winsock.Register Me
         
-        ' set the receive timeout to its default value
-        
-        Me.SetReceiveTimeout DefaultTimeoutMs
+        ' set the default timeout
+        SetTimeout DefaultTimeoutMs
     End If
     
 End Sub
@@ -192,11 +191,11 @@ End Property
 
 ''' <summary>   Intializes an Inet stream socket using the provided socket id. </summary>
 ''' <param name="connectedSocketId">   The ID of a connected socket. </param>
-''' <param name="timeoutMs">           [Optional, 500] The receive timeout interval in milliseconds. </param>
-Public Sub Initialize(ByVal connectedSocketId As Long, Optional ByVal timeoutMs As Long = 500)
+''' <param name="timeoutMs">           [Optional, 500] The timeout interval in milliseconds. </param>
+Public Sub Initialize(ByVal connectedSocketId As Long, Optional timeoutMs As Long = 500)
     m_socketId = connectedSocketId
     m_connected = True
-    Me.SetReceiveTimeout timeoutMs
+    Me.SetTimeout (timeoutMs)
 End Sub
 
 ''' <summary>   Opens a socket connection and sets and returns the socket id. </summary>
@@ -312,7 +311,7 @@ End Function
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="serverSocket">   [in] Reference to the server socket. </param>
-''' <param name="timeoutMs">      [Optional, 500] The maximum milliseconds time for select to wait. </param>
+''' <param name="timeoutMs">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
 ''' <returns>   the connected socket. </returns>
 Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
         Optional ByVal timeoutMs As Long = 500) As IPv4StreamSocket
@@ -389,7 +388,7 @@ End Function
 ''' <returns>   If no error, the number of byte that were sent to the server.
 ''' Otherwise, RECEIVE_ERROR.
 ''' </returns>
-Public Function ReceiveTerminatedMessage(ByRef buffer As String, ByVal maxLength As Integer, _
+Public Function ReceiveTerminatedMessage(buffer As String, ByVal maxLength As Integer, _
                                          Optional ByVal termination As String = vbLf) As Integer
 
     Dim c As String * 1
@@ -492,7 +491,7 @@ End Function
 ''' <remarks>   Data is read until exhausted. </remarks>
 ''' <param name="bufferSize">   [Optional, 1024] The number of character to read on each trial. </param>
 ''' <returns>   The received characters. </returns>
-Public Function ReceiveString(Optional ByVal bufferSize As Integer = 1024) As String
+Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
     
     Dim buffer As String
     Dim message As String
@@ -509,23 +508,23 @@ Public Function ReceiveString(Optional ByVal bufferSize As Integer = 1024) As St
     ReceiveString = Trim(message)
 End Function
 
-''' <summary>   Sets the socket receive timeout. </summary>
-''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
+''' <summary>   Sets the socket timeout. </summary>
+''' <param name="timeout">   The timeout interval in milliseconds. </param>
+Public Sub SetTimeout(ByVal interval As Long)
 
     Dim result As Long
-    result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, timeoutMs, 4)
+    result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, interval, 4)
 
     If result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetReceiveTimeout", _
+        Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetTimeout", _
                   UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
     Else
-        m_receiveTimeout = timeoutMs
+        m_timeout = interval
     End If
     
 End Sub
 
-''' <summary>   Gets the socket receive timeout in milliseconds. </summary>
-Public Property Get ReceiveTimeout() As Long
-    ReceiveTimeout = m_receiveTimeout
+''' <summary>   Gets the socket timeout in milliseconds. </summary>
+Public Property Get Timeout() As Long
+    Timeout = m_timeout
 End Property

@@ -13,7 +13,7 @@ Option Explicit
 ''' <param name="text">   The text to trim. </param>
 ''' <param name="c">   The character to trim. </param>
 ''' <returns>   A string. <returns>
-Public Function TrimLeft(ByVal text As String, ByVal c As String) As String
+Public Function TrimLeft(ByVal text As String, c As String) As String
     Dim textLength As Long
     textLength = Len(text)
     
@@ -38,7 +38,7 @@ End Function
 ''' <param name="text">   The text to trim. </param>
 ''' <param name="c">   The character to trim. </param>
 ''' <returns>   A string. <returns>
-Public Function TrimRight(ByVal text As String, ByVal c As String) As String
+Public Function TrimRight(ByVal text As String, c As String) As String
     Dim textLength As Long
     textLength = Len(text)
     
@@ -140,7 +140,7 @@ End Function
 ''' by without formatting suffixes. </summary>
 ''' <param name="mask">     The mask such as 'A{0} b{1}'. </param>
 ''' <param name="tokens">   The parameter list matching the mask. </param>
-Public Function StringFormat(ByVal mask As String, ParamArray tokens() As Variant) As String
+Public Function StringFormat(ByVal mask As String, ParamArray tokens()) As String
     Dim i As Long
     For i = 0 To UBound(tokens)
         mask = Replace$(mask, "{" & i & "}", tokens(i))

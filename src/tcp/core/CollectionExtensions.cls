@@ -12,11 +12,11 @@ Attribute VB_Exposed = False
 ''' <param name="collection">   The subject collection. </param>
 ''' <param name="key">          The key to check for in the collection. </param>
 ''' <returns>   </returns>
-Public Function ContainsKey(ByVal col As VBA.collection, ByVal key As Variant) As Boolean
+Public Function ContainsKey(col As VBA.collection, ByVal key As Variant) As Boolean
     Dim found As Boolean
     found = False
     For Each colItem In col
-        If colItem = key Then
+        If key = key Then
             found = True
             Exit For
         End If
@@ -40,7 +40,7 @@ End Function
 ''' <param name="contained">   The collection which to check for being contained in the
 '''                           subject collection. </param>
 ''' <returns>   </returns>
-Public Function ContainsAll(ByVal col As VBA.collection, ByVal contained As VBA.collection) As Boolean
+Public Function ContainsAll(col As VBA.collection, contained As VBA.collection) As Boolean
     
     Dim result As Boolean
     Dim key As Variant

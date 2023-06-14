@@ -9,95 +9,72 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Private m_wsa As wsock32.WSADATA
-Private m_serverSocket As Long
-Private m_fdSet As wsock32.fd_set
+Private m_tcpServerSocket As IPv4StreamSocket
 
+''' <summary>   Gets the Tcp Server socket. </summary>
+''' <value>   A IPv4StreamSocket. </value>
+Public Property Get TcpServerSocket() As IPv4StreamSocket
+    Set TcpServerSocket = m_tcpServerSocket
+End Property
 
-Private Sub Class_Initialize()
-    Dim result As Long
-    result = wsock32.WSAStartup(257, m_wsa)
+''' <summary>   Associates any local address with a socket and start listening. </summary>
+''' <param name="port">   The port that the server is listening on. </param>
+''' <param name="backlog">   [Optional, 10] The maximum length of the queue of pending connections. </para>
+''' <returns>   True if the socket is bound. </returns>
+Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10) As Boolean
+
+    On Error GoTo Finally
     
-    If result <> 0 Then
-        Err.Raise StatusCode.ErrorSocketSetup
-        Exit Sub
+    Set m_tcpServerSocket = New IPv4StreamSocket
+    
+    ' bind the socket to the specified port for listening on any address
+    
+    m_tcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, port
+    
+    ' get the socket to start listening
+    
+    BindTo = m_tcpServerSocket.StartListening(backlog)
+    
+Finally:
+
+    If Me.Connected Then
+        Me.TcpServerSocket.CloseConnection
     End If
-End Sub
-
-
-
-Public Sub BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10)
-    m_serverSocket = wsock32.socket(AF_INET, SOCK_STREAM, 0)
+    Set m_tcpServerSocket = Nothing
     
-    If m_serverSocket = wsock32.INVALID_SOCKET Then
-        Err.Raise StatusCode.ErrorSocketCreation
-        Exit Sub
+    Err.Raise Err
+
+End Function
+
+''' <summary>   Returns the connection state of the client. </summary>
+''' <returns>   True if the socket is connected; otherwise, False. </returns>
+Public Property Get Connected() As Boolean
+    If m_tcpServerSocket Is Nothing Then
+        Connected = False
+    Else
+        Connected = m_tcpServerSocket.Connected
     End If
-    
-    Dim endpoint As wsock32.sockaddr_in
-    endpoint.sin_family = wsock32.AF_INET
-    endpoint.sin_addr.s_addr = wsock32.INADDR_ANY
-    endpoint.sin_port = wsock32.htons(port)
-    
-    Dim bindResult As Long
-    bindResult = wsock32.bind(m_serverSocket, endpoint, 16)
-    
-    If bindResult <> 0 Then
-        Dispose
-        Err.Raise StatusCode.ErrorSocketBind
-        Exit Sub
-    End If
-    
-    Dim listenResult As Long
-    listenResult = wsock32.listen(m_serverSocket, backlog)
-    
-    If listenResult <> 0 Then
-        Dispose
-        Err.Raise StatusCode.ErrorSocketStartListening
-        Exit Sub
-    End If
-End Sub
+End Property
 
-
+''' <summary>   Permits an incoming connection attempt on a socket. </summary>
+''' <param name="timeout">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
+''' <returns>   the connected tcp client. </returns>
 Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
-    wsock32.FD_ZERO_MACRO m_fdSet
-    wsock32.FD_SET_MACRO m_serverSocket, m_fdSet
-    
-    Dim time As wsock32.timeval
-    time.tv_sec = timeoutMs / 1000
-    time.tv_usec = timeoutMs Mod 1000
-    
-    Dim emptyFdSet As fd_set
-    
-    Dim selectResult As Integer
-    selectResult = wsock32.select_(m_serverSocket, m_fdSet, emptyFdSet, emptyFdSet, time)
-    
-    If selectResult = 0 Then
-        Set AcceptTcpClient = Nothing
-        Exit Function
-    End If
-    
-    Dim socket
-    Dim socketAddress As wsock32.sockaddr
-    
-    socket = wsock32.accept(m_serverSocket, socketAddress, 16)
-    
-    If socket = -1 Then
-        Dispose
-        Err.Raise StatusCode.ErrorSocketAcceptClient
-        Exit Function
-    End If
+
+    Dim connectedTcpClientSocket As IPv4StreamSocket
+    connectedTcpClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
     
     Dim client As TcpClient
     Set client = New TcpClient
-    
-    client.Initialize socket
+    client.Initialize connectedTcpClientSocket
     
     Set AcceptTcpClient = client
 End Function
 
-
+''' <summary>   Closes and releases the socket. </summary>
 Public Sub Dispose()
-    wsock32.closesocket (m_serverSocket)
-    wsock32.WSACleanup
+    If Me.Connected Then
+        m_tcpServerSocket.CloseConnection
+    End If
+    Set m_tcpServerSocket = Nothing
 End Sub

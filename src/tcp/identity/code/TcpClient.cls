@@ -25,7 +25,7 @@ End Property
 ''' <param name="host">   An IPv4 dotted-decimal host address. </param>
 ''' <param name="port">   The port that the server is listening on. </param>
 ''' <returns>   True if the socket is connected. </returns>
-Public Function ConnectTo(host As String, port As Long) As Boolean
+Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
     
     If host = "localhost" Then
         host = "127.0.0.1"
@@ -85,7 +85,7 @@ End Function
 ''' <remarks>   Data is read until exhausted. </remarks>
 ''' <param name="bufferSize">   [Optional, 1024] The number of character to read on each trial. </param>
 ''' <returns>   The received characters. </returns>
-Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
+Public Function ReceiveString(Optional ByVal bufferSize As Integer = 1024) As String
     
     ReceiveString = Me.TcpClientSocket.ReceiveString(bufferSize)
 

@@ -11,14 +11,14 @@ Option Explicit
 
 Private m_readTermination As String
 Private m_writeTermination As String
-Private m_receiveTimeout As Long
+Private m_timeoutMs As Long
 Private m_tcpClient As TcpClient
 
 ''' <summary>   Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
     m_readTermination = vbLf
     m_writeTermination = vbLf
-    m_receiveTimeout = 500
+    m_timeoutMs = 500
 End Sub
 
 ''' <summary>   Termiantes an IEEE488 Session. </summary>
@@ -84,36 +84,35 @@ Public Property Let WriteTermination(value As String)
     m_writeTermination = value
 End Property
 
-''' <summary>   Gets the receive timeout in Milliseconds. </summary>
+''' <summary>   Gets the Timeout in Milliseconds. </summary>
 ''' <value>   A string. </value>
-Public Property Get ReceiveTimeout() As String
-    ReceiveTimeout = m_receiveTimeout
+Public Property Get timeoutMs() As String
+    timeoutMs = m_timeoutMs
 End Property
 
-''' <summary>   Sets the socket receive timeout. </summary>
-''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
+''' <summary>   Sets the socket timeout. </summary>
+''' <param name="timeout">   The timeout interval in milliseconds. </param>
+Public Sub SetTimeout(ByVal interval As Long)
     If Me.Connected Then
-        If timeoutMs <> m_tcpClient.TcpClientSocket.ReceiveTimeout Then
-            m_tcpClient.TcpClientSocket.SetReceiveTimeout timeoutMs
+        If interval <> m_tcpClient.TcpClientSocket.Timeout Then
+            m_tcpClient.TcpClientSocket.SetTimeout interval
         End If
     End If
-    m_receiveTimeout = timeoutMs
+    m_timeoutMs = interval
     
 End Sub
 
 ''' <summary>   Opens a TCP Client connection. </summary>
-''' <param name="host">        An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <param name="host">   An IPv4 dotted-decimal host address. </param>
+''' <param name="port">   The port that the server is listening on. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional timeoutMs As Long) As Boolean
    
     Set m_tcpClient = New TcpClient
    
     m_tcpClient.ConnectTo host, port
     
-    Me.SetReceiveTimeout timeoutMs
+    Me.SetTimeout timeoutMs
     
     OpenConnection = Me.Connected
    

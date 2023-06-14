@@ -22,7 +22,7 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 
 #### Description
 
-The ISR VBA IOT TCP workbooks provide rudimentary methods for communicating with LXI instruments in desktop platforms.
+The ISR VBA IOT TCP workbooks consists of VBA class for communicating with LXI instruments in desktop platforms.
 
 Unlike VXI-11 or HiSlip, these classes do not implement the bus level method for issuing device clear, reading service requests or responding to instrument initiated event. While  control ports for these methods are available in some Keysight instruments, these ports are not part of the standard LXI framework.
 

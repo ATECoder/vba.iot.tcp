@@ -48,7 +48,7 @@ End Property
 
 ''' <summary>   Returns the text in this StringBuilder. </summary>
 ''' <param name="separator">   [Optional, Null string] The separator to use in joining components. </param>
-Public Function ToString(Optional ByVal separator As String = vbNullString) As String
+Public Function ToString(Optional separator As String = vbNullString) As String
 
     If m_currentIndex > 0 Then
         ReDim Preserve m_buffer(1 To m_currentIndex)

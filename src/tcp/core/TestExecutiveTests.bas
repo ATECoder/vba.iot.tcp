@@ -8,11 +8,9 @@ Public Type TestFileHandle
 End Type
 
 ''' <summary>   Adds the test modules. </summary>
-Private Sub AddTestModules(ByVal knownTestModules As VBA.collection)
-    knownTestModules.Add "CollectionExtensionsTests"
+Private Sub AddTestModules(knownTestModules As VBA.collection)
     knownTestModules.Add "IPv4StreamSocketTests"
     knownTestModules.Add "MarshalTests"
-    knownTestModules.Add "PathExtensionsTests"
     knownTestModules.Add "StopWatchTests"
     knownTestModules.Add "StringBuilderTests"
     knownTestModules.Add "StringExtensionsTests"
