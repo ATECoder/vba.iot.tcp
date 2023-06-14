@@ -12,6 +12,8 @@ Open source used by this software is described and licensed at the following sit
 * [Web Excel] 
 * [Enumerate and execute Excel Macros]  
 * [Singleton class in VBA]  
+* [String builder]  
+* [String format]  
 * [Utter Access Archive: Singleton]  
 
 <a name="Closed-software"></a>
@@ -29,3 +31,5 @@ Closed software used by this software are described and licensed on the followin
 [Enumerate and execute Excel Macros]: https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros
 [Singleton class in VBA]: https://stackoverflow.com/questions/396117/class-static-methods-in-vba
 [Utter Access Archive: Singleton]: https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton
+[string builder]: https://codereview.stackexchange.com/questions/67596/a-lightning-fast-stringbuilder
+[string format]: https://stackoverflow.com/questions/17233701/obtaining-the-equivalent-to-printf-or-string-format-in-excel

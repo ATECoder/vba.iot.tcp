@@ -22,10 +22,11 @@
 
 The main types provided by this library are:
 
-* _WinsockSession_ initiates a Winsock session.
-* _Socket_ opens a socket to the instrument.
+* _Winsock_ initiates a Winsock session.
+* _IPv4StreamSocket_ opens an IPv4 streaming socket to the instrument.
+* _TcpCllient_ Encapsulates the _IPv4StreamSocket_.
+* _ViSession_ Encapsulates the _TcpCllient_ and defines termination and timeout.
 * _IEEE488Session_ implement the core IEEE488 methods for communicating with an LXI Instrument.
-
 
 ### Testing
 
