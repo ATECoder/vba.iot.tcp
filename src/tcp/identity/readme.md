@@ -26,6 +26,11 @@ The main types provided by this library are:
 * _Socket_ opens a socket to the instrument.
 * _IEEE488Session_ implement the core IEEE488 methods for communicating with an LXI Instrument.
 
+
+### Testing
+
+To enable unit testing, the Excel _Trust Center_, which can be found from the _Search_ box, and check _Trust access to the VBA project object model_ from the _Macro Settings_ in the _Trust Center_.  
+
 ### Feedback
 
 [vba.iot.tcp.identity] is released as open source under the MIT license.

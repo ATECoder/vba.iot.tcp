@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-''' <summary> Populates a combo box with the list of tests. </summary>
+''' <summary>   Populates a combo box with the list of tests. </summary>
 Private Sub ListTestsButton_Click()
     Dim moduleName As Variant
     testNamesCombo.Clear
@@ -18,7 +18,7 @@ Private Sub ListTestsButton_Click()
     Next moduleName
 End Sub
 
-''' <summary> Runs the selected test. </summary>
+''' <summary>   Runs the selected test. </summary>
 Private Sub RunTestsButton_Click()
     My.ExecuteTestSheetTests
 End Sub

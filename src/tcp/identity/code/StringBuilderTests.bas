@@ -1,8 +1,8 @@
 Attribute VB_Name = "StringBuilderTests"
 Option Explicit
 
-''' <summary> Unit test. Tests appending items to string builder. </summary>
-''' <returns> An instance of the <see cref="Assert"/> class. </returns>
+''' <summary>   Unit test. Tests appending items to string builder. </summary>
+''' <returns>   An instance of the <see cref="Assert"/>   class. </returns>
 Public Function TestAppendingToEmptyBuilder() As Assert
     Dim builder As StringBuilder
     Set builder = New StringBuilder
@@ -13,8 +13,8 @@ Public Function TestAppendingToEmptyBuilder() As Assert
             "Appended value should equal expected value")
 End Function
 
-''' <summary> Unit test. Tests appending an empty string to the string builder. </summary>
-''' <returns> An instance of the <see cref="Assert"/> class. </returns>
+''' <summary>   Unit test. Tests appending an empty string to the string builder. </summary>
+''' <returns>   An instance of the <see cref="Assert"/>   class. </returns>
 Public Function TestAppendingEmptyString() As Assert
     Dim builder As StringBuilder
     Set builder = New StringBuilder
@@ -25,8 +25,8 @@ Public Function TestAppendingEmptyString() As Assert
             "Appended empty value should equal expected value")
 End Function
 
-''' <summary> Unit test. Tests appending a long string to the string builder. </summary>
-''' <returns> An instance of the <see cref="Assert"/> class. </returns>
+''' <summary>   Unit test. Tests appending a long string to the string builder. </summary>
+''' <returns>   An instance of the <see cref="Assert"/>   class. </returns>
 Public Function TestAppendingLongString() As Assert
     Dim builder As StringBuilder
     Set builder = New StringBuilder

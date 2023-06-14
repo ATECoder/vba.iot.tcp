@@ -14,7 +14,7 @@ Private m_buffer() As String
 Private m_currentIndex As Long
 Private m_maxIndex As Long
 
-''' < summary> Initializes this class. </summary>
+''' < summary>   Initializes this class. </summary>
 ''' <remarks>
 ''' <see href="https://codereview.stackexchange.com/questions/67596/a-lightning-fast-stringbuilder"/>
 ''' </remarks>
@@ -26,8 +26,8 @@ Private Sub Class_Initialize()
 
 End Sub
 
-''' < summary> Appends the given Text to this StringBuilder. </summary>
-''' <param name="text"> the text to append. </param>
+''' < summary>   Appends the given Text to this StringBuilder. </summary>
+''' <param name="text">   the text to append. </param>
 Public Sub Append(ByVal text As String)
 
     m_currentIndex = m_currentIndex + 1
@@ -40,14 +40,14 @@ Public Sub Append(ByVal text As String)
 
 End Sub
 
-''' <summary> Returns the current length. </summary>
-''' <value> A Long. </value>
+''' <summary>   Returns the current length. </summary>
+''' <value>   A Long. </value>
 Public Property Get Length() As Long
     Length = m_currentIndex
 End Property
 
-''' <summary> Returns the text in this StringBuilder. </summary>
-''' <param name="separator"> [Optional, Null string] The separator to use in joining components. </param>
+''' <summary>   Returns the text in this StringBuilder. </summary>
+''' <param name="separator">   [Optional, Null string] The separator to use in joining components. </param>
 Public Function ToString(Optional separator As String = vbNullString) As String
 
     If m_currentIndex > 0 Then

@@ -1,13 +1,13 @@
 Attribute VB_Name = "TestExecutiveTests"
 Option Explicit
 
-''' <summary> Defines a test file handle. </summary>
+''' <summary>   Defines a test file handle. </summary>
 Public Type TestFileHandle
     TestFilename As String
     TestFileStream As TextStream
 End Type
 
-''' <summary> Adds the test modules. </summary>
+''' <summary>   Adds the test modules. </summary>
 Private Sub AddTestModules(knownTestModules As VBA.collection)
     knownTestModules.Add "IPv4StreamSocketTests"
     knownTestModules.Add "MarshalTests"
@@ -19,8 +19,8 @@ Private Sub AddTestModules(knownTestModules As VBA.collection)
     knownTestModules.Add "WinsockTests"
 End Sub
 
-''' <summary> Unit test. Asserts creating a list of test modules. </summary>
-''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
+''' <summary>   Unit test. Asserts creating a list of test modules. </summary>
+''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestModuleList() As Assert
     Dim modules As VBA.collection
     Set modules = WorkbookUtilities.ListTestModules
@@ -42,8 +42,8 @@ Public Function TestModuleList() As Assert
   
 End Function
 
-''' <summary> Unit test. Asserts creating a list of test macros. </summary>
-''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
+''' <summary>   Unit test. Asserts creating a list of test macros. </summary>
+''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestMacroList() As Assert
     Dim modules As VBA.collection
     Set modules = WorkbookUtilities.ListTestModules()

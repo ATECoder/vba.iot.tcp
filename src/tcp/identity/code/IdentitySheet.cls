@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-''' <summary> Reads the identity form the instrument with the
+''' <summary>   Reads the identity form the instrument with the
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
 
@@ -28,17 +28,18 @@ Private Sub ReadIdentityButton_Click()
     
 #If False Then
     ReadIdentity host, port, repeatCount
-#Else
+#ElseIf False Then
     TcpClientReadIdentity host, port, repeatCount
+#Else
+    Ieee488SessionReadIdentity host, port, repeatCount
 #End If
-    
     
 End Sub
 
-''' <summary> Sends the identity query and reads back the identity from the instrument. </summary>
-''' <param name="host"> The host IPv4 dotted address. </param>
-''' <param name="port"> the host port number. </param>
-''' <param name="repeatCount"> The number of time to repeat the query. </param>
+''' <summary>   Sends the identity query and reads back the identity from the instrument. </summary>
+''' <param name="host">   The host IPv4 dotted address. </param>
+''' <param name="port">   the host port number. </param>
+''' <param name="repeatCount">   The number of time to repeat the query. </param>
 Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
@@ -76,6 +77,8 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         Dim loopCount As Integer
         Do While loopCount < repeatCount
             
+            DoEvents
+            
             loopCount = loopCount + 1
             sw.Restart
             
@@ -92,13 +95,13 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             Range("I2").value = buffer
 #Else
             ' receive the reading
-            Dim identity As String
-            identity = socket.ReceiveRaw()
+            Dim Identity As String
+            Identity = socket.ReceiveRaw()
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(identity)
-            Range("I2").value = identity
+            Range("H2").value = Len(Identity)
+            Range("I2").value = Identity
 #End If
     
         Loop
@@ -138,10 +141,11 @@ Finally:
 
 End Sub
 
-''' <summary> Sends the identity query and reads back the identity from the instrument. </summary>
-''' <param name="host"> The host IPv4 dotted address. </param>
-''' <param name="port"> the host port number. </param>
-''' <param name="repeatCount"> The number of time to repeat the query. </param>
+''' <summary>   Uses the Tcp Client to send the identity query and reads back the identity
+''' from the instrument. </summary>
+''' <param name="host">   The host IPv4 dotted address. </param>
+''' <param name="port">   the host port number. </param>
+''' <param name="repeatCount">   The number of time to repeat the query. </param>
 Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
@@ -175,6 +179,8 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         Dim loopCount As Integer
         Do While loopCount < repeatCount
             
+            DoEvents
+            
             loopCount = loopCount + 1
             sw.Restart
             
@@ -182,13 +188,13 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             client.SendMessage command & vbLf
         
             ' receive the reading
-            Dim identity As String
-            identity = client.ReceiveRaw()
+            Dim Identity As String
+            Identity = client.ReceiveRaw()
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(identity)
-            Range("I2").value = identity
+            Range("H2").value = Len(Identity)
+            Range("I2").value = Identity
     
         Loop
   
@@ -228,6 +234,97 @@ Finally:
     End If
 
 End Sub
+
+
+''' <summary>   Uses the IEEE 4888 session to send the identity query and reads back the identity
+''' from the instrument. </summary>
+''' <param name="host">   The host IPv4 dotted address. </param>
+''' <param name="port">   the host port number. </param>
+''' <param name="repeatCount">   The number of time to repeat the query. </param>
+Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+
+    On Error GoTo Finally
+    
+    Range("E2").value = ""
+    Range("F2").value = ""
+    Range("G2").value = ""
+    Range("H2").value = ""
+    Range("I2").value = ""
+
+    Dim sw As New StopWatch
+    Dim totalMilliseconds As Double
+    
+    Dim session As Ieee488Session
+    Set session = New Ieee488Session
+    
+    session.OpenConnection host, port
+    
+    ' report the socket number
+    Range("E2").value = session.SocketId
+   
+    ' report the connection state
+    Range("F2").value = session.Connected
+    
+    If session.Connected Then
+    
+        Dim command As String
+        command = "*IDN?"
+        Range("G2").value = command
+        
+        Dim loopCount As Integer
+        Do While loopCount < repeatCount
+            
+            DoEvents
+           
+            loopCount = loopCount + 1
+            sw.Restart
+            
+            session.QueryIdentity
+            
+            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            
+            Range("H2").value = Len(session.Identity)
+            Range("I2").value = session.Identity
+    
+        Loop
+  
+        ' command = ":SYST:PRES"
+        ' count = SendMessage(command)
+        ' Call opc
+        
+        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
+        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+    
+    Else
+        MsgBox "connection failed without reporting an exception"
+    End If
+    
+Finally:
+
+    Dim errorMessage As String
+    If Not Err Is Nothing Then
+        If Err.Number <> 0 Then
+            errorMessage = "Reading identity failed using Tcp session " & UserDefinedErrors.FormattedErr & _
+                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+        End If
+    End If
+    
+    On Error Resume Next
+    If Not session Is Nothing Then
+        If session.Connected Then
+            session.CloseConnection
+        End If
+    End If
+    
+    ' terminate the session
+    Set session = Nothing
+    
+    If Len(errorMessage) > 0 Then
+        MsgBox errorMessage
+    End If
+
+End Sub
+
 
 
 

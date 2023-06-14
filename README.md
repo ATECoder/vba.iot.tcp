@@ -6,7 +6,8 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 * [Issues](#Issues)
 * [Supported VBA Releases](#Supported-VBA-Releases)
 * Project README files:
-  * [identity](/src/tcp/identity/readme.md) 
+  * [identity](/src/tcp/identity/readme.md)
+* [Using Prologix](Prologix.md)
 * [Attributions](Attributions.md)
 * [Change Log](./CHANGELOG.md)
 * [Cloning](Cloning.md)

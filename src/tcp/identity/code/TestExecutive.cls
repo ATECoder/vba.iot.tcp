@@ -9,8 +9,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-''' <summary> Creates a temporary test file. </summary>
-''' <returns> A <see cref="TestFileHandle"/>. <returns>
+''' <summary>   Creates a temporary test file. </summary>
+''' <returns>   A <see cref="TestFileHandle"/>. <returns>
 Public Function CreateTestFile() As TestFileHandle
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -21,8 +21,8 @@ Public Function CreateTestFile() As TestFileHandle
     Set CreateTestFile.TestFileStream = fso.CreateTextFile(CreateTestFile.TestFilename, True)
 End Function
 
-''' <summary> Deletes the given test file. </summary>
-''' <param name="fileHandle"> The <see cref="TestFileHandle"/> to delete. </param>
+''' <summary>   Deletes the given test file. </summary>
+''' <param name="fileHandle">   The <see cref="TestFileHandle"/>   to delete. </param>
 Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
@@ -30,8 +30,8 @@ Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
     fso.DeleteFile fileHandle.TestFilename
 End Sub
 
-''' <summary> Execture all test macros in the module specified in the test sheet. </summary>
-''' <para name="testDataSheet"> Specifies the work sheet were test data are set and logged. </param>
+''' <summary>   Execture all test macros in the module specified in the test sheet. </summary>
+''' <para name="testDataSheet">   Specifies the work sheet were test data are set and logged. </param>
 Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     On Error GoTo Finally

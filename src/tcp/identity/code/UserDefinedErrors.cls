@@ -22,8 +22,9 @@ Private m_socketBindError As UserDefinedError
 Private m_socketListenError As UserDefinedError
 Private m_socketAcceptError As UserDefinedError
 Private m_socketSetStatusError As UserDefinedError
+Private m_invalidArgumentError As UserDefinedError
 
-''' <summary> Initializes the user defined errors. </summary>
+''' <summary>   Initializes the user defined errors. </summary>
 Private Sub Class_Initialize()
 
     Set m_errorsDix = New Dictionary
@@ -104,14 +105,20 @@ Private Sub Class_Initialize()
         "Failed send a socket message using winsock send()."
     AddUserDefinedError Me.SocketSetStatusError
 
+    errorCode = errorCode + 1
+    Set m_invalidArgumentError = New UserDefinedError
+    m_invalidArgumentError.InitiateProperties errorCode, "InvalidArgumentError", _
+        "Invalid argument error."
+    AddUserDefinedError Me.InvalidArgumentError
+
 End Sub
 
-''' <summary> Initializes the error codes and descriptions. </summary>
+''' <summary>   Initializes the error codes and descriptions. </summary>
 Public Sub Initialize()
     Class_Initialize
 End Sub
 
-''' <summary> Builds a an error message from the VBA <see cref="Err"/>. </summary>
+''' <summary>   Builds a an error message from the VBA <see cref="Err"/>. </summary>
 Public Function FormattedErr() As String
     Dim ErrNumberDetails As String
     
@@ -119,26 +126,26 @@ Public Function FormattedErr() As String
     FormattedErr = "[Error Number=" & Err.Number & ErrNumberDetails & ", Source=" & Err.source & ", Description=" & Err.Description & "]"
 End Function
 
-''' <summary> Adds a user defined error to the error dictionary. </summary>
-''' <para name"userError"> The error of type <see cref="UserDefinedError"/> </param>
+''' <summary>   Adds a user defined error to the error dictionary. </summary>
+''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
 Private Sub AddUserDefinedError(userError As UserDefinedError)
     m_errorsDix.Add userError.Code, userError
 End Sub
 
-''' <summary> Returns true if the specified error exists. </summary>
-''' <para name"userError"> The error of type <see cref="UserDefinedError"/> </param>
+''' <summary>   Returns true if the specified error exists. </summary>
+''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
 Public Function UserDefinedErrorExists(ByVal userError As UserDefinedError) As Boolean
     UserDefinedErrorExists = m_errorsDix.Exists(userError.Code)
 End Function
 
-''' <summary> Returns true if the specified error exists. </summary>
-''' <para name"userErrorCode"> The error code </param>
+''' <summary>   Returns true if the specified error exists. </summary>
+''' <para name"userErrorCode">   The error code </param>
 Public Function UserDefinedErrorCodeExists(ByVal userErrorCode As Long) As Boolean
     UserDefinedErrorCodeExists = m_errorsDix.Exists(userErrorCode)
 End Function
 
-''' <summary> Returns a user defined error. </summary>
-''' <param name="key"> The user defined error code. </param>
+''' <summary>   Returns a user defined error. </summary>
+''' <param name="key">   The user defined error code. </param>
 Public Function GetUserDefinedError(ByVal key As Long) As UserDefinedError
     If m_errorsDix.Exists(key) Then
         Set GetUserDefinedError = m_errorsDix.Item(key)
@@ -148,77 +155,79 @@ Public Function GetUserDefinedError(ByVal key As Long) As UserDefinedError
     End If
 End Function
 
-''' <summary> Get the error that occured starting Winsock. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured starting Winsock. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get WinsockStartingError() As UserDefinedError
     Set WinsockStartingError = m_winsockStartingError
 End Property
 
-''' <summary> Get the error that occured ending Winsock. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured ending Winsock. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get WinsockCleanupError() As UserDefinedError
     Set WinsockCleanupError = m_winsockCleanupError
 End Property
 
-''' <summary> Get the error that occured creating a socket. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured creating a socket. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketCreationError() As UserDefinedError
     Set SocketCreationError = m_socketCreationError
 End Property
 
-''' <summary> Get the error that occured connecting a socket. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured connecting a socket. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketConnectionError() As UserDefinedError
     Set SocketConnectionError = m_socketConnectionError
 End Property
 
-''' <summary> Get the error that occured disconnecting a socket. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured disconnecting a socket. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketDisconnectionError() As UserDefinedError
     Set SocketDisconnectionError = m_socketDisconnectionError
 End Property
 
-''' <summary> Get the error that occured setting a socket option. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured setting a socket option. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketOptionSettingError() As UserDefinedError
     Set SocketOptionSettingError = m_socketOptionSettingError
 End Property
 
-''' <summary> Get the error that occured sending a socket message. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured sending a socket message. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketSendError() As UserDefinedError
     Set SocketSendError = m_socketSendError
 End Property
 
-''' <summary> Get the error that occured receiving a socket message. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured receiving a socket message. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketReceiveError() As UserDefinedError
     Set SocketReceiveError = m_socketReceiveError
 End Property
 
-''' <summary> Get the error that occured binding a socket to an address. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured binding a socket to an address. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketBindError() As UserDefinedError
     Set SocketBindError = m_socketBindError
 End Property
 
-''' <summary> Get the error that occured starting to listen on a socket. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured starting to listen on a socket. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketListenError() As UserDefinedError
     Set SocketListenError = m_socketListenError
 End Property
 
-''' <summary> Get the error that occured accepting an incomming connection. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured accepting an incomming connection. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketAcceptError() As UserDefinedError
     Set SocketAcceptError = m_socketAcceptError
 End Property
 
-''' <summary> Get the error that occured determining the status of a socket set. </summary>
-''' <values> Returns a user defined error. </value>
+''' <summary>   Get the error that occured determining the status of a socket set. </summary>
+''' <values>   Returns a user defined error. </value>
 Public Property Get SocketSetStatusError() As UserDefinedError
     Set SocketSetStatusError = m_socketSetStatusError
 End Property
 
-
+Public Property Get InvalidArgumentError() As UserDefinedError
+    Set InvalidArgumentError = m_invalidArgumentError
+End Property
 

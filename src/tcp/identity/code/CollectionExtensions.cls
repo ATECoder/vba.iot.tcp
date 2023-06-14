@@ -8,10 +8,10 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-''' <summary> Returns true if the collection contains the specified key. </summary>
-''' <param name="collection"> The subject collection. </param>
-''' <param name="key">        The key to check for in the collection. </param>
-''' <returns> </returns>
+''' <summary>   Returns true if the collection contains the specified key. </summary>
+''' <param name="collection">   The subject collection. </param>
+''' <param name="key">          The key to check for in the collection. </param>
+''' <returns>   </returns>
 Public Function ContainsKey(col As VBA.collection, ByVal key As Variant) As Boolean
     Dim found As Boolean
     found = False
@@ -35,11 +35,11 @@ Public Function ContainsKey(col As VBA.collection, ByVal key As Variant) As Bool
     ContainsKey = found
 End Function
 
-''' <summary> returns true if the object is containd in the collection. </summary>
-''' <param name="collection"> The subject collection. </param>
-''' <param name="contained">  The collection which to check for being contained in the
+''' <summary>   returns true if the object is containd in the collection. </summary>
+''' <param name="collection">   The subject collection. </param>
+''' <param name="contained">   The collection which to check for being contained in the
 '''                           subject collection. </param>
-''' <returns> </returns>
+''' <returns>   </returns>
 Public Function ContainsAll(col As VBA.collection, contained As VBA.collection) As Boolean
     
     Dim result As Boolean

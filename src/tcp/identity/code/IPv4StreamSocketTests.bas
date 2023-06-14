@@ -1,8 +1,8 @@
 Attribute VB_Name = "IPv4StreamSocketTests"
 Option Explicit
 
-''' <summary> Unit test. Asserts creating a socket. </summary>
-''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
+''' <summary>   Unit test. Asserts creating a socket. </summary>
+''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestCreateSocket() As Assert
 
     Dim sock As IPv4StreamSocket

@@ -1,7 +1,7 @@
 Attribute VB_Name = "wsock32"
 Option Explicit
 
-''' <summary> The winsock implementation version </summary.
+''' <summary>   The winsock implementation version </summary.
 ''' <remarks>
 ''' Version 1.1 (1*256 + 1) = 257
 ''' version 2.0 (2*256 + 0) = 512
@@ -14,7 +14,7 @@ Public Const ws32_WSASYS_STATUS_LEN = 128
 Public Const ws32_WSADESCRIPTION_LEN_ARRAY = ws32_WSADESCRIPTION_LEN + 1
 Public Const ws32_WSASYS_STATUS_LEN_ARRAY = ws32_WSASYS_STATUS_LEN + 1
 
-''' <summary> A data structure that receives the information returned from
+''' <summary>   A data structure that receives the information returned from
 ''' the WSAStartup() function. </summary>
 Public Type ws32_WSADATA
     wVersion As Integer
@@ -33,7 +33,7 @@ Public Const ws32_AF_INET = 2               ' The Internet Protocol version 4 (I
 
 ' Define socket types
 
-''' <summar> A socket type that provides sequenced, reliable, two-way, connection-based byte streams with an
+''' <summar>   A socket type that provides sequenced, reliable, two-way, connection-based byte streams with an
 ''' OOB data transmission mechanism. This socket type uses the Transmission Control Protocol (TCP) for the
 ''' Internet address family (ws32_AF_INET or ws32_AF_INET6). </summary>
 Public Const ws32_SOCK_STREAM = 1
@@ -52,12 +52,12 @@ Public Const ws32_SOCK_SEQPACKET = 5        ' Sequenced Packet socket
 Public Const ws32_INADDR_ANY As Long = 0
 Public Const ws32_INADDR_NONE As Long = &HFFFFFFFF
 
-''' <summary> Sets the Internet address type as a long integer (32-bit) </summary>
+''' <summary>   Sets the Internet address type as a long integer (32-bit) </summary>
 Public Type ws32_IN_ADDR
     s_addr As Long
 End Type
 
-''' <summary> Sets the socket IPv4 address expressed in network byte order. </summary>
+''' <summary>   Sets the socket IPv4 address expressed in network byte order. </summary>
 Public Type ws32_SocketAddress
     sa_family As Integer
     sa_data As String * 14
@@ -65,7 +65,7 @@ End Type
 
 Public Const ws32_SocketAddressLen = 16
 
-''' <summary> Sets the socket IPv4 address expressed in network byte order. </summary>
+''' <summary>   Sets the socket IPv4 address expressed in network byte order. </summary>
 Public Type ws32_SocketAddress_in
     sin_family As Integer     ' Address family of the socket, such as ws32_AF_INET.
     sin_port As Integer       ' sock address port number, e.g.,  htons(5150);
@@ -92,7 +92,7 @@ Public Const ws32_MSG_WAITALL = &H8   ' do not complete until packet is complete
 
 Public Const ws32_FD_SETSIZE = 64
 
-''' <summary> Defines a set of scokets returned from the <see cref="SelectSockets"/> alias select
+''' <summary>   Defines a set of scokets returned from the <see cref="SelectSockets"/>   alias select
 ''' winsock Api call. </summary>
 ''' <remarks>
 ''' Four macros are defined in the header file Winsock2.h for manipulating and checking the descriptor sets.

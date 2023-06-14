@@ -9,14 +9,14 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-''' <summary> Handles the Workbook activate event. </summary>
-''' <remarks> Initializes the user defined errors. </remarks>
+''' <summary>   Handles the Workbook activate event. </summary>
+''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
     UserDefinedErrors.Initialize
 End Sub
 
-''' <summary> Handles the workbook before close event. </summary>
-''' <remarks> Exports source code files. </remarks>
+''' <summary>   Handles the workbook before close event. </summary>
+''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
     My.ExportCodeFiles
 End Sub

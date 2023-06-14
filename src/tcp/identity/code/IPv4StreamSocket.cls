@@ -14,15 +14,15 @@ Private Const SEND_PARTIAL_MESSAGE_ERROR = -2
 Private Const RECEIVE_ERROR = -1
 Private Const DefaultTimeoutMs = 500
 
-''' <summary> Permits an incoming connection attempt on a socket. </summary>
-''' <param name="s">                   [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
-'''                                    The connection is actually made with the socket that is returned by accept.</param>
-''' <param name="clientAddress">       [out] An optional pointer to a buffer that receives the address of the connecting entity,
-'''                                    as known to the communications layer. The exact format of the addr parameter is determined by the address family
-'''                                    that was established when the socket from the ws32_SocketAddress structure was created.</param>
-''' <param name="clientAddressLength"> [in, out] An optional pointer to an integer that contains the length of structure pointed to by
-'''                                    the addr parameter. </param>
-''' <returns> If no error occurs, accept returns a value of type SOCKET that is a descriptor for the new socket.
+''' <summary>   Permits an incoming connection attempt on a socket. </summary>
+''' <param name="s">                     [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
+'''                                      The connection is actually made with the socket that is returned by accept.</param>
+''' <param name="clientAddress">         [out] An optional pointer to a buffer that receives the address of the connecting entity,
+'''                                      as known to the communications layer. The exact format of the addr parameter is determined by the address family
+'''                                      that was established when the socket from the ws32_SocketAddress structure was created.</param>
+''' <param name="clientAddressLength">   [in, out] An optional pointer to an integer that contains the length of structure pointed to by
+'''                                      the addr parameter. </param>
+''' <returns>   If no error occurs, accept returns a value of type SOCKET that is a descriptor for the new socket.
 ''' This returned value is a handle for the socket on which the actual connection is made. Otherwise, a value of
 ''' ws32_INVALID_SOCKET is returned, and a specific error code can be retrieved by calling WSAGetLastError.
 ''' The integer referred to by clientAddressLength initially contains the amount of space pointed to by clientAddress. On return it
@@ -30,80 +30,80 @@ Private Const DefaultTimeoutMs = 500
 Private Declare PtrSafe Function accept_ Lib "wsock32.dll" Alias "accept" ( _
         ByVal s As Long, clientAddress As wsock32.ws32_SocketAddress, clientAddressLength As Integer) As Long
 
-''' <summary> Associates a local address with a socket. </summary>
-''' <param name="s">             [in] A descriptor identifying an unbound socket. </param>
-''' <param name="address">       [in] A pointer to a ws32_SocketAddress_in structure of the local address
-'''                              to assign to the bound socket . </param>
-''' <param name="addressLength"> [in] The length, in bytes, of the value pointed to by address. </param>
-''' <returns> Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
+''' <summary>   Associates a local address with a socket. </summary>
+''' <param name="s">               [in] A descriptor identifying an unbound socket. </param>
+''' <param name="address">         [in] A pointer to a ws32_SocketAddress_in structure of the local address
+'''                                to assign to the bound socket . </param>
+''' <param name="addressLength">   [in] The length, in bytes, of the value pointed to by address. </param>
+''' <returns>   Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function bind_ Lib "wsock32.dll" Alias "bind" ( _
         ByVal s As Long, address As wsock32.ws32_SocketAddress_in, ByVal addressLength As Integer) As Long
 
-''' <summary> Closes an existing socket. </summary>
-''' <param name="s"> [in] A descriptor identifying the socket to close. </param>
-''' <returns> If no error occurs, closesocket returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned.
+''' <summary>   Closes an existing socket. </summary>
+''' <param name="s">   [in] A descriptor identifying the socket to close. </param>
+''' <returns>   If no error occurs, closesocket returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function closesocket_ Lib "wsock32.dll" Alias "closesocket" ( _
         ByVal s As Long) As Long
 
-''' <summary> Establishes a connection to a specified socket. </summary>
-''' <param name="s">          [in] A descriptor identifying an unconnected socket. </param>
-''' <param name="address">    [in] A pointer to the <see cref="ws32_SocketAddress_in"/> structure to which the
-'''                           connection should be established. </param>
-''' <param name="addressLen"> [in] The length, in bytes, of the ws32_SocketAddress structure pointed to by the
-'''                           <paramref name="address"/> parameter. </param>
-''' <returns> Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
+''' <summary>   Establishes a connection to a specified socket. </summary>
+''' <param name="s">            [in] A descriptor identifying an unconnected socket. </param>
+''' <param name="address">      [in] A pointer to the <see cref="ws32_SocketAddress_in"/>   structure to which the
+'''                             connection should be established. </param>
+''' <param name="addressLen">   [in] The length, in bytes, of the ws32_SocketAddress structure pointed to by the
+'''                             <paramref name="address"/>   parameter. </param>
+''' <returns>   Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function connect_ Lib "wsock32.dll" Alias "connect" ( _
         ByVal s As Long, ByRef address As wsock32.ws32_SocketAddress_in, ByVal addressLen As Long) As Long
 
-''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
-''' <param name="s">       [in] A descriptor identifying a bound, unconnected socket. </param>
-''' <param name="backlog"> [in] The maximum length of the queue of pending connections. If set to SOMAXCONN,
-'''                         the underlying service provider responsible for socket s will set the backlog to a
-'''                         maximum reasonable value. If set to SOMAXCONN_HINT(N) (where N is a number), the
-'''                         backlog value will be N, adjusted to be within the range (200, 65535). Note that
-'''                         SOMAXCONN_HINT can be used to set the backlog to a larger value than possible with SOMAXCONN.
-'''                         SOMAXCONN_HINT is only supported by the Microsoft TCP/IP service provider. There is no
-'''                         standard provision to obtain the actual backlog value.
+''' <summary>   Places a socket in a state in which it is listening for an incoming connection. </summary>
+''' <param name="s">         [in] A descriptor identifying a bound, unconnected socket. </param>
+''' <param name="backlog">   [in] The maximum length of the queue of pending connections. If set to SOMAXCONN,
+'''                          the underlying service provider responsible for socket s will set the backlog to a
+'''                          maximum reasonable value. If set to SOMAXCONN_HINT(N) (where N is a number), the
+'''                          backlog value will be N, adjusted to be within the range (200, 65535). Note that
+'''                          SOMAXCONN_HINT can be used to set the backlog to a larger value than possible with SOMAXCONN.
+'''                          SOMAXCONN_HINT is only supported by the Microsoft TCP/IP service provider. There is no
+'''                          standard provision to obtain the actual backlog value.
 ''' </param>
-''' <returns> Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
+''' <returns>   Zero if no error occurs; otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function listen_ Lib "wsock32.dll" Alias "listen" ( _
         ByVal s As Long, ByVal backlog As Integer) As Long
 
-''' <summary> Sends data on a connected socket. </summary>
-''' <param name="s">            [in] A descriptor identifying a connected socket. </param>
-''' <param name="buffer">       [in] A pointer to a buffer containing the data to be transmitted. </param>
-''' <param name="bufferLength"> [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
-''' <param name="flags">        [in] A set of flags that specify the way in which the call is made. This parameter is
-'''                             constructed by using the bitwise OR operator with any of the following values:
-'''                             ws32_MSG_DONTROUTE: Specifies that the data should not be subject to routing. A Windows Sockets
-'''                             service provider can choose to ignore this flag.
-'''                             ws32_MSG_OOB: Sends OOB data (stream-style socket such as ws32_SOCK_STREAM only).
-'''                             </param>
-''' <returns> Returns the total number of bytes sent, which can be less than the number requested to be sent
+''' <summary>   Sends data on a connected socket. </summary>
+''' <param name="s">              [in] A descriptor identifying a connected socket. </param>
+''' <param name="buffer">         [in] A pointer to a buffer containing the data to be transmitted. </param>
+''' <param name="bufferLength">   [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
+''' <param name="flags">          [in] A set of flags that specify the way in which the call is made. This parameter is
+'''                               constructed by using the bitwise OR operator with any of the following values:
+'''                               ws32_MSG_DONTROUTE: Specifies that the data should not be subject to routing. A Windows Sockets
+'''                               service provider can choose to ignore this flag.
+'''                               ws32_MSG_OOB: Sends OOB data (stream-style socket such as ws32_SOCK_STREAM only).
+'''                               </param>
+''' <returns>   Returns the total number of bytes sent, which can be less than the number requested to be sent
 ''' in the len parameter. If an error occured, a value of ws32_SOCKET_ERROR is returned, and a specific error code
 ''' can be retrieved by calling WSAGetLastError.
 ''' <returns>
 Private Declare PtrSafe Function send_ Lib "wsock32.dll" Alias "send" ( _
         ByVal s As Long, buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
-''' <summary> Sets a socket option. </summary>
-''' <param name="s">       [in] A descriptor that identifies a socket. </param>
-''' <param name="level">   [in] The level at which the option is defined (for example, ws32_SOL_SOCKET). </param>
-''' <param name="optname"> [in] The socket option for which the value is to be set (for example, ws32_SO_BROADCAST).
-'''                        The optname parameter must be a socket option defined within the specified level,
-'''                        or behavior is undefined. </param>
-''' <param name="optval">  [in] A pointer to the buffer in which the value for the requested option is specified. </param>
-''' <param name="optlen">  [in] The size, in bytes, of the buffer pointed to by the optval parameter. </param>
-''' <returns> If no error occurs, setsockopt returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned,
+''' <summary>   Sets a socket option. </summary>
+''' <param name="s">         [in] A descriptor that identifies a socket. </param>
+''' <param name="level">     [in] The level at which the option is defined (for example, ws32_SOL_SOCKET). </param>
+''' <param name="optname">   [in] The socket option for which the value is to be set (for example, ws32_SO_BROADCAST).
+'''                          The optname parameter must be a socket option defined within the specified level,
+'''                          or behavior is undefined. </param>
+''' <param name="optval">    [in] A pointer to the buffer in which the value for the requested option is specified. </param>
+''' <param name="optlen">    [in] The size, in bytes, of the buffer pointed to by the optval parameter. </param>
+''' <returns>   If no error occurs, setsockopt returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned,
 ''' and a specific error code can be retrieved by calling WSAGetLastError. <returns>
 Private Declare PtrSafe Function setsockopt_ Lib "wsock32.dll" Alias "setsockopt" ( _
         ByVal s As Long, ByVal level As Long, ByVal optname As Long, ByRef optval As Long, ByVal optlen As Integer) As Long
 
-''' <summary> Receives data from a connected socket or a bound connectionless socket. </summary>
+''' <summary>   Receives data from a connected socket or a bound connectionless socket. </summary>
 ''' <remarks>
 ''' The flags parameter can be used to influence the behavior of the function invocation beyond the options specified
 ''' for the associated socket. The semantics of this function are determined by the socket options and the flags parameter.
@@ -119,10 +119,10 @@ Private Declare PtrSafe Function setsockopt_ Lib "wsock32.dll" Alias "setsockopt
 ''' ws32_MSG_PARTIAL, then this call will fail with WSAEOPNOTSUPP. This flag is not supported on datagram sockets
 ''' or message-oriented sockets.
 ''' </remarks>
-''' <param name="s">            [in] A descriptor identifying a connected socket. </param>
-''' <param name="buffer">       [out] A pointer to the buffer to receive the incomming data. </param>
-''' <param name="bufferLength"> [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
-''' <param name="flags">        [in] A set of flags that influences the behavior of this function. </param>
+''' <param name="s">              [in] A descriptor identifying a connected socket. </param>
+''' <param name="buffer">         [out] A pointer to the buffer to receive the incomming data. </param>
+''' <param name="bufferLength">   [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
+''' <param name="flags">          [in] A set of flags that influences the behavior of this function. </param>
 ''' <returns>
 ''' If no error occurs, recv returns the number of bytes received and the buffer pointed to by the buffre parameter will
 ''' contain this data received. If the connection has been gracefully closed, the return value is zero.
@@ -138,7 +138,7 @@ Private m_listening As Boolean
 Private m_timeout As Integer
 Private m_fdSet As wsock32.ws32_fd_set
 
-''' <summary> Initializes an internet protocol Stream Socket with a socket id. </summary>
+''' <summary>   Initializes an internet protocol Stream Socket with a socket id. </summary>
 Private Sub Class_Initialize()
 
     ' see that the singleton windock class is instantiated
@@ -164,7 +164,7 @@ Private Sub Class_Initialize()
     
 End Sub
 
-''' <summary> terminates the socket and releases its Winsock registration. </summary>
+''' <summary>   terminates the socket and releases its Winsock registration. </summary>
 Private Sub Class_Terminate()
 
     ' see that the singleton windock class is instantiated
@@ -177,34 +177,39 @@ Private Sub Class_Terminate()
 
 End Sub
 
-''' <summary> Returns the socket id. </summary>
-''' <returns> The socket identity. </returns>
+''' <summary>   Returns a descriptor identifying the socket. </summary>
+''' <returns>   The socket identifying descriptor. </returns>
 Public Property Get SocketId() As Long
     SocketId = m_socketId
 End Property
 
-''' <summary> Returns the connection state of the socket. </summary>
-''' <returns> True if the socket is connected; otherwise, False. </returns>
+''' <summary>   Returns the connection state of the socket. </summary>
+''' <returns>   True if the socket is connected; otherwise, False. </returns>
 Public Property Get Connected() As Boolean
     Connected = m_connected
 End Property
 
-''' <summary> Intializes an Inet stream socket using the provided socket id. </summary>
-''' <param name="connectedSocketId"> The ID of a connected socket. </param>
-''' <param name="timeoutMs">         [Optional, 500] The timeout interval in milliseconds. </param>
+''' <summary>   Intializes an Inet stream socket using the provided socket id. </summary>
+''' <param name="connectedSocketId">   The ID of a connected socket. </param>
+''' <param name="timeoutMs">           [Optional, 500] The timeout interval in milliseconds. </param>
 Public Sub Initialize(ByVal connectedSocketId As Long, Optional timeoutMs As Long = 500)
     m_socketId = connectedSocketId
     m_connected = True
     Me.SetTimeout (timeoutMs)
 End Sub
 
-''' <summary> Opens a socket connection and sets and returns the socket id. </summary>
-''' <param name="host"> An IPv4 dotted-decimal host address. </param>
-''' <param name="port"> The port that the server is listening on. </param>
-''' <returns> True if the socket is connected. </returns>
+''' <summary>   Opens a socket connection and sets and returns the socket id. </summary>
+''' <param name="host">   An IPv4 dotted-decimal host address. </param>
+''' <param name="port">   The port that the server is listening on. </param>
+''' <returns>   True if the socket is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Boolean
    
     m_connected = False
+    If StringExtensions.IsNullOrEmpty(host) Then
+        Err.Raise UserDefinedErrors.InvalidArgumentError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
+                  UserDefinedErrors.InvalidArgumentError.Description & " Argument: host"
+    End If
+    
     If host = "localhost" Then
         host = "127.0.0.1"
     End If
@@ -236,8 +241,8 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
 
 End Function
 
-''' <summary> Closes the socket connection and zeros the socket id. </summary>
-''' <returns> True if socket disconnection succeeded; otherwise, false. </returns>
+''' <summary>   Closes the socket connection and zeros the socket id. </summary>
+''' <returns>   True if socket disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
     Dim result As Long
@@ -254,10 +259,10 @@ Public Function CloseConnection() As Boolean
 
 End Function
 
-''' <summary> Associates a local address with a socket. </summary>
-''' <param name="address"> The INet address to bind to. </param>
-''' <param name="port">    The port that the server is listening on. </param>
-''' <returns> True if the socket is bound. </returns>
+''' <summary>   Associates a local address with a socket. </summary>
+''' <param name="address">   The INet address to bind to. </param>
+''' <param name="port">   The port that the server is listening on. </param>
+''' <returns>   True if the socket is bound. </returns>
 Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
 
     Dim endpoint As wsock32.ws32_SocketAddress_in
@@ -279,16 +284,16 @@ Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
    
 End Function
 
-''' <summary> Returns the listening state of the socket. </summary>
-''' <value> True if the socket is Listening; otherwise, False. </value>
+''' <summary>   Returns the listening state of the socket. </summary>
+''' <value>   True if the socket is Listening; otherwise, False. </value>
 Public Property Get Listening() As Boolean
     Listening = m_listening
 End Property
 
 
-''' <summary> Places a socket in a state in which it is listening for an incoming connection. </summary>
-''' <param name="backlog"> [Optional, 10] [in] The maximum length of the queue of pending connections. </para>
-''' <returns> True if the socket is Listening; otherwise, False. </returns>
+''' <summary>   Places a socket in a state in which it is listening for an incoming connection. </summary>
+''' <param name="backlog">   [Optional, 10] [in] The maximum length of the queue of pending connections. </para>
+''' <returns>   True if the socket is Listening; otherwise, False. </returns>
 Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolean
 
     Dim listenResult As Long
@@ -304,10 +309,10 @@ Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolea
 
 End Function
 
-''' <summary> Permits an incoming connection attempt on a socket. </summary>
-''' <param name="serverSocket">  [in] Reference to the server socket. </param>
-''' <param name="timeoutMs">     [Optional, 500] The maximum milliseconds time for select to wait. </param>
-''' <returns> the connected socket. </returns>
+''' <summary>   Permits an incoming connection attempt on a socket. </summary>
+''' <param name="serverSocket">   [in] Reference to the server socket. </param>
+''' <param name="timeoutMs">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
+''' <returns>   the connected socket. </returns>
 Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
         Optional ByVal timeoutMs As Long = 500) As IPv4StreamSocket
 
@@ -345,9 +350,9 @@ Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
     Set AcceptTcpClient = clientSocket
 End Function
 
-''' <summary> Sends a terminated message to the server. </summary>
-''' <param name="message"> The terminated message. </param>
-''' <returns> The number of bytes that were sent to the server. </returns>
+''' <summary>   Sends a terminated message to the server. </summary>
+''' <param name="message">   The terminated message. </param>
+''' <returns>   The number of bytes that were sent to the server. </returns>
 Public Function SendMessage(ByVal message As String) As Integer
 
     If StringExtensions.IsNullOrEmpty(message) Then
@@ -375,12 +380,12 @@ Public Function SendMessage(ByVal message As String) As Integer
 
 End Function
 
-''' <summary> Receives a message from the server untill reaching
+''' <summary>   Receives a message from the server untill reaching
 ''' the specified termiantion. </summary>
-''' <param name="buffer">      Where the message will go. </param>
-''' <param name="maxLength">   The maximum number of bytes to read. </param>
-''' <param name="termination"> [Optional, vbLf] The character that signifies the end of the stream. </param>
-''' <returns> If no error, the number of byte that were sent to the server.
+''' <param name="buffer">        Where the message will go. </param>
+''' <param name="maxLength">     The maximum number of bytes to read. </param>
+''' <param name="termination">   [Optional, vbLf] The character that signifies the end of the stream. </param>
+''' <returns>   If no error, the number of byte that were sent to the server.
 ''' Otherwise, RECEIVE_ERROR.
 ''' </returns>
 Public Function ReceiveTerminatedMessage(buffer As String, ByVal maxLength As Integer, _
@@ -421,12 +426,12 @@ Public Function ReceiveTerminatedMessage(buffer As String, ByVal maxLength As In
     
 End Function
 
-''' <summary> Receives a message from the server untill reaching the specified termiantion
+''' <summary>   Receives a message from the server untill reaching the specified termiantion
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">   [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">     [Optional, True] True to return the string without the termination. </param>
-''' <param name="termination"> [Optional, 10 ASCII] The character that signifies the end of the stream. </param>
-''' <returns> The received string. </returns>
+''' <param name="trimEnd">   [Optional, True] True to return the string without the termination. </param>
+''' <param name="termination">   [Optional, 10 ASCII] The character that signifies the end of the stream. </param>
+''' <returns>   The received string. </returns>
 Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
                            Optional ByVal trimEnd As Boolean = True, _
                            Optional ByVal termination As String = vbLf) As String
@@ -463,9 +468,9 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
     
 End Function
 
-''' <summary> Receives a message from the server. </summary>
-''' <param name="maxLength"> The maximum number of maxLength to read. </param>
-''' <returns> The received characters. </returns>
+''' <summary>   Receives a message from the server. </summary>
+''' <param name="maxLength">   The maximum number of maxLength to read. </param>
+''' <returns>   The received characters. </returns>
 Public Function ReceiveBytes(ByVal maxLength As Long) As String
     
     Dim buffer As String
@@ -482,10 +487,10 @@ Public Function ReceiveBytes(ByVal maxLength As Long) As String
     
 End Function
 
-''' <summary> Receives a message from the server. </summary>
-''' <remarks> Data is read until exhausted. </remarks>
-''' <param name="bufferSize"> [Optional, 1024] The number of character to read on each trial. </param>
-''' <returns> The received characters. </returns>
+''' <summary>   Receives a message from the server. </summary>
+''' <remarks>   Data is read until exhausted. </remarks>
+''' <param name="bufferSize">   [Optional, 1024] The number of character to read on each trial. </param>
+''' <returns>   The received characters. </returns>
 Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
     
     Dim buffer As String
@@ -503,9 +508,8 @@ Public Function ReceiveString(Optional bufferSize As Integer = 1024) As String
     ReceiveString = Trim(message)
 End Function
 
-
-''' <summary> Sets the socket timeout. </summary>
-''' <param name="timeout"> The timeout interval in milliseconds. </param>
+''' <summary>   Sets the socket timeout. </summary>
+''' <param name="timeout">   The timeout interval in milliseconds. </param>
 Public Sub SetTimeout(ByVal interval As Long)
 
     Dim result As Long
@@ -520,7 +524,7 @@ Public Sub SetTimeout(ByVal interval As Long)
     
 End Sub
 
-''' <summary> Gets the socket timeout in milliseconds. </summary>
-Public Property Get timeout() As Long
-    timeout = m_timeout
+''' <summary>   Gets the socket timeout in milliseconds. </summary>
+Public Property Get Timeout() As Long
+    Timeout = m_timeout
 End Property

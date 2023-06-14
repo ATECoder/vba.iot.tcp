@@ -1,8 +1,8 @@
 Attribute VB_Name = "WinsockTests"
 Option Explicit
 
-''' <summary> Unit test. Asserts instatiating and disposing of the Winsock framework. </summary>
-''' <returns> An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
+''' <summary>   Unit test. Asserts instatiating and disposing of the Winsock framework. </summary>
+''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestInitializeAndDispose() As Assert
 
     ' this is required to initialize Winsock.  It will only ran once.
