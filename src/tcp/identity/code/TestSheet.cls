@@ -20,5 +20,5 @@ End Sub
 
 ''' <summary>   Runs the selected test. </summary>
 Private Sub RunTestsButton_Click()
-    My.ExecuteTestSheetTests
+    ThisApp.ExecuteTestSheetTests
 End Sub

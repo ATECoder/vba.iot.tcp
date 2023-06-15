@@ -18,6 +18,6 @@ End Sub
 ''' <summary>   Handles the workbook before close event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
-    My.ExportCodeFiles
+    ThisApp.ExportCodeFiles
 End Sub
 
