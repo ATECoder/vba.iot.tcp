@@ -49,3 +49,24 @@ Public Function TestStringFormat() As Assert
     Set TestStringFormat = Assert.AreEqual("aaa", StringExtensions.StringFormat("a{0}{1}", "a", "a"), "String formats")
 End Function
 
+''' <summary>   Unit test. Asserts delimited string element should pop. </summary>
+''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
+Public Function TestDelimitedStringElementShouldPop() As Assert
+    Dim delimitedString As String: delimitedString = "a,b,c"
+    Set TestDelimitedStringElementShouldPop = Assert.AreEqual("a", StringExtensions.Pop(delimitedString, ","), _
+        "First element in " & delimitedString & " should pop")
+    If TestDelimitedStringElementShouldPop.AssertSuccessful Then
+        Set TestDelimitedStringElementShouldPop = Assert.AreEqual("b", StringExtensions.Pop(delimitedString, ","), _
+            "Second element in " & delimitedString & " should pop")
+    End If
+    If TestDelimitedStringElementShouldPop.AssertSuccessful Then
+        Set TestDelimitedStringElementShouldPop = Assert.AreEqual("c", StringExtensions.Pop(delimitedString, ","), _
+            "Third element in " & delimitedString & " should pop")
+    End If
+    If TestDelimitedStringElementShouldPop.AssertSuccessful Then
+        Set TestDelimitedStringElementShouldPop = Assert.AreEqual("", StringExtensions.Pop(delimitedString, ","), _
+            "No element in " & delimitedString & " should pop")
+    End If
+End Function
+
+

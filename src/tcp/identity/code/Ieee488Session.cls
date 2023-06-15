@@ -19,7 +19,7 @@ Private Sub Class_Initialize()
     
 End Sub
 
-''' <summary> Termiantes an IEEE488 Session. </summary>
+''' <summary> Terminates an IEEE488 Session. </summary>
 Private Sub Class_Terminate()
     
     Me.Dispose
