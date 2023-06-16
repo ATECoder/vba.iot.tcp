@@ -40,7 +40,7 @@ Public Function TestModuleList() As Assert
     End If
     
     Set TestModuleList = Assert.IsTrue(CollectionExtensions.ContainsAll(modules, knownTestModules), _
-        "listed test modules do not contain all the know test modules")
+        "listed test modules do not contain all the known test modules")
   
 End Function
 
@@ -62,9 +62,6 @@ Public Function TestMacroList() As Assert
         Exit Function
     End If
     
-    Set TestMacroList = Assert.IsTrue(CollectionExtensions.ContainsAll(modules, knownTestModules), _
-        "listed test modules do not contain all the know test modules")
-  
 End Function
 
 

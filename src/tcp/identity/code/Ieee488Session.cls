@@ -9,8 +9,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const PrologixPortNumber As Integer = 1234
 Private m_viSession As ViSession
 Private m_identity As String
+Private m_usingPrologix As Boolean
 
 ''' <summary> Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
@@ -19,7 +21,7 @@ Private Sub Class_Initialize()
     
 End Sub
 
-''' <summary> Terminates an IEEE488 Session. </summary>
+''' <summary> Termiantes an IEEE488 Session. </summary>
 Private Sub Class_Terminate()
     
     Me.Dispose
@@ -63,6 +65,7 @@ End Property
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
+    m_usingPrologix = port = PrologixPortNumber
     OpenConnection = m_viSession.OpenConnection(host, port, timeoutMs)
    
 End Function
@@ -74,6 +77,10 @@ Public Function CloseConnection() As Boolean
     CloseConnection = m_viSession.CloseConnection
     
 End Function
+
+Public Property Get UsingPrologix() As Boolean
+    UsingPrologix = m_usingPrologix
+End Property
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
 ''' <returns>   The socket identifying descriptor. </returns>
@@ -161,6 +168,39 @@ Public Function QueryOptions() As String
     
 End Function
 
+''' <summary> Issues an SDC. </summary>
+Public Function SelectiveDeviceClear() As Integer
+    
+    If Me.UsingPrologix Then
+        SelectiveDeviceClear = Me.WriteLine("++clr")
+    Else
+        SelectiveDeviceClear = 0
+    End If
+    
+End Function
+
+''' <summary> Reads the status byte. </summary>
+Public Function ReadStatusByte() As Integer
+    
+    If Me.UsingPrologix Then
+        ReadStatusByte = -CInt(Me.QueryLine("++spoll"))
+    Else
+        ReadStatusByte = Me.QueryServiceRequestStatus
+    End If
+    
+End Function
+
+''' <summary> Query service request status. </summary>
+Public Function SRQ() As Boolean
+    
+    If Me.UsingPrologix Then
+        SRQ = 1 = CInt(Me.QueryLine("++srq"))
+    Else
+        SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus)
+    End If
+    
+End Function
+
 ''' <summary> Issues a wait (*WAI) command. </summary>
 Public Function Wait() As Integer
     
@@ -170,10 +210,10 @@ End Function
 
 ''' <summary> Enables standard events using the (*ESE {0}) command. </summary>
 ''' <param name="standardEvents">   The stadnard event bits to enable. <param>
-Public Function EnableStandardEvents(ByVal standardEvents As Integer) As Integer
+Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Integer
     
     Dim command As String
-    command = StringExtensions.StringFormat(StandardEventEnableCommandFormat, standardEvents)
+    command = StringExtensions.StringFormat(StandardEventEnableCommandFormat, StandardEvents)
     EnableStandardEvents = Me.ViSession.WriteLine(command)
     
 End Function
@@ -182,9 +222,9 @@ End Function
 ''' <value>   A string. </returns>
 Public Function QueryStandardEventsEnable() As Integer
     
-    Dim standardEvents As String
-    standardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
-    QueryStandardEventsEnable = CInt(standardEvents)
+    Dim StandardEvents As String
+    StandardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
+    QueryStandardEventsEnable = CInt(StandardEvents)
 
 End Function
 
@@ -192,9 +232,9 @@ End Function
 ''' <value>   A string. </returns>
 Public Function QueryStandardEventsStatus() As Integer
     
-    Dim standardEvents As String
-    standardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
-    QueryStandardEventsStatus = CInt(standardEvents)
+    Dim StandardEvents As String
+    StandardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
+    QueryStandardEventsStatus = CInt(StandardEvents)
     
 End Function
 

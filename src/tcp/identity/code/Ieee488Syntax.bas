@@ -61,7 +61,7 @@ Public Const ResetKnownStateCommand As String = "*RST"
 ''' 0000000000001001. This value indicates that bit 0 (OPC) and bit 3 (DDE)
 ''' are set.
 ''' </remarks>
-Public Enum standardEvents
+Public Enum StandardEvents
 
     ''' <summary> The None option. </summary>
     None = 0

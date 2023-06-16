@@ -1,4 +1,4 @@
-Attribute VB_Name = "PathExtensionTests"
+Attribute VB_Name = "PathExtensionsTests"
 Option Explicit
 
 ''' <summary>   Unit test. Asserts that the path elements should join. </summary>

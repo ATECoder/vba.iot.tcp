@@ -16,10 +16,10 @@ Private Const DefaultTimeoutMs = 500
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="s">                     [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
-'''                                      The connection is actually made with the socket that is returned by accept.</param>
+'''                                      The connection is actually made with the socket that is returned by accept. </param>
 ''' <param name="clientAddress">         [out] An optional pointer to a buffer that receives the address of the connecting entity,
 '''                                      as known to the communications layer. The exact format of the address parameter is determined by the address family
-'''                                      that was established when the socket from the ws32_SocketAddress structure was created.</param>
+'''                                      that was established when the socket from the ws32_SocketAddress structure was created. </param>
 ''' <param name="clientAddressLength">   [in, out] An optional pointer to an integer that contains the length of structure pointed to by
 '''                                      the address parameter. </param>
 ''' <returns>   If no error occurs, accept returns a value of type SOCKET that is a descriptor for the new socket.

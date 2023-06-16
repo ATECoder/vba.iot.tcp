@@ -83,11 +83,13 @@ End Function
 
 ''' <summary>   Checks whether the given text starts with the given sequence. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">        The text to check for the sequence. </param>
-''' <param name="startText">   The text to be located at the start. </param>
+''' <param name="text">            The text to check for the sequence. </param>
+''' <param name="startText">       The text to be located at the start. </param>
+''' <param name="compareMethod">   [Optional, vbBinaryCompare] The compare method. </param>
 ''' <returns>   A Boolean <returns>
-Public Function StartsWith(ByVal text As String, ByVal startText As String) As Boolean
-    StartsWith = InStr(text, startText) = 1
+Public Function StartsWith(ByVal text As String, ByVal startText As String, _
+                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    StartsWith = 1 = InStr(1, text, startText, compareMethod)
 End Function
 
 ''' <summary>   Checks whether the given text ends with the given sequence. </summary>
@@ -95,8 +97,9 @@ End Function
 ''' <param name="text">   The text to check for the sequence. </param>
 ''' <param name="endText">   The text to be located at the end. </param>
 ''' <returns>   A Boolean. <returns>
-Public Function EndsWith(ByVal text As String, ByVal endText As String) As Boolean
-    EndsWith = Right(text, Len(endText)) = endText
+Public Function EndsWith(ByVal text As String, ByVal endText As String, _
+                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    EndsWith = StrComp(Right(text, Len(endText)), endText, compareMethod)
 End Function
 
 ''' <summary>   Gets the character at the given index from the given string. </summary>

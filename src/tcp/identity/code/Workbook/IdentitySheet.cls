@@ -254,18 +254,18 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     Dim sw As New StopWatch
     Dim totalMilliseconds As Double
     
-    Dim session As Ieee488Session
-    Set session = New Ieee488Session
+    Dim Session As Ieee488Session
+    Set Session = New Ieee488Session
     
-    session.OpenConnection host, port
+    Session.OpenConnection host, port
     
     ' report the socket number
-    Range("E2").value = session.SocketId
+    Range("E2").value = Session.SocketId
    
     ' report the connection state
-    Range("F2").value = session.Connected
+    Range("F2").value = Session.Connected
     
-    If session.Connected Then
+    If Session.Connected Then
     
         Dim command As String
         command = "*IDN?"
@@ -279,12 +279,12 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
             loopCount = loopCount + 1
             sw.Restart
             
-            session.QueryIdentity
+            Session.QueryIdentity
             
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(session.Identity)
-            Range("I2").value = session.Identity
+            Range("H2").value = Len(Session.Identity)
+            Range("I2").value = Session.Identity
     
         Loop
   
@@ -310,14 +310,14 @@ Finally:
     End If
     
     On Error Resume Next
-    If Not session Is Nothing Then
-        If session.Connected Then
-            session.CloseConnection
+    If Not Session Is Nothing Then
+        If Session.Connected Then
+            Session.CloseConnection
         End If
     End If
     
     ' terminate the session
-    Set session = Nothing
+    Set Session = Nothing
     
     If Len(errorMessage) > 0 Then
         MsgBox errorMessage

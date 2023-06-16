@@ -232,3 +232,147 @@ Public Property Get InvalidArgumentError() As UserDefinedError
     Set InvalidArgumentError = m_invalidArgumentError
 End Property
 
+''' <summary>   Appends the procedure, module, and application to the Err object source string. </summary>
+''' <remakrs>
+''' We use special markers to prefix the application
+''' and module names.  This way we can locate the name
+''' of the last application or module and determine if
+''' we need to append module or application names or
+''' just the procedure name.
+'''
+''' Moreover, we can determine the first source because
+''' when an error first occurs in a procedure, the error
+''' source string is the application title (App.Title).
+''' </remarks>
+''' <param name="procedureName">   Specifies the name of the procedure which to append to the source string. </param>
+''' <param name="moduleName">      Specifies the module name to append to the source string. </param>
+Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As String)
+
+    Const appSeparator = ":"
+    Const moduleSeparator = ";"
+    Const procSeperator = "."
+    
+    ' this procedure must not trap errors because it must
+    ' not alter the error object.
+      
+    ' thus we assume that this code is robust and will
+    ' not cause errors.
+  
+    ' get the current soruce string
+    Dim errorSource As String: errorSource = Err.source
+    
+    ' check if the error occurred in this procedure
+    If (errorSource = ThisWorkbook.name) Or (Len(errorSource) = 0) Then
+    
+        ' if the source string is the application title,
+        ' the error occurred in the procedure.  Because
+        ' this is the lowest error level, append the
+        ' application and module to the source string
+        errorSource = procedureName & _
+                  moduleSeparator & moduleName & _
+                  appSeparator & ThisWorkbook.name
+  
+    ' check if the error was raised from the same
+    ' re-entrant procedure
+    ElseIf InStr(1, errorSource, procedureName) = 1 Then
+  
+        ' if the same proceudre, leave the error
+        ' source as is.
+      
+    Else
+    
+        ' otherwise, the error was raised from another
+        ' procedure.
+        
+        ' check if the error occurred in the same module
+        
+        ' get the position of the last module name
+        Dim moduleNamePos As Long: moduleNamePos = InStr(1, errorSource, moduleSeparator) + 1
+        
+        ' check if this is the same as this module
+        If InStr(moduleNamePos, errorSource, moduleName) = moduleNamePos Then
+      
+            ' if the error was in the same module, just
+            ' append the procedure.
+            errorSource = procedureName & procSeperator & _
+                      errorSource
+        
+        Else
+        
+            ' if the last error was raised from another
+            ' module, check if this module is in this or
+            ' another application
+            
+            ' get the position of the last application in
+            ' the string
+            moduleNamePos = InStr(1, errorSource, appSeparator) + 1
+            
+            ' check if this is the same as this application
+            If InStr(moduleNamePos, errorSource, ThisWorkbook.name) = moduleNamePos Then
+        
+                ' if the source is in this application than
+                ' just append the module and procedure
+                errorSource = procedureName & moduleSeparator & moduleName & _
+                              procSeperator & errorSource
+            Else
+                ' if the source is another application than
+                ' append the procedure, module, and application
+                errorSource = procedureName & _
+                         moduleSeparator & moduleName & _
+                         appSeparator & ThisWorkbook.name & _
+                         procSeperator & errorSource
+            End If
+        
+        End If
+      
+    End If
+  
+    ' Update the current soruce string
+    Err.source = errorSource
+ 
+End Sub
+
+''' <summary>   Builds a standard error message. </summary>
+''' <param name="vbWarning">   [Optional, false] A Boolean expression
+'''                            that is set to true to display a warning rather than
+'''                            an error message.</param>
+''' <returns>   A Standard error message string in the form: <para>
+''' Error yyy (hxxx) occurred in <c>Source</c>: Description </para><para>
+''' or  </para><para>
+''' Warning yyy (hxxx) occurred in <c>Source</c>: Description  </para>
+''' </returns>
+Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = False) As String
+
+    Dim builder As StringBuilder: builder = New StringBuilder
+  
+    ' check if we have an error
+    If Err.Number <> 0 Then
+    
+        builder.Append IIf(vbWarning, "Warning ", "Error ")
+        builder.Append Format$(Err.Number)
+        
+        Dim lErrNumber As Long: lErrNumber = Err.Number - vbObjectError
+        
+        If Abs(lErrNumber) < &HFFFF& Then
+            lErrNumber = lErrNumber - &H200
+            builder.Append " (+0x"
+        Else
+            lErrNumber = Err.Number
+            builder.Append " (0x"
+        End If
+        builder.Append Hex$(lErrNumber)
+        builder.Append ") "
+        
+        builder.Append ") occurred in "
+        builder.Append Err.source
+        builder.Append vbCrLf
+        builder.Append vbCrLf
+        builder.Append Err.Description
+        
+    End If
+
+    BuildStandardErrorMessage = builder.ToString
+
+End Function
+
+
