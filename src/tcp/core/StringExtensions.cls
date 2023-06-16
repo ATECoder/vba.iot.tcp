@@ -83,11 +83,13 @@ End Function
 
 ''' <summary>   Checks whether the given text starts with the given sequence. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">        The text to check for the sequence. </param>
-''' <param name="startText">   The text to be located at the start. </param>
+''' <param name="text">            The text to check for the sequence. </param>
+''' <param name="startText">       The text to be located at the start. </param>
+''' <param name="compareMethod">   [Optional, vbBinaryCompare] The compare method. </param>
 ''' <returns>   A Boolean <returns>
-Public Function StartsWith(ByVal text As String, ByVal startText As String) As Boolean
-    StartsWith = InStr(text, startText) = 1
+Public Function StartsWith(ByVal text As String, ByVal startText As String, _
+                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    StartsWith = 1 = InStr(1, text, startText, compareMethod)
 End Function
 
 ''' <summary>   Checks whether the given text ends with the given sequence. </summary>
@@ -95,8 +97,9 @@ End Function
 ''' <param name="text">   The text to check for the sequence. </param>
 ''' <param name="endText">   The text to be located at the end. </param>
 ''' <returns>   A Boolean. <returns>
-Public Function EndsWith(ByVal text As String, ByVal endText As String) As Boolean
-    EndsWith = Right(text, Len(endText)) = endText
+Public Function EndsWith(ByVal text As String, ByVal endText As String, _
+                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    EndsWith = StrComp(Right(text, Len(endText)), endText, compareMethod)
 End Function
 
 ''' <summary>   Gets the character at the given index from the given string. </summary>
@@ -147,3 +150,43 @@ Public Function StringFormat(ByVal mask As String, ParamArray tokens() As Varian
     Next
     StringFormat = mask
 End Function
+
+''' <summary>   Pops an element from a delimited string. </summary>
+''' <remarks>
+''' Use this function to extract a substring from a string up to but not including the delimiter.
+''' </remarks>
+''' <param name="delimitedString">   A string expression that includes a series of tokens and
+'''                                  where a remainder string is returned. </param>
+''' <param name="delimiter">         A String expression that specifies the delimiter to use
+'''                                  for returning the token.. </param>
+''' <returns> A string. The first sub string ending but not including the the delimiter or the
+''' original string if the delimiter was not located. </returns>
+Public Function Pop(ByRef delimitedString As String, ByVal delimiter As String) As String
+
+  Dim lPos As Long
+  
+  ' find the delimiter in the string
+  lPos = InStr(1, delimitedString, delimiter, vbTextCompare)
+  
+  ' check if we have a delimiter in the string
+  If lPos > 0 Then
+  
+    ' if we have a delimiter, return the string all the
+    ' way up to but not including the delimiter
+    Pop = Left$(delimitedString, lPos - 1)
+    
+    ' return the string past the delimiter
+    delimitedString = Mid$(delimitedString, lPos + Len(delimiter))
+    
+  Else
+    ' if the string does not include the delimiter, we
+    ' must return the original string
+    Pop = delimitedString
+    
+    ' and empty the returned string
+    delimitedString = Empty
+    
+  End If
+  
+End Function
+

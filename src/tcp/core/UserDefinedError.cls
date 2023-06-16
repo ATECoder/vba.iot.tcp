@@ -44,8 +44,8 @@ End Property
 
 ''' <summary>   Gets the error name. </summary>
 ''' <value>   The error name of String type. </value>
-Public Property Get Name() As String
-    Name = m_name
+Public Property Get name() As String
+    name = m_name
 End Property
 
 ''' <summary>   The error description. </summary>
@@ -58,7 +58,7 @@ End Property
 ''' <param name="additionaInfo">   [Optional, empty] additional information to append to the error message. </param>
 ''' <returns>   A String representation of the error. </returns>
 Public Function ToString(Optional ByVal additionalInfo As String = "") As String
-    ToString = "User Error " & Me.Name & " (0x" & VBA.LCase$(VBA.Hex$(Me.Code)) & " 0x" & VBA.LCase$(VBA.Hex$(Me.UserErrorNumber)) & "): " & _
+    ToString = "User Error " & Me.name & " (0x" & VBA.LCase$(VBA.Hex$(Me.Code)) & " 0x" & VBA.LCase$(VBA.Hex$(Me.UserErrorNumber)) & "): " & _
                 Me.Description & additionalInfo
 End Function
 

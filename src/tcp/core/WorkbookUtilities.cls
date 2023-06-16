@@ -26,17 +26,64 @@ Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
         fso.CreateFolder (path)
     End If
     
+    Dim filePath As String
+    
     For Each component In ActiveWorkbook.VBProject.VBComponents
+        Dim name As String: name = component.name
         extension = GetFileExtension(component)
-        If extension <> "" Then
+        If Not StringExtensions.IsNullOrEmpty(extension) Then
+            filePath = PathExtensions.PathJoin(Me.GetPath(component, path, "workbook"), component.name & extension)
             fileCount = fileCount + 1
-            component.Export Filename:=path & component.Name & extension
+            component.Export Filename:=filePath
         End If
     Next component
     
     Debug.Print "Exported " & CStr(fileCount) & " files to " & path
     
 End Sub
+
+''' <summary>   Gets the destination path for this component. <summary>
+''' <param name="component">   A reference to a VB Component. </param>
+''' <param name="path">        The top path. </param>
+''' <param name="workbookPath">   The workbook and sheets sub path. </param>
+Public Function GetPath(ByVal component As VBComponent, ByVal path As String, ByVal subPath As String)
+    If Me.IsSheet(component) Or Me.IsWorkbook(component) Or Me.IsChart(component) Or _
+        StringExtensions.StartsWith(component.name, "This", vbTextCompare) Then
+        GetPath = PathExtensions.PathJoin(path, subPath)
+    Else
+        GetPath = path
+    End If
+End Function
+
+''' <summary>   Detects if a component is a workbook. <summary>
+''' <param name="component">   A reference to a VB Component. </param>
+''' <returns> True if the component is a work book. </returns>
+Public Function IsWorkbook(ByVal component As VBComponent)
+    On Error Resume Next
+    Dim op As Property: Set op = component.Properties("AutoSaveOn")
+    On Error GoTo 0
+    IsWorkbook = Not op Is Nothing
+End Function
+
+''' <summary>   Detects if a component is a sheet. <summary>
+''' <param name="component">   A reference to a VB Component. </param>
+''' <returns> True if the component is a sheet. </returns>
+Public Function IsSheet(ByVal component As VBComponent)
+    On Error Resume Next
+    Dim op As Property: Set op = component.Properties("Cells")
+    On Error GoTo 0
+    IsSheet = Not op Is Nothing
+End Function
+
+''' <summary>   Detects if a component is a shart. <summary>
+''' <param name="component">   A reference to a VB Component. </param>
+''' <returns> True if the component is a shart. </returns>
+Public Function IsChart(ByVal component As VBComponent)
+    On Error Resume Next
+    Dim op As Property: Set op = component.Properties("AutoScaling")
+    On Error GoTo 0
+    IsChart = Not op Is Nothing
+End Function
 
 ''' <summary>   Get the extension if the component is a file </summary>
 ''' <param name="component">   The <see cref="VBComponent"/>   </param>

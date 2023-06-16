@@ -16,12 +16,12 @@ Private Const DefaultTimeoutMs = 500
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="s">                     [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
-'''                                      The connection is actually made with the socket that is returned by accept.</param>
+'''                                      The connection is actually made with the socket that is returned by accept. </param>
 ''' <param name="clientAddress">         [out] An optional pointer to a buffer that receives the address of the connecting entity,
-'''                                      as known to the communications layer. The exact format of the addr parameter is determined by the address family
-'''                                      that was established when the socket from the ws32_SocketAddress structure was created.</param>
+'''                                      as known to the communications layer. The exact format of the address parameter is determined by the address family
+'''                                      that was established when the socket from the ws32_SocketAddress structure was created. </param>
 ''' <param name="clientAddressLength">   [in, out] An optional pointer to an integer that contains the length of structure pointed to by
-'''                                      the addr parameter. </param>
+'''                                      the address parameter. </param>
 ''' <returns>   If no error occurs, accept returns a value of type SOCKET that is a descriptor for the new socket.
 ''' This returned value is a handle for the socket on which the actual connection is made. Otherwise, a value of
 ''' ws32_INVALID_SOCKET is returned, and a specific error code can be retrieved by calling WSAGetLastError.
@@ -84,7 +84,7 @@ Private Declare PtrSafe Function listen_ Lib "wsock32.dll" Alias "listen" ( _
 '''                               ws32_MSG_OOB: Sends OOB data (stream-style socket such as ws32_SOCK_STREAM only).
 '''                               </param>
 ''' <returns>   Returns the total number of bytes sent, which can be less than the number requested to be sent
-''' in the len parameter. If an error occured, a value of ws32_SOCKET_ERROR is returned, and a specific error code
+''' in the length parameter. If an error occurred, a value of ws32_SOCKET_ERROR is returned, and a specific error code
 ''' can be retrieved by calling WSAGetLastError.
 ''' <returns>
 Private Declare PtrSafe Function send_ Lib "wsock32.dll" Alias "send" ( _
@@ -120,11 +120,11 @@ Private Declare PtrSafe Function setsockopt_ Lib "wsock32.dll" Alias "setsockopt
 ''' or message-oriented sockets.
 ''' </remarks>
 ''' <param name="s">              [in] A descriptor identifying a connected socket. </param>
-''' <param name="buffer">         [out] A pointer to the buffer to receive the incomming data. </param>
+''' <param name="buffer">         [out] A pointer to the buffer to receive the incoming data. </param>
 ''' <param name="bufferLength">   [in] The length, in bytes, of the data in buffer pointed to by the buffer parameter. </param>
 ''' <param name="flags">          [in] A set of flags that influences the behavior of this function. </param>
 ''' <returns>
-''' If no error occurs, recv returns the number of bytes received and the buffer pointed to by the buffre parameter will
+''' If no error occurs, receive returns the number of bytes received and the buffer pointed to by the buffer parameter will
 ''' contain this data received. If the connection has been gracefully closed, the return value is zero.
 ''' Otherwise, a value of ws32_SOCKET_ERROR is returned, and a specific error code can be retrieved by calling WSAGetLastError.
 ''' <returns>
@@ -141,7 +141,7 @@ Private m_fdSet As wsock32.ws32_fd_set
 ''' <summary>   Initializes an internet protocol Stream Socket with a socket id. </summary>
 Private Sub Class_Initialize()
 
-    ' see that the singleton windock class is instantiated
+    ' see that the singleton Winsock class is instantiated
     On Error Resume Next
     
     ' this is required to initialize Winsock.  It will only ran once.
@@ -168,7 +168,7 @@ End Sub
 ''' <summary>   terminates the socket and releases its Winsock registration. </summary>
 Private Sub Class_Terminate()
 
-    ' see that the singleton windock class is instantiated
+    ' see that the singleton Winsock class is instantiated
     On Error Resume Next
     
     ' unregister this socket.
@@ -190,7 +190,7 @@ Public Property Get Connected() As Boolean
     Connected = m_connected
 End Property
 
-''' <summary>   Intializes an Inet stream socket using the provided socket id. </summary>
+''' <summary>   Initializes an Inet stream socket using the provided socket id. </summary>
 ''' <param name="connectedSocketId">   The ID of a connected socket. </param>
 ''' <param name="timeoutMs">           [Optional, 500] The receive timeout interval in milliseconds. </param>
 Public Sub Initialize(ByVal connectedSocketId As Long, Optional ByVal timeoutMs As Long = 500)
@@ -216,7 +216,7 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
     End If
     
     ' Open a connection to a server
-    ' can use this: https://www.allscoop.com/tcp-listen.php to listen.
+    ' can use this: https://www.allscoop.com/Tcp-listen.php to listen.
     
     Dim address As wsock32.ws32_SocketAddress_in
     
@@ -381,8 +381,8 @@ Public Function SendMessage(ByVal message As String) As Integer
 
 End Function
 
-''' <summary>   Receives a message from the server untill reaching
-''' the specified termiantion. </summary>
+''' <summary>   Receives a message from the server until reaching
+''' the specified termination. </summary>
 ''' <param name="buffer">        Where the message will go. </param>
 ''' <param name="maxLength">     The maximum number of bytes to read. </param>
 ''' <param name="termination">   [Optional, vbLf] The character that signifies the end of the stream. </param>
@@ -427,7 +427,7 @@ Public Function ReceiveTerminatedMessage(ByRef buffer As String, ByVal maxLength
     
 End Function
 
-''' <summary>   Receives a message from the server untill reaching the specified termiantion
+''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
 ''' <param name="maxLength">   [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">   [Optional, True] True to return the string without the termination. </param>

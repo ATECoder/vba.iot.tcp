@@ -2,9 +2,6 @@
 
 #### Updates
 * test session: selective device clear and read status byte
-* get new items from flying
+* test user 32 message box.
 * ieer488: check the service request status is cleared after *STB?.
-* add test to Pop.
-* add build and test scripts
-
-
+* add build and test power shell scripts
