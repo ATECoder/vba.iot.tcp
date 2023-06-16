@@ -13,7 +13,6 @@ Private Const thisModuleName As String = "K2700"
 Private Const Mux40Cards As String = "7702,7708"
 Private Const Mux20Cards As String = "7700,7710"
 
-
 ' reference to the IEEE488 session
 Private m_session As Ieee488Session
 
@@ -162,139 +161,136 @@ End Property
 ''' <returns>  The channel list to close. </returns>
 Public Function BuildChannelList(ByVal resistanceNumber As Integer) As String
 
-  Const thisProcedureName = "BuildChannelList"
-  
-  ' Trap errors to the error handler
-  On Error GoTo err_Handler
-  
-  Dim routeCommand As String
-  
-  ' Check if we need to close the bottom or top
-  ' channle.
-  If resistanceNumber <= 20 Then
-  
-    If Me.HasMux40A Then
-      
-      routeCommand = ":ROUT:MULT:CLOS (@144,145)"
+    Const thisProcedureName = "BuildChannelList"
     
-    ElseIf Me.HasMux20A Then
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Dim routeCommand As String
+    
+    ' Check if we need to close the bottom or top
+    ' channle.
+    If resistanceNumber <= 20 Then
+    
+        If Me.HasMux40A Then
+          
+            routeCommand = ":ROUT:MULT:CLOS (@144,145)"
+        
+        ElseIf Me.HasMux20A Then
+          
+            routeCommand = ":ROUT:MULT:CLOS (@124,125)"
+        
+        End If
+    
+    ElseIf resistanceNumber <= 40 Then
       
-      routeCommand = ":ROUT:MULT:CLOS (@124,125)"
+        If Me.HasMux40A Then
+        
+            ' Get channel string
+            routeCommand = ":ROUT:MULT:CLOS (@144,145)"
+        
+        ElseIf Me.HasMux20B Then
+          
+            ' Get channel string
+            routeCommand = ":ROUT:MULT:CLOS (@224,225)"
+        
+        End If
+      
+    ElseIf resistanceNumber > 40 Then
+    
+        If Me.HasMux40B Then
+            routeCommand = ":ROUT:MULT:CLOS (@244,245)"
+        End If
     
     End If
-  
-  ElseIf resistanceNumber <= 40 Then
-    
-    If Me.HasMux40A Then
-    
-      ' Get channel string
-      routeCommand = ":ROUT:MULT:CLOS (@144,145)"
-    
-    ElseIf Me.HasMux20B Then
-      
-      ' Get channel string
-      routeCommand = ":ROUT:MULT:CLOS (@224,225)"
-    
-    End If
-    
-  ElseIf resistanceNumber > 40 Then
-  
-    If Me.HasMux40B Then
-      routeCommand = ":ROUT:MULT:CLOS (@244,245)"
-    End If
-  
-  End If
-      
-  ' set the return value
-  BuildChannelList = routeCommand
+        
+    ' set the return value
+    BuildChannelList = routeCommand
 
 ' ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
 exit_Handler:
-  Exit Function
+    Exit Function
   
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
-  ' append the error source
-  UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
-  
-  ' raise error
-  Err.Raise Err.Number
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
+    
+    ' raise error
+    Err.Raise Err.Number
 
 End Function
 
-''' <summary>   Returns the scan list. </summary>
+''' <summary>   Returns the scan list for a specific resistance. </summary>
 ''' <param name="resistanceNumber">   The resistance number. </param>
 ''' <returns>  The scan list. </returns>
 Public Function BuildScanList(ByVal resistanceNumber As Integer) As String
 
-  Const thisProcedureName = "BuildScanList"
-  
-  ' Trap errors to the error handler
-  On Error GoTo err_Handler
-  
-  Dim sChan As String
-  Dim sRchan As String
-  
-  ' Check if we need to close the bottom or top
-  ' channle.
-  If resistanceNumber <= 20 Then
-  
-    ' Get channel string
-    If Me.HasMux40A Or Me.HasMux20A Then
+    Const thisProcedureName = "BuildScanList"
     
-      sRchan = "1" & Right$("0" & Format$(resistanceNumber), 2)
-      sChan = "(@" & sRchan & ")"
-  
-    End If
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
-  ElseIf resistanceNumber <= 40 Then
+    Dim scanList As String
+    Dim resistaceChannel As String
     
-    If Me.HasMux40A Then
+    ' Check if we need to close the bottom or top
+    ' channle.
+    If resistanceNumber <= 20 Then
     
-      ' Get channel string
-      sRchan = "1" & Right$("0" & Format$(resistanceNumber), 2)
-      sChan = "(@" & sRchan & ")"
-    
-    ElseIf Me.HasMux20B Then
+        ' Get channel string
+        If Me.HasMux40A Or Me.HasMux20A Then
+        
+            resistaceChannel = "1" & Right$("0" & Format$(resistanceNumber), 2)
+            scanList = "(@" & resistaceChannel & ")"
+        
+        End If
       
-      ' Get channel string
-      sRchan = "2" & Right$("0" & Format$(resistanceNumber - 20), 2)
+    ElseIf resistanceNumber <= 40 Then
       
-      sChan = "(@" & sRchan & ")"
+        If Me.HasMux40A Then
+        
+            ' Get channel string
+            resistaceChannel = "1" & Right$("0" & Format$(resistanceNumber), 2)
+            scanList = "(@" & resistaceChannel & ")"
+        
+        ElseIf Me.HasMux20B Then
+          
+            ' Get channel string
+            resistaceChannel = "2" & Right$("0" & Format$(resistanceNumber - 20), 2)
+            
+            scanList = "(@" & resistaceChannel & ")"
+        
+        End If
+      
+    ElseIf resistanceNumber > 40 Then
+    
+        ' Get channel string
+        resistaceChannel = "2" & Right$("0" & Format$(resistanceNumber - 40), 2)
+        
+        If Me.HasMux40B Then
+            scanList = "(@" & resistaceChannel & ")"
+        End If
     
     End If
-    
-  ElseIf resistanceNumber > 40 Then
-  
-    ' Get channel string
-    sRchan = "2" & Right$("0" & Format$(resistanceNumber - 40), 2)
-  
-    If Me.HasMux40B Then
-      sChan = "(@" & sRchan & ")"
-    End If
-  
-  End If
-      
-  ' set the return value
-  BuildScanList = sChan
+        
+    ' set the return value
+    BuildScanList = scanList
 
 ' ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
 exit_Handler:
-  Exit Function
+    Exit Function
   
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
-  ' append the error source
-  UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
-  
-  ' raise error
-  Err.Raise Err.Number
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
+    
+    ' raise error
+    Err.Raise Err.Number
 
 End Function
-
-
-
 
 

@@ -99,7 +99,7 @@ End Function
 ''' <returns>   A Boolean. <returns>
 Public Function EndsWith(ByVal text As String, ByVal endText As String, _
                            Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
-    EndsWith = StrComp(Right(text, Len(endText)), endText, compareMethod)
+    EndsWith = 0 = StrComp(Right(text, Len(endText)), endText, compareMethod)
 End Function
 
 ''' <summary>   Gets the character at the given index from the given string. </summary>
