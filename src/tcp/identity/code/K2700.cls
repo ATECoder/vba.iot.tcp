@@ -68,7 +68,7 @@ Public Function Initialize(ByVal host As String, ByVal port As Long, _
     m_session.OpenConnection host, port, timeoutMs
 
     ' this only works with the Prologix device
-    Me.Session.SelectiveDeviceClear
+    ' Me.Session.SelectiveDeviceClear
     Me.Session.ResetKnownState
     Me.Session.ClearExecutionState
     
@@ -77,26 +77,24 @@ Public Function Initialize(ByVal host As String, ByVal port As Long, _
     Dim card1 As String: card1 = StringExtensions.Pop(availableCards, ",")
     Dim card2 As String: card2 = StringExtensions.Pop(availableCards, ",")
     
-    Dim card As Variant
-    For Each card In Split(Mux20Cards, ",")
-        m_hasMux20A = InStr(1, card1, CStr(card), vbTextCompare)
-        m_hasMux20B = InStr(1, card2, CStr(card), vbTextCompare)
-    Next card
+    m_hasMux20A = 0 < InStr(1, Mux20Cards, card1, vbTextCompare)
+    m_hasMux20B = 0 < InStr(1, Mux20Cards, card2, vbTextCompare)
     
-    For Each card In Split(Mux40Cards, ",")
-        m_hasMux40A = InStr(1, card1, CStr(card), vbTextCompare)
-        m_hasMux40B = InStr(1, card2, CStr(card), vbTextCompare)
-    Next card
+    m_hasMux40A = 0 < InStr(1, Mux40Cards, card1, vbTextCompare)
+    m_hasMux40B = 0 < InStr(1, Mux40Cards, card2, vbTextCompare)
     
     If Me.HasMux40A Then
        Me.Session.WriteLine ":FUNC 'RES',(@101:140)"
     End If
+    
     If Me.HasMux40B Then
       Me.Session.WriteLine ":FUNC 'RES',(@201:240)"
     End If
+    
     If Me.HasMux20A Then
       Me.Session.WriteLine ":FUNC 'RES',(@101:120)"
     End If
+    
     If Me.HasMux20B Then
       Me.Session.WriteLine ":FUNC 'RES',(@201:220)"
     End If
@@ -292,5 +290,4 @@ err_Handler:
     Err.Raise Err.Number
 
 End Function
-
 

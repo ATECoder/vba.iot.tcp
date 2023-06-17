@@ -168,6 +168,28 @@ Public Function QueryOptions() As String
     
 End Function
 
+''' <summary> Issues a local lockout (++llo). </summary>
+Public Function LocalLockout() As Integer
+    
+    If Me.UsingPrologix Then
+        LocalLockout = Me.WriteLine("++llo")
+    Else
+        LocalLockout = 0
+    End If
+    
+End Function
+
+''' <summary> Issues a Go To Local (GTL) (++loc). </summary>
+Public Function GoToLocal() As Integer
+    
+    If Me.UsingPrologix Then
+        GoToLocal = Me.WriteLine("++loc")
+    Else
+        GoToLocal = 0
+    End If
+    
+End Function
+
 ''' <summary> Issues an SDC. </summary>
 Public Function SelectiveDeviceClear() As Integer
     
@@ -183,7 +205,7 @@ End Function
 Public Function ReadStatusByte() As Integer
     
     If Me.UsingPrologix Then
-        ReadStatusByte = -CInt(Me.QueryLine("++spoll"))
+        ReadStatusByte = CInt(Me.QueryLine("++spoll"))
     Else
         ReadStatusByte = Me.QueryServiceRequestStatus
     End If
