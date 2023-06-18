@@ -36,7 +36,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     On Error GoTo Finally
     
-    Dim moduleName As String
+    Dim ModuleName As String
     Dim messages As New VBA.collection
     Dim passedCount As Integer
     Dim failedCount As Integer
@@ -44,10 +44,10 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     row = 1
     
     testDataSheet.Rows("2:" & testDataSheet.Rows.count).ClearContents
-    moduleName = testDataSheet.Range("B" & row).value
+    ModuleName = testDataSheet.Range("B" & row).value
     row = row + 1
     testDataSheet.Range("A" & row).value = "Testing"
-    testDataSheet.Range("B" & row).value = moduleName
+    testDataSheet.Range("B" & row).value = ModuleName
    
     row = row + 1
     testDataSheet.Range("A" & row).value = "Test Name"
@@ -57,7 +57,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     Dim delimiter As String
     delimiter = " "
-    AppArray() = Split(WorkbookUtilities.ListAllMacroNames(moduleName, delimiter), delimiter)
+    AppArray() = Split(WorkbookUtilities.ListAllMacroNames(ModuleName, delimiter), delimiter)
     
     Dim sw As StopWatch
     Set sw = New StopWatch

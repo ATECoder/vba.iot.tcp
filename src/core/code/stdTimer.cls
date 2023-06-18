@@ -94,7 +94,7 @@ Public Sub injectCode(ByVal wb As Workbook, ByVal sModuleName As String, ByRef s
   With wb.VBProject.VBComponents.Add(iModuleType).CodeModule
     If .CountOfLines > 0 Then .DeleteLines 1, .CountOfLines
     .AddFromString sCode
-    .Parent.name = sModuleName
+    .Parent.Name = sModuleName
   End With
 End Sub
 
@@ -117,7 +117,7 @@ Private Function setVBOM(ByVal newValue As Boolean) As Boolean
   #Else
     Dim rKey As String
     rKey = "HKEY_CURRENT_USER\Software\Microsoft\Office\" & Application.Version _
-          & "\" & Replace(Application.name, "Microsoft ", vbNullString) _
+          & "\" & Replace(Application.Name, "Microsoft ", vbNullString) _
           & "\Security\AccessVBOM"
     On Error Resume Next
     CreateObject("WScript.Shell").RegWrite rKey, i, "REG_DWORD"
