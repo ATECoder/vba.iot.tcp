@@ -26,14 +26,6 @@ Private Sub Class_Initialize()
 
 End Sub
 
-''' <summary>   Create a new instance of this class to wshare with external workbooks. </summary>
-''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
-''' </remarks>
-Public Function CreateNew() As StringBuilder
-    CreateNew = New StringBuilder
-End Function
-
 ''' < summary>   Appends the given Text to this StringBuilder. </summary>
 ''' <param name="text">   the text to append. </param>
 Public Sub Append(ByVal text As String)

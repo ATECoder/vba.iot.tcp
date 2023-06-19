@@ -8,6 +8,18 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
+Private m_exportCodebBeforeClosing As Boolean
+
+''' <summary>   Gets the option for exporting code files when closing. </summary>
+Public Property Get ExportCodeBeforeClosing() As Boolean
+    ExportCodeBeforeClosing = m_exportCodebBeforeClosing
+End Property
+
+''' <summary>   Enables or disables exporting code files when closing. </summary>
+''' <para name="value">   True to enable exporting code files when closing. </param>
+Public Property Let ExportCodeBeforeClosing(ByVal value As Boolean)
+    m_exportCodebBeforeClosing = value
+End Property
 
 ''' <summary>   Exports all code files to the active workbook path. </summary>
 ''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
@@ -29,7 +41,7 @@ Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
         If Not StringExtensions.IsNullOrEmpty(extension) Then
             filePath = PathExtensions.JoinFile(Me.GetWorkbookPath(component, path, "workbook"), component.Name & extension)
             fileCount = fileCount + 1
-            component.Export fileName:=filePath
+            component.Export FileName:=filePath
         End If
     Next component
     
@@ -96,251 +108,45 @@ Public Function GetFileExtension(ByVal component As VBComponent)
     End Select
 End Function
 
-''' <summary>   List all test modules that start with the 'Test' prefix and
-''' contain methods that start with the test prefix. <summary>
-''' <param name="macroNamePrefix">   [Optional, 'Test'] The macro name prefix. </param>
-''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
-Public Function ListTestModules(Optional ByVal macroNamePrefix As String = "Test", _
-                                Optional ByVal moduleNameSuffix As String = "Tests") As VBA.collection
-
-    Dim pj As VBProject
-    Dim component As VBComponent
-    On Error Resume Next
-    Dim moduleNames As VBA.collection
-    Set moduleNames = New VBA.collection
-    Dim currentModuleName As String
-    Dim newModuleName As String
-    newModuleName = ""
-    currentModuleName = ""
-    
-    For Each pj In Application.VBE.VBProjects
-        For Each component In pj.VBComponents
-            If IsObject(component) Then
-                newModuleName = pj.Name & "." & component.CodeModule
-                If Not StringExtensions.IsNullOrEmpty(newModuleName) And currentModuleName <> newModuleName Then
-                    currentModuleName = newModuleName
-                    If StringExtensions.EndsWith(currentModuleName, "Tests") Then
-                        If HasMacros(component) Then
-                            moduleNames.Add currentModuleName
-                        End If
-                    End If
-                End If
-            End If
-        Next
-    Next
-    Set ListTestModules = moduleNames
-End Function
-
-''' <summary>   List all macros in the specified module. <summary>
-''' <remarks>
-''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
-''' <remarks>
-''' <param name="moduleName">   The module name where the macros reside. </param>
-''' <param name="delimiter">   [Optional, ' '] The delimiter to use when joining the names. </param>
-''' <returns>   Space separated list of macros delimited by <paramref name="delimiter"/>. </returns>
-Function ListAllMacroNames(ModuleName As String, Optional ByVal delimiter As String = " ") As String
-
-    Dim pj As VBProject
-    Dim component As VBComponent
-    Dim curMacro As String, newMacro As String
-    Dim x As String
-    Dim y As String
-    Dim macros As String
-    
-    On Error Resume Next
-    curMacro = ""
-    
-    For Each pj In Application.VBE.VBProjects
-        For Each component In pj.VBComponents
-            If Not component Is Nothing Then
-                Dim codeModuleName As String: codeModuleName = pj.Name & "." & component.CodeModule
-                If codeModuleName = ModuleName Then
-                    Dim i As Integer
-                    For i = 1 To component.CodeModule.CountOfLines
-                       newMacro = pj.Name & "." & component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
-                       If curMacro <> newMacro Then
-                          curMacro = newMacro
-
-                            If curMacro <> "" And curMacro <> "app_NewDocument" Then
-                                macros = curMacro + delimiter + macros
-                            End If
-
-                       End If
-                    Next
-                End If
-            End If
-        Next
-    Next
-
-    ListAllMacroNames = macros
-
-End Function
-
-''' <summary>   Checks if the Lists all macros in the specified module. <summary>
-''' <param name="component">   The component to check for macro methods. </param>
-''' <param name="prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
-Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
-
-    Dim curMacro As String, newMacro As String
-    
-    On Error Resume Next
-    curMacro = ""
-    
-    If Not component Is Nothing Then
-        Dim i As Integer
-        For i = 1 To component.CodeModule.CountOfLines
-            newMacro = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
-            If curMacro <> newMacro Then
-                curMacro = newMacro
-                If StringExtensions.StartsWith(curMacro, prefix) Then
-                   HasMacros = True
-                   Exit Function
-                End If
-            End If
-        Next
-    End If
-    HasMacros = False
-
-End Function
-
-
-''' <summary>   Lists all macros in the specified module. <summary>
-''' <remarks>
-''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
-''' <remarks>
-''' <param name="moduleName">   The module name where the macros reside. </param>
-''' <param name="prefix">       [Optional, 'Test'] The prefix of the macro name. </param>
-''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateMacroNames(ModuleName As String, Optional ByVal prefix As String = "Test") As VBA.collection
-
-    Dim pj As VBProject
-    Dim component As VBComponent
-    Dim curMacro As String, newMacro As String
-    Dim macros As VBA.collection
-    Set macros = New VBA.collection
-    
-    On Error Resume Next
-    curMacro = ""
-    
-    For Each pj In Application.VBE.VBProjects
-        For Each component In pj.VBComponents
-            If Not component Is Nothing Then
-                Dim codeModuleName As String: codeModuleName = pj.Name & "." & component.CodeModule
-                If codeModuleName = ModuleName Then
-                    Dim i As Integer
-                    For i = 1 To component.CodeModule.CountOfLines
-                        newMacro = pj.Name & "." & component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
-                        If curMacro <> newMacro Then
-                            curMacro = newMacro
-                            If StringExtensions.StartsWith(curMacro, prefix) Then
-                                macros.Add curMacro
-                            End If
-                        End If
-                    Next
-                End If
-            End If
-        Next
-    Next
-    Set EnumerateMacroNames = macros
-
-End Function
-
-
-''' <summary>   Lists all macros in the specified module. <summary>
-''' <remarks>
-''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
-''' <remarks>
-''' <param name="moduleName">   The module name where the macros reside. </param>
-''' <param name="prefix">       [Optional, 'Test'] The prefix of the macro name. </param>
-''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateMacros(ModuleName As String, Optional ByVal prefix As String = "Test") As VBA.collection
-
-    Dim pj As VBProject
-    Dim component As VBComponent
-    Dim curMacro As String, newMacro As String
-    Dim macros As VBA.collection
-    Set macros = New VBA.collection
-    
-    On Error Resume Next
-    curMacro = ""
-    
-    For Each pj In Application.VBE.VBProjects
-        For Each component In pj.VBComponents
-            If Not component Is Nothing Then
-                Dim codeModuleName As String: codeModuleName = pj.Name & "." & component.CodeModule
-                If codeModuleName = ModuleName Then
-                    Dim i As Integer
-                    For i = 1 To component.CodeModule.CountOfLines
-                        newMacro = pj.Name & "." & component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
-                        If curMacro <> newMacro Then
-                            curMacro = newMacro
-                            If StringExtensions.StartsWith(curMacro, prefix) Then
-                                macros.Add curMacro
-                            End If
-                        End If
-                    Next
-                End If
-            End If
-        Next
-    Next
-    Set EnumerateMacros = macros
-
-End Function
-
 ''' <summary>   List all modules that end with the specified suffix and
 ''' contain methods that start with the specified prefix. <summary>
 ''' <param name="macroNamePrefix">    [Optional, 'Test'] The macro name prefix. </param>
 ''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
 Public Function EnumerateModules(Optional ByVal macroNamePrefix As String = "Test", _
-                                 Optional ByVal moduleNameSuffix As String = "Tests") As VBA.collection
+                                 Optional ByVal moduleNameSuffix As String = "Tests") As VBA.Collection
 
-    Dim pj As VBProject
-    Dim component As VBComponent
-    On Error Resume Next
-    Dim moduleNames As VBA.collection
-    Set moduleNames = New VBA.collection
-    Dim currentModuleName As String
-    Dim newModuleName As String
-    newModuleName = ""
-    currentModuleName = ""
-    
-    For Each pj In Application.VBE.VBProjects
-        For Each component In pj.VBComponents
-            If IsObject(component) Then
-                newModuleName = pj.Name & "." & component.CodeModule
-                If Not StringExtensions.IsNullOrEmpty(newModuleName) And currentModuleName <> newModuleName Then
-                    currentModuleName = newModuleName
-                    If StringExtensions.EndsWith(currentModuleName, "Tests") Then
-                        If HasMacros(component) Then
-                            moduleNames.Add currentModuleName
-                        End If
-                    End If
-                End If
-            End If
-        Next
-    Next
-    Set ListTestModules = moduleNames
+    Dim modules As VBA.Collection: Set modules = New VBA.Collection
+
+    Dim project As VBProject
+    For Each project In Application.VBE.VBProjects
+        CollectionExtensions.AddItems EnumerateProjectModules(project, macroNamePrefix, moduleNameSuffix), _
+                                      modules
+    Next project
+    Set EnumerateModules = modules
 End Function
 
+''' <summary>   List all project modules that end with the specified suffix and
+''' contain methods that start with the specified prefix. <summary>
+''' <param name="project">            The project which modules are to be added. </param>
+''' <param name="macroNamePrefix">    [Optional, 'Test'] The macro name prefix. </param>
+''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
 Public Function EnumerateProjectModules(ByVal project As VBProject, _
                                         Optional ByVal macroNamePrefix As String = "Test", _
-                                        Optional ByVal modulesuffix As String = "Tests") As VBA.collection
+                                        Optional ByVal modulesuffix As String = "Tests") As VBA.Collection
     On Error Resume Next
-    Dim modules As VBA.collection: Set modules = New VBA.collection
-    Dim currentModuleName As String
-    Dim newModuleName As String
-    newModuleName = ""
-    currentModuleName = ""
+    Dim modules As VBA.Collection: Set modules = New VBA.Collection
+    Dim currentModule As ModuleInfo: Set currentModule = New ModuleInfo
+    Dim newModule As ModuleInfo: Set newModule = New ModuleInfo
     
     Dim component As VBComponent
     For Each component In project.VBComponents
         If IsObject(component) Then
-            newModuleName = pj.Name & "." & component.CodeModule
-            If Not StringExtensions.IsNullOrEmpty(newModuleName) And currentModuleName <> newModuleName Then
-                currentModuleName = newModuleName
-                If StringExtensions.EndsWith(currentModuleName, "Tests") Then
+            newModule.Initialize project.Name, component.CodeModule
+            If Not newModule.Equals(currentModule) Then
+                currentModule = newModule.Clone
+                If StringExtensions.EndsWith(currentModule.moduleName, "Tests") Then
                     If HasMacros(component) Then
-                        modules.Add currentModuleName
+                        modules.Add currentModule
                     End If
                 End If
             End If
@@ -348,4 +154,123 @@ Public Function EnumerateProjectModules(ByVal project As VBProject, _
     Next
     Set EnumerateProjectModules = modules
 End Function
+
+''' <summary>   Checks if the Lists all macros in the specified module. <summary>
+''' <param name="component">   The component to check for macro methods. </param>
+''' <param name="prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
+Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
+
+    Dim currentName As String, newName As String
+    HasMacros = False
+    
+    On Error Resume Next
+    currentName = ""
+    
+    If Not component Is Nothing Then
+        Dim i As Integer
+        For i = 1 To component.CodeModule.CountOfLines
+            newName = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+            If currentName <> newName Then
+                currentName = newName
+                If StringExtensions.StartsWith(currentName, prefix) Then
+                   HasMacros = True
+                   Exit For
+                End If
+            End If
+        Next
+    End If
+
+End Function
+
+''' <summary>   Finds a project. <summary>
+''' <param name="projectName">   The projectName. </param>
+''' <returns>   A reference to the found project or nothing. </returns>
+Public Function FindProjectByName(ByVal projectName As String) As VBProject
+    Dim project As VBProject
+    For Each project In Application.VBE.VBProjects
+        If StrComp(project.Name, projectName, vbTextCompare) Then
+            Set FindProjectByName = project
+            Exit For
+        End If
+    Next project
+End Function
+
+''' <summary>   Finds a code module by name. <summary>
+''' <param name="project">      The project. </param>
+''' <param name="moduleName">   The component (e.g., module) name. </param>
+''' <returns>   A reference to the component of found code module or nothing. </returns>
+Public Function FindCodeModuleByName(ByRef project As VBProject, ByVal moduleName As String) As VBComponent
+    If Not project Is Nothing Then
+        Dim component As VBComponent
+        For Each component In project.VBComponents
+            If StrComp(component.CodeModule, moduleName, vbTextCompare) Then
+                Set FindCodeModuleByName = component
+                Exit For
+            End If
+        Next component
+    End If
+End Function
+
+
+''' <summary>   Enumerates all macros in the specified module. <summary>
+''' <remarks>
+''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
+''' <remarks>
+''' <param name="module">   The module info of the module containing the macros. </param>
+''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
+''' <returns>   A Collection of macro names. </returns>
+Public Function EnumerateMacros(ByRef module As ModuleInfo, Optional ByVal prefix As String = "Test") As VBA.Collection
+
+    Dim macros As Collection: Set macros = New Collection
+    If Not module Is Nothing Then
+    
+        Dim project As VBProject: Set project = FindProjectByName(module.projectName)
+        
+        If Not project Is Nothing Then
+        
+            Dim component As VBComponent: Set component = FindCodeModuleByName(project, module.moduleName)
+            
+            If Not component Is Nothing Then
+            
+                Set macros = EnumerateComponentMacros(component, module, prefix)
+            
+            End If
+        
+        End If
+    
+    End If
+    Set EnumerateMacros = macros
+
+End Function
+
+''' <summary>   Enumerates all macros in the specified module. <summary>
+''' <remarks>
+''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
+''' <remarks>
+''' <param name="module">   The module info of the module containing the macros. </param>
+''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
+''' <returns>   A Collection of macro names. </returns>
+Public Function EnumerateComponentMacros(ByRef module As ModuleInfo, _
+        ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As VBA.Collection
+
+    Dim macros As VBA.Collection: Set macros = New VBA.Collection
+    Dim currentName As String: currentName = ""
+    Dim newName As String
+    Dim i As Integer
+    For i = 1 To component.CodeModule.CountOfLines
+        newName = component.CodeModule.ProcOfLine(Line:=i, prockind:=vbext_pk_Proc)
+        If currentName <> newName Then
+            currentName = newName
+            If StringExtensions.StartsWith(currentName, prefix) Then
+                Dim macro As MacroInfo: Set macro = Constructor.CreateMacroInfo()
+                macro.InitializeModuelMacro module, currentName
+                macros.Add macro
+            End If
+        End If
+    Next
+    Set EnumerateComponentMacros = macros
+
+End Function
+
+
 

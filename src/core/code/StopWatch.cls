@@ -50,14 +50,6 @@ Private Sub Class_Initialize()
     Restart
 End Sub
 
-''' <summary>   Create a new instance of this class to wshare with external workbooks. </summary>
-''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
-''' </remarks>
-Public Function CreateNew() As StopWatch
-    CreateNew = New StopWatch
-End Function
-
 ''' <summary>   Restarts the stopwatch counter. </summary>
 ''' <remarks>   Sets the stopwatch start and end counts and
 ''' marks the stopwatch as counting.

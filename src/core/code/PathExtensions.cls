@@ -100,13 +100,13 @@ End Function
 ''' <param name="path">       The path. </param>
 ''' <param name="fileName">   The file name. </param>
 ''' <returns> A string. </returns>
-Public Function JoinFile(ByVal path As String, ByVal fileName As String, _
+Public Function JoinFile(ByVal path As String, ByVal FileName As String, _
         Optional ByVal Create As Boolean = False) As String
 
     path = TrimPath(path)
     If Create Then path = CreateFolder(path)
     If Not StringExtensions.IsNullOrEmpty(path) Then path = path & "\"
-    JoinFile = path & fileName
+    JoinFile = path & FileName
 
 End Function
 

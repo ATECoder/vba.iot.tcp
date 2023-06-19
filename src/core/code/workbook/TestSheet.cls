@@ -11,15 +11,16 @@ Option Explicit
 
 ''' <summary>   Populates a combo box with the list of tests. </summary>
 Private Sub ListTestsButton_Click()
-    Dim ModuleName As Variant
+    Dim module As ModuleInfo
     testNamesCombo.Clear
-    For Each ModuleName In WorkbookUtilities.ListTestModules
-        testNamesCombo.AddItem ModuleName
-    Next ModuleName
+    For Each module In WorkbookUtilities.EnumerateProjectModules(Application.ActiveWorkbook.VBProject)
+        testNamesCombo.AddItem module.FullName
+    Next module
 End Sub
 
 ''' <summary>   Runs the selected test. </summary>
 Private Sub RunTestsButton_Click()
-    Call cc_isr_Core.StringExtensionsTests.TestDelimitedStringElementShouldPop
-'     TestExecutive.Execute TestSheet
+'   Call cc_isr_Core.StringExtensionsTests.TestDelimitedStringElementShouldPop
+    Stop
+    TestExecutive.Execute TestSheet
 End Sub

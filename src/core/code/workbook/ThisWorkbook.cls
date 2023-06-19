@@ -15,12 +15,18 @@ Private Sub Workbook_Activate()
     On Error Resume Next
     cc_isr_Core.UserDefinedErrors.Initialize
     Workbooks("cc.isr.core.xlsm").Windows(1).Visible = True
+    
+    ' turn on exporting when this book is activated.
+    cc_isr_Core.WorkbookUtilities.ExportCodeBeforeClosing = True
 End Sub
 
 ''' <summary>   Handles the workbook before close event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
     On Error Resume Next
-    cc_isr_Core.WorkbookUtilities.ExportCodeFiles
+    If WorkbookUtilities.ExportCodeBeforeClosing Then
+        WorkbookUtilities.ExportCodeFiles
+    End If
 End Sub
+
 

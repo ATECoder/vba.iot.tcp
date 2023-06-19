@@ -149,7 +149,7 @@ End Function
 ''' <param name="key">   The user defined error code. </param>
 Public Function GetUserDefinedError(ByVal key As Long) As UserDefinedError
     If m_errorsDix.Exists(key) Then
-        Set GetUserDefinedError = m_errorsDix.Item(key)
+        Set GetUserDefinedError = m_errorsDix.item(key)
     Else
         Set GetUserDefinedError = New UserDefinedError
         GetUserDefinedError.InitiateProperties key, "UnknwonUserDefinedError", "Unknown error."
@@ -246,7 +246,7 @@ End Property
 ''' </remarks>
 ''' <param name="procedureName">   Specifies the name of the procedure which to append to the source string. </param>
 ''' <param name="moduleName">      Specifies the module name to append to the source string. </param>
-Public Sub AppendErrSource(ByVal procedureName As String, ByVal ModuleName As String)
+Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As String)
 
     Const appSeparator = ":"
     Const moduleSeparator = ";"
@@ -269,7 +269,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal ModuleName As St
         ' this is the lowest error level, append the
         ' application and module to the source string
         errorSource = procedureName & _
-                  moduleSeparator & ModuleName & _
+                  moduleSeparator & moduleName & _
                   appSeparator & ThisWorkbook.Name
   
     ' check if the error was raised from the same
@@ -290,7 +290,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal ModuleName As St
         Dim moduleNamePos As Long: moduleNamePos = InStr(1, errorSource, moduleSeparator) + 1
         
         ' check if this is the same as this module
-        If InStr(moduleNamePos, errorSource, ModuleName) = moduleNamePos Then
+        If InStr(moduleNamePos, errorSource, moduleName) = moduleNamePos Then
       
             ' if the error was in the same module, just
             ' append the procedure.
@@ -312,13 +312,13 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal ModuleName As St
         
                 ' if the source is in this application than
                 ' just append the module and procedure
-                errorSource = procedureName & moduleSeparator & ModuleName & _
+                errorSource = procedureName & moduleSeparator & moduleName & _
                               procSeperator & errorSource
             Else
                 ' if the source is another application than
                 ' append the procedure, module, and application
                 errorSource = procedureName & _
-                         moduleSeparator & ModuleName & _
+                         moduleSeparator & moduleName & _
                          appSeparator & ThisWorkbook.Name & _
                          procSeperator & errorSource
             End If

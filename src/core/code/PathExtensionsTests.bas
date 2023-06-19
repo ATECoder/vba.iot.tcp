@@ -8,7 +8,7 @@ Public Function TestPathElementsShouldJoin() As Assert
     Dim element1 As String: element1 = ActiveWorkbook.path
     Dim element2 As String: element2 = "dummy"
     Dim element3 As String: element3 = "workbook"
-    Dim fileName As String: fileName = "filename.txt"
+    Dim FileName As String: FileName = "filename.txt"
     
     ' test joining without creating
     
@@ -19,7 +19,7 @@ Public Function TestPathElementsShouldJoin() As Assert
     If Not TestPathElementsShouldJoin.AssertSuccessful Then Exit Function
     
     Dim expectedPath As String: expectedPath = element1 & "\" & element2 & "\" & element3
-    Dim expectedFilePath As String: expectedFilePath = expectedPath & "\" & fileName
+    Dim expectedFilePath As String: expectedFilePath = expectedPath & "\" & FileName
    
     ' test joining without creating
     
@@ -30,7 +30,7 @@ Public Function TestPathElementsShouldJoin() As Assert
     
     ' test joining a file.
     
-    Dim actualFilePath As String: actualFilePath = PathExtensions.JoinFile(actualPath, fileName)
+    Dim actualFilePath As String: actualFilePath = PathExtensions.JoinFile(actualPath, FileName)
     Set TestPathElementsShouldJoin = Assert.AreEqual(expectedFilePath, actualFilePath, _
         "The path path should be joined")
     
