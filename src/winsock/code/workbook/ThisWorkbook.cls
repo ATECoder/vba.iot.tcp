@@ -41,6 +41,8 @@ Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
     End If
 End Sub
 
+''' <summary>   Handles the workbook open event. </summary>
+''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()
 
     ' hide and turn off code saving on the referenced workbooks

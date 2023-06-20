@@ -26,8 +26,16 @@ Private Sub ReadIdentityButton_Click()
     
     ' scpi.preset
     
+#If True Then
     ' read identity using basic winsock.
     ReadIdentity host, port, repeatCount
+#ElseIf False Then
+    ' read identity using the Tcp Clienar.
+    TcpClientReadIdentity host, port, repeatCount
+#Else
+    ' read identity using winsock with buffer.
+    ReadIdentityUsingBuffer host, port, repeatCount
+#End If
     
 End Sub
 
@@ -221,5 +229,98 @@ Finally:
 
 End Sub
 
+''' <summary>   Uses the Tcp Client to send the identity query and reads back the identity
+''' from the instrument. </summary>
+''' <param name="host">   The host IPv4 dotted address. </param>
+''' <param name="port">   the host port number. </param>
+''' <param name="repeatCount">   The number of time to repeat the query. </param>
+Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+
+    On Error GoTo Finally
+    
+    Range("E2").value = ""
+    Range("F2").value = ""
+    Range("G2").value = ""
+    Range("H2").value = ""
+    Range("I2").value = ""
+
+    Dim sw As New StopWatch
+    Dim totalMilliseconds As Double
+    
+    Dim client As TcpClient
+    Set client = New TcpClient
+    
+    client.ConnectTo host, port
+    
+    ' report the socket number
+    Range("E2").value = client.TcpClientSocket.SocketId
+   
+    ' report the connection state
+    Range("F2").value = client.TcpClientSocket.Connected
+    
+    If client.TcpClientSocket.Connected Then
+    
+        Dim command As String
+        command = "*IDN?"
+        Range("G2").value = command
+        
+        Dim loopCount As Integer
+        Do While loopCount < repeatCount
+            
+            DoEvents
+            
+            loopCount = loopCount + 1
+            sw.Restart
+            
+            ' send the command
+            client.SendMessage command & vbLf
+        
+            ' receive the reading
+            Dim Identity As String
+            Identity = client.ReceiveRaw()
+    
+            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            
+            Range("H2").value = Len(Identity)
+            Range("I2").value = Identity
+    
+        Loop
+  
+        ' command = ":SYST:PRES"
+        ' count = SendMessage(command)
+        ' Call opc
+        
+        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
+        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+    
+    Else
+        MsgBox "connection failed without reporting an exception"
+    End If
+    
+Finally:
+
+    Dim errorMessage As String
+    If Not Err Is Nothing Then
+        If Err.Number <> 0 Then
+            errorMessage = "Reading identity failed using Tcp Client " & UserDefinedErrors.FormattedErr & _
+                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+        End If
+    End If
+    
+    On Error Resume Next
+    If Not client Is Nothing Then
+        If client.Connected Then
+            client.Disconnect
+        End If
+    End If
+    
+    ' terminate the client
+    Set client = Nothing
+    
+    If Len(errorMessage) > 0 Then
+        MsgBox errorMessage
+    End If
+
+End Sub
 
 
