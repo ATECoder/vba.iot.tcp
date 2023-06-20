@@ -233,7 +233,7 @@ Public Property Get InvalidArgumentError() As UserDefinedError
 End Property
 
 ''' <summary>   Appends the procedure, module, and application to the Err object source string. </summary>
-''' <remakrs>
+''' <remarks>
 ''' We use special markers to prefix the application
 ''' and module names.  This way we can locate the name
 ''' of the last application or module and determine if
@@ -258,7 +258,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
     ' thus we assume that this code is robust and will
     ' not cause errors.
   
-    ' get the current soruce string
+    ' get the current source string
     Dim errorSource As String: errorSource = Err.source
     
     ' check if the error occurred in this procedure
@@ -276,7 +276,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
     ' re-entrant procedure
     ElseIf InStr(1, errorSource, procedureName) = 1 Then
   
-        ' if the same proceudre, leave the error
+        ' if the same procedure, leave the error
         ' source as is.
       
     Else
@@ -327,7 +327,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
       
     End If
   
-    ' Update the current soruce string
+    ' Update the current source string
     Err.source = errorSource
  
 End Sub
@@ -337,9 +337,9 @@ End Sub
 '''                            that is set to true to display a warning rather than
 '''                            an error message.</param>
 ''' <returns>   A Standard error message string in the form: <para>
-''' Error yyy (hxxx) occurred in <c>Source</c>: Description </para><para>
+''' Error # (0x#) occurred in <c>Source</c>: Description </para><para>
 ''' or  </para><para>
-''' Warning yyy (hxxx) occurred in <c>Source</c>: Description  </para>
+''' Warning # (0x#) occurred in <c>Source</c>: Description  </para>
 ''' </returns>
 Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = False) As String
 

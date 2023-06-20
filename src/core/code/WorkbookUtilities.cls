@@ -36,6 +36,7 @@ Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
     Dim filePath As String
     
     For Each component In ActiveWorkbook.VBProject.VBComponents
+        DoEvents
         Dim Name As String: Name = component.Name
         extension = GetFileExtension(component)
         If Not StringExtensions.IsNullOrEmpty(extension) Then
@@ -82,9 +83,9 @@ Public Function IsSheet(ByVal component As VBComponent)
     IsSheet = Not op Is Nothing
 End Function
 
-''' <summary>   Detects if a component is a shart. <summary>
+''' <summary>   Detects if a component is a chart. <summary>
 ''' <param name="component">   A reference to a VB Component. </param>
-''' <returns> True if the component is a shart. </returns>
+''' <returns> True if the component is a chart. </returns>
 Public Function IsChart(ByVal component As VBComponent)
     On Error Resume Next
     Dim op As Property: Set op = component.Properties("AutoScaling")
@@ -119,6 +120,7 @@ Public Function EnumerateModules(Optional ByVal macroNamePrefix As String = "Tes
 
     Dim project As VBProject
     For Each project In Application.VBE.VBProjects
+        DoEvents
         CollectionExtensions.AddItems EnumerateProjectModules(project, macroNamePrefix, moduleNameSuffix), _
                                       modules
     Next project
@@ -132,7 +134,7 @@ End Function
 ''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
 Public Function EnumerateProjectModules(ByVal project As VBProject, _
                                         Optional ByVal macroNamePrefix As String = "Test", _
-                                        Optional ByVal modulesuffix As String = "Tests") As VBA.Collection
+                                        Optional ByVal moduleSuffix As String = "Tests") As VBA.Collection
     On Error Resume Next
     Dim modules As VBA.Collection: Set modules = New VBA.Collection
     Dim currentModule As ModuleInfo: Set currentModule = New ModuleInfo
@@ -140,10 +142,11 @@ Public Function EnumerateProjectModules(ByVal project As VBProject, _
     
     Dim component As VBComponent
     For Each component In project.VBComponents
+        DoEvents
         If IsObject(component) Then
             newModule.Initialize project.Name, component.CodeModule
             If Not newModule.Equals(currentModule) Then
-                currentModule = newModule.Clone
+                Set currentModule = newModule.Clone
                 If StringExtensions.EndsWith(currentModule.moduleName, "Tests") Then
                     If HasMacros(component) Then
                         modules.Add currentModule
@@ -188,7 +191,8 @@ End Function
 Public Function FindProjectByName(ByVal projectName As String) As VBProject
     Dim project As VBProject
     For Each project In Application.VBE.VBProjects
-        If StrComp(project.Name, projectName, vbTextCompare) Then
+        DoEvents
+        If 0 = StrComp(project.Name, projectName, vbTextCompare) Then
             Set FindProjectByName = project
             Exit For
         End If
@@ -203,7 +207,8 @@ Public Function FindCodeModuleByName(ByRef project As VBProject, ByVal moduleNam
     If Not project Is Nothing Then
         Dim component As VBComponent
         For Each component In project.VBComponents
-            If StrComp(component.CodeModule, moduleName, vbTextCompare) Then
+            DoEvents
+            If 0 = StrComp(component.CodeModule, moduleName, vbTextCompare) Then
                 Set FindCodeModuleByName = component
                 Exit For
             End If
@@ -232,7 +237,7 @@ Public Function EnumerateMacros(ByRef module As ModuleInfo, Optional ByVal prefi
             
             If Not component Is Nothing Then
             
-                Set macros = EnumerateComponentMacros(component, module, prefix)
+                Set macros = EnumerateComponentMacros(module, component, prefix)
             
             End If
         

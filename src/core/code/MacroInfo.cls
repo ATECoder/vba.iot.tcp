@@ -43,8 +43,8 @@ End Sub
 
 ''' <summary>   Creates a clone of the this macro info. </summary>
 Public Function Clone() As MacroInfo
-    Dim newMacro As MacroInfo: Set newMacro = New MacroInfo
-    newMacro.Initialize Me.projectName, Me.moduleName, Me.macroName
+    Set Clone = New MacroInfo
+    Clone.Initialize Me.projectName, Me.moduleName, Me.macroName
 End Function
 
 ''' <summary>   Gets the macro name. </summary>
@@ -64,17 +64,19 @@ End Property
 
 ''' <summary>   Gets the full name. </summary>
 Public Property Get FullName() As String
+Attribute FullName.VB_Description = "Get the macro full name"
+Attribute FullName.VB_UserMemId = 0
     FullName = m_projectName & "." & m_moduleName & "." & m_macroName
 End Property
 
-''' <summary>   Checks if the two macros are equal refering to the same
+''' <summary>   Checks if the two macros are equal referring to the same
 ''  macro in the project. </summary>
 ''' <param name="macro">   The macro to check for equality. </param>
 Public Function Equals(ByRef macro As MacroInfo) As Boolean
     If IsObject(macro) Then
-        Equals = StrComp(Me.projectName, macro.projectName) And _
-                 StrComp(Me.moduleName, macro.moduleName) And _
-                 StrComp(Me.macroName, macro.macroName)
+        Equals = (0 = StrComp(Me.projectName, macro.projectName)) And _
+                 (0 = StrComp(Me.moduleName, macro.moduleName)) And _
+                 (0 = StrComp(Me.macroName, macro.macroName))
     Else
         Equals = False
     End If

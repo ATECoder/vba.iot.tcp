@@ -24,6 +24,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     row = 1
     
     testDataSheet.Rows("2:" & testDataSheet.Rows.count).ClearContents
+    testDataSheet.Range("B1", "B" & testDataSheet.Rows.count).Interior.ColorIndex = 0
     
     moduleFullName = testDataSheet.Range("B" & row).value
     
@@ -39,6 +40,18 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     testDataSheet.Range("B" & row).value = module.moduleName
    
     row = row + 1
+    Dim passCountRow As Integer: passCountRow = row
+    testDataSheet.Range("A" & passCountRow).value = "Passed"
+    
+    row = row + 1
+    Dim failCountRow As Integer: failCountRow = row
+    testDataSheet.Range("A" & failCountRow).value = "Failed"
+    
+    row = row + 1
+    Dim durationRow As Integer: durationRow = row
+    testDataSheet.Range("A" & durationRow).value = "Duration"
+   
+    row = row + 1
     testDataSheet.Range("A" & row).value = "Test Name"
     testDataSheet.Range("B" & row).value = "Outcome"
     
@@ -49,6 +62,8 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     For Each macro In macros
         
+        DoEvents
+        
         Set Assert = Application.Run(macro.FullName)
         
         row = row + 1
@@ -58,9 +73,11 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
             If Assert.AssertSuccessful Then
                 passedCount = passedCount + 1
                 testDataSheet.Range("B" & row).value = "passed"
+                testDataSheet.Range("B" & row).Interior.ColorIndex = 4
             Else
                 failedCount = failedCount + 1
                 testDataSheet.Range("B" & row).value = Assert.AssertMessage
+                testDataSheet.Range("B" & row).Interior.ColorIndex = 3
             End If
         Else
             testDataSheet.Range("B" & row).value = "assert not defined"
@@ -69,18 +86,10 @@ Public Sub Execute(ByRef testDataSheet As Worksheet)
     Next macro
     
     sw.StopCounter
-    row = row + 1
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Summary:"
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Passed"
-    testDataSheet.Range("B" & row).value = passedCount
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Failed"
-    testDataSheet.Range("B" & row).value = failedCount
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Duration"
-    testDataSheet.Range("B" & row).value = CStr(sw.ElapsedMilliseconds) & " ms"
+    
+    testDataSheet.Range("B" & passCountRow).value = passedCount
+    testDataSheet.Range("B" & failCountRow).value = failedCount
+    testDataSheet.Range("B" & durationRow).value = CStr(sw.ElapsedMilliseconds) & " ms"
     
     Exit Sub
 

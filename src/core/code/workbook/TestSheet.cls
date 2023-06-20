@@ -14,6 +14,7 @@ Private Sub ListTestsButton_Click()
     Dim module As ModuleInfo
     testNamesCombo.Clear
     For Each module In WorkbookUtilities.EnumerateProjectModules(Application.ActiveWorkbook.VBProject)
+        DoEvents
         testNamesCombo.AddItem module.FullName
     Next module
 End Sub
@@ -21,6 +22,5 @@ End Sub
 ''' <summary>   Runs the selected test. </summary>
 Private Sub RunTestsButton_Click()
 '   Call cc_isr_Core.StringExtensionsTests.TestDelimitedStringElementShouldPop
-    Stop
     TestExecutive.Execute TestSheet
 End Sub

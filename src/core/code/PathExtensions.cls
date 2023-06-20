@@ -113,7 +113,7 @@ End Function
 ''' <summary> Joins the sub folder to the path and creates the path if it does not exist. </summary>
 ''' <param name="path">        The path. </param>
 ''' <param name="subFolder">   The sub folder to join to the path. </param>
-''' <param name="create">      [optional, False] If true, ereates the folder for the path. </param>
+''' <param name="create">      [optional, False] If true, creates the folder for the path. </param>
 ''' <returns> A string. </returns>
 Public Function Join(ByVal path As String, ByVal subFolder As String, Optional ByVal Create As Boolean = False) As String
 
@@ -134,6 +134,7 @@ Public Function JoinAll(ByVal Create As Boolean, ParamArray pathParts() As Varia
     If Not IsEmpty(pathParts) Then
         Dim path As Variant
         For Each path In pathParts
+            DoEvents
             joinedPath = Join(joinedPath, path, Create)
         Next
     End If

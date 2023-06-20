@@ -11,11 +11,13 @@ Attribute VB_Exposed = True
 ''' <summary>   Returns true if the collection contains the specified key. </summary>
 ''' <param name="collection">   The subject collection. </param>
 ''' <param name="key">          The key to check for in the collection. </param>
-''' <returns>   </returns>
-Public Function ContainsKey(ByVal col As VBA.Collection, ByVal key As Variant) As Boolean
+''' <returns>   True if the key is contained in the collection. </returns>
+Public Function ContainsKey(ByRef col As VBA.Collection, ByRef key As Variant) As Boolean
     Dim found As Boolean
     found = False
+    Dim colItem As Variant
     For Each colItem In col
+        DoEvents
         If colItem = key Then
             found = True
             Exit For
@@ -35,22 +37,43 @@ Public Function ContainsKey(ByVal col As VBA.Collection, ByVal key As Variant) A
     ContainsKey = found
 End Function
 
-''' <summary>   returns true if the object is containd in the collection. </summary>
+''' <summary>   Returns true if the object is contained in the collection. </summary>
 ''' <param name="col">         The subject collection. </param>
 ''' <param name="contained">   The collection which to check for being contained in the
 '''                            subject collection. </param>
-''' <returns>   True if the contiants collection is fully containd in the collection. </returns>
-Public Function ContainsAll(ByVal col As VBA.Collection, ByVal contained As VBA.Collection) As Boolean
+''' <returns>   True if the contained collection is fully contained in the collection. </returns>
+Public Function ContainsAll(ByRef col As VBA.Collection, ByRef contained As VBA.Collection) As Boolean
     
-    Dim result As Boolean
+    Dim result As Boolean: result = False
     Dim key As Variant
     For Each key In contained
+        DoEvents
         If Not ContainsKey(col, key) Then
-            ContainsAll = False
-            Exit Function
+            result = False
+            Exit For
         End If
     Next key
-    ContainsAll = True
+    ContainsAll = result
+    
+End Function
+
+''' <summary>   Returns the first item that exists in <paramref name="contained"/>
+''' not existing in <paramref name="col"/>. </summary>
+''' <param name="col">         The subject collection. </param>
+''' <param name="contained">   The collection which to check for being contained in the
+'''                            subject collection. </param>
+Public Function FindMissingItem(ByRef col As VBA.Collection, ByRef contained As VBA.Collection) As Variant
+    
+    Dim result As Variant: Set result = Nothing
+    Dim key As Variant
+    For Each key In contained
+        DoEvents
+        If Not ContainsKey(col, key) Then
+            result = key
+            Exit For
+        End If
+    Next key
+    Set FindMissingItem = result
     
 End Function
 
@@ -63,6 +86,7 @@ Public Function AddItems(ByVal source As VBA.Collection, ByVal destination As VB
     Dim count As Integer: count = 0
     Dim item As Variant
     For Each item In source
+        DoEvents
         destination.Add item
         count = count + 1
     Next item

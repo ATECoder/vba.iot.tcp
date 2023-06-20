@@ -38,8 +38,8 @@ End Sub
 
 ''' <summary>   Creates a clone of the this module info. </summary>
 Public Function Clone() As ModuleInfo
-    Dim newModule As ModuleInfo: Set newModule = New ModuleInfo
-    newModule.Initialize Me.projectName, Me.moduleName
+    Set Clone = New ModuleInfo
+    Clone.Initialize Me.projectName, Me.moduleName
 End Function
 
 ''' <summary>   Gets the project name. </summary>
@@ -54,16 +54,18 @@ End Property
 
 ''' <summary>   Gets the full name. </summary>
 Public Property Get FullName() As String
+Attribute FullName.VB_Description = "This is a description of a member variable"
+Attribute FullName.VB_UserMemId = 0
     FullName = m_projectName & "." & m_moduleName
 End Property
 
-''' <summary>   Checks if the two modules are equal refering to the same
+''' <summary>   Checks if the two modules are equal referring to the same
 ''  component in the project. </summary>
 ''' <param name="module">   The module to check for equality. </param>
 Public Function Equals(ByRef module As ModuleInfo) As Boolean
     If IsObject(module) Then
-        Equals = StrComp(Me.projectName, module.projectName) And _
-                 StrComp(Me.moduleName, module.moduleName)
+        Equals = (0 = StrComp(Me.projectName, module.projectName)) And _
+                 (0 = StrComp(Me.moduleName, module.moduleName))
     Else
         Equals = False
     End If

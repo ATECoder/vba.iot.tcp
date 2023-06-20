@@ -14,8 +14,8 @@ Attribute VB_Exposed = True
 '  * Use of remote workbook
 '  * Use of VBOM and simplified registry setting
 '
-'Comparrison of SaveTimers-Native and stdTimer:
-'  * stdTimer will not raise the Tick event while displaying Msgbox or InputBox, however SafeTimers will
+'Comparison of SaveTimers-Native and stdTimer:
+'  * stdTimer will not raise the Tick event while displaying MsgBox or InputBox, however SafeTimers will
 '  * stdTimer will raise events while Edit mode is "Edit" or "Point", SafeTimers-Native do not.
 '  * stdTimer uses COM events (specifically WorksheetChange), SafeTimers-Native uses direct COM calls as a communication mechanism
 '  * stdTimer can be bound to stdICallable callback OR via event interop. SafeTimers-Native can only be hooked into with Module macro names
@@ -25,7 +25,7 @@ Attribute VB_Exposed = True
 '  * Neither set of timers will be called exactly when it needs to. There will be a little bit of error which may have to be corrected.
 '
 'Architecture:
-'  When a timer is initialised it:
+'  When a timer is initialized it:
 '    * Ensures VBOM is enabled
 '    * Creates a `new Application` object and adds a workbook to this new application.
 '    * Adds Timer code to this workbook and schedules this code to run with `xlApp.OnTime Now(), "MainLoop"`
@@ -56,7 +56,7 @@ Public Function Create(ByVal iMilliseconds As Long, Optional ByVal callback As O
   Call Create.protInit(iMilliseconds, callback)
 End Function
 
-'Initialise module
+'Initialize module
 '@param {Long} Number of milliseconds to raise Tick Event between
 '@param {stdICallable} Optional Listener
 Public Sub protInit(ByVal iTimerResolution As Long, callback As Object)
@@ -157,7 +157,7 @@ Private Function getTimerCode(ByVal iTimerResolution As Long) As String
   s = s & vbCrLf & "Sub StartTimer()"
   s = s & vbCrLf & "  bEnabled = true"
   s = s & vbCrLf & "  bRunning = true"
-  s = s & vbCrLf & "  Application.OnTime now(), ""MainLoop""" 'initialise main loop asynchronously
+  s = s & vbCrLf & "  Application.OnTime now(), ""MainLoop""" 'initialize main loop asynchronously
   s = s & vbCrLf & "End Sub"
   s = s & vbCrLf & "Sub PauseTimer()"
   s = s & vbCrLf & "  bEnabled = false"
