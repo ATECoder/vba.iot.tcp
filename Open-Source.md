@@ -11,7 +11,9 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 Open source used by this software is described and licensed at the following sites:  
 * [Web Excel] 
 * [Enumerate and execute Excel Macros]  
+* [safe timers]
 * [Singleton class in VBA]  
+* [stdTimer]
 * [String builder]  
 * [String format]  
 * [Utter Access Archive: Singleton]  
@@ -33,3 +35,5 @@ Closed software used by this software are described and licensed on the followin
 [Utter Access Archive: Singleton]: https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton
 [string builder]: https://codereview.stackexchange.com/questions/67596/a-lightning-fast-stringbuilder
 [string format]: https://stackoverflow.com/questions/17233701/obtaining-the-equivalent-to-printf-or-string-format-in-excel
+[safe timers]: https://github.com/cristianbuse/Excel-VBA-SafeTimers
+[stdTimer]: https://github.com/sancarn/stdVBA/blob/master/src/stdTimer.cls
