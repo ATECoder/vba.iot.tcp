@@ -8,18 +8,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
-Private m_exportCodebBeforeClosing As Boolean
-
-''' <summary>   Gets the option for exporting code files when closing. </summary>
-Public Property Get ExportCodeBeforeClosing() As Boolean
-    ExportCodeBeforeClosing = m_exportCodebBeforeClosing
-End Property
-
-''' <summary>   Enables or disables exporting code files when closing. </summary>
-''' <para name="value">   True to enable exporting code files when closing. </param>
-Public Property Let ExportCodeBeforeClosing(ByVal value As Boolean)
-    m_exportCodebBeforeClosing = value
-End Property
 
 ''' <summary>   Exports all code files to the active workbook path. </summary>
 ''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
