@@ -27,7 +27,7 @@ End Function
 
 ''' <summary>   Creates an instance of the <see cref="stdTimer"/> class. </summary>
 ''' <param name="iMilliseconds">   [Long] Number of milliseconds to raise Tick Event between </param>
-''' <param name="callback">   {stdICallable=Nothing} Callback object. Must contain a Run() method. </param>
+''' <param name="callback">        [stdICallable=Nothing] Callback object. Must contain a Run() method. </param>
 ''' <returns> {stdTimer} The frequency isn't guaranteed but it will be as close as humanly possible. </returns>
 Public Function CreateStdTimer(ByVal iMilliseconds As Long, Optional ByVal callback As Object = Nothing) As stdTimer
   Set CreateStdTimer = New stdTimer
