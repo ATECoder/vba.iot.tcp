@@ -54,18 +54,40 @@ Public Property Get Session() As Ieee488Session
     Set Session = m_session
 End Property
 
+''' <summary>   Opens a TCP Client connection to the specified host at the specified port
+''' as sets the connection timeout. </summary>
+''' <param name="host">        An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <returns>   True if the TCP Client is connected. </returns>
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
+        Optional ByVal timeoutMs As Long = 500) As Boolean
+       
+    Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
+
+    OpenConnection = m_session.OpenConnection(host, port, timeoutMs)
+
+End Function
+
+''' <summary>   Closes the TCP Client connection. </summary>
+''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
+Public Function CloseConnection() As Boolean
+
+    CloseConnection = m_session.CloseConnection
+    
+End Function
+
 ''' <summary>   Initializes the k2700. </summary>
 '''< remarks>   This is a singleton class.
 ''' </remarks>
-''' <returns>   If successful, returns zero. Otherwise, it returns the extended error code
-''' in the return value for this function.
-''' </returns>
+''' <param name="host">        An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <returns>   True if the device was initialized. </returns>
 Public Function Initialize(ByVal host As String, ByVal port As Long, _
         Optional ByVal timeoutMs As Long = 500) As Boolean
 
-    Set m_session = New Ieee488Session
-
-    m_session.OpenConnection host, port, timeoutMs
+    Me.OpenConnection host, port, timeoutMs
 
     ' this only works with the Prologix device
     ' Me.Session.SelectiveDeviceClear
