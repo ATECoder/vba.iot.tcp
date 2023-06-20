@@ -10,21 +10,14 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <summary>   Executes all test macros in the module specified in the test sheet. </summary>
-''' <para name="testDataSheet">         Specifies the work sheet were test data are set and logged. </param>
-''' <para name="usingRemoteWorkbook">   True if using a remote workbook where workbook file needs to be added
-''' to the application run call. </param>
-Public Sub Execute(ByRef testDataSheet As Worksheet, Optional usingRemoteWorkbook As Boolean = False)
+''' <para name="testDataSheet">   Specifies the work sheet were test data are set and logged. </param>
+Public Sub Execute(ByRef testDataSheet As Worksheet)
     
     On Error GoTo Finally
     
-    If usingRemoteWorkbook Then
-        Dim wb As Workbook: Set wb = testDataSheet.Parent
-        Dim filePath As String: filePath = wb.FullName
-    End If
-
     Dim moduleFullName As String
    
-    Dim messages As New VBA.Collection
+    Dim messages As New VBA.collection
     Dim passedCount As Integer
     Dim failedCount As Integer
     Dim row As Integer
@@ -64,7 +57,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet, Optional usingRemoteWorkboo
     testDataSheet.Range("A" & row).value = "Test Name"
     testDataSheet.Range("B" & row).value = "Outcome"
     
-    Dim macros As Collection: Set macros = WorkbookUtilities.EnumerateMacros(module)
+    Dim macros As collection: Set macros = WorkbookUtilities.EnumerateMacros(module)
     Dim macro As MacroInfo
     
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
@@ -73,12 +66,7 @@ Public Sub Execute(ByRef testDataSheet As Worksheet, Optional usingRemoteWorkboo
         
         DoEvents
         
-        Dim arg As String: arg = macro.FullName
-        If usingRemoteWorkbook Then
-            arg = "'" & filePath & "'!" & arg
-        End If
-        
-        Set Assert = Application.Run(arg)
+        Set Assert = Application.Run(macro.FullName)
         
         row = row + 1
         
@@ -111,7 +99,5 @@ Finally:
     MsgBox "Test execution failed " & UserDefinedErrors.FormattedErr & _
            " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
 End Sub
-
-
 
 

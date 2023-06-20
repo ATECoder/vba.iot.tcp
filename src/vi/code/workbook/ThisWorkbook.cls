@@ -8,6 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
+
 Private m_exportCodebBeforeClosing As Boolean
 
 ''' <summary>   Gets the option for exporting code files when closing. </summary>
@@ -24,10 +25,23 @@ End Property
 ''' <summary>   Handles the Workbook activate event. </summary>
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
-    On Error Resume Next
+    
+    ' hide and turn off code saving on the referenced workbooks
+    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = False
+    Workbooks("cc.isr.core.xlsm").Windows(1).Visible = False
+    
+    cc_isr_Winsock.ThisWorkbook.ExportCodeBeforeClosing = False
+    Workbooks("cc.isr.winsock.xlsm").Windows(1).Visible = False
+    
+    cc_isr_Ieee488.ThisWorkbook.ExportCodeBeforeClosing = False
+    Workbooks("cc.isr.ieee488.xlsm").Windows(1).Visible = False
     
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
+    
+    ' turn on exporting and display for this workbook
+    Me.ExportCodeBeforeClosing = True
+    ThisWorkbook.Windows(1).Visible = True
     
 End Sub
 
@@ -38,14 +52,7 @@ Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
     If Me.ExportCodeBeforeClosing Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
-    ' Application.Windows(ThisWorkbook.name).Visible = True
 End Sub
 
-Private Sub Workbook_Open()
 
-    ' turn on code exporting for this work book
-    ThisWorkbook.ExportCodeBeforeClosing = True
-    Application.Windows(ThisWorkbook.Name).Visible = True
-
-End Sub
 

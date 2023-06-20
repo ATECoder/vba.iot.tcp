@@ -13,6 +13,15 @@ Option Explicit
 ''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
 Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
 
+    Me.ExportProjectCodeFiles ActiveWorkbook.VBProject, subFolder
+    
+End Sub
+
+''' <summary>   Exports code files of the specified project to the active workbook path. </summary>
+''' <para name="project">     The VB Project which code files to export. </param>
+''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
+Public Sub ExportProjectCodeFiles(ByRef project As VBProject, Optional ByVal subFolder As String = "code")
+
     Dim component As VBIDE.VBComponent
     Dim extension As String
     Dim fileCount As Integer
@@ -23,7 +32,7 @@ Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
     
     Dim filePath As String
     
-    For Each component In ActiveWorkbook.VBProject.VBComponents
+    For Each component In project.VBComponents
         DoEvents
         Dim Name As String: Name = component.Name
         extension = GetFileExtension(component)

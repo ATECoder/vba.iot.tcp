@@ -6,7 +6,7 @@ Attribute VB_Name = "IPv4StreamSocket"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Option Explicit
 
 Private Const SEND_MESSAGE_ERROR = -1
@@ -440,8 +440,7 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
     Dim c As String * 1
     Dim count As Integer
     
-    Dim builder As StringBuilder
-    Set builder = New StringBuilder
+    Dim builder As StringBuilder: Set builder = cc_isr_Core.Constructor.CreateStringBuilder()
     Dim currentLength As Long
     currentLength = 0
     Do While currentLength < maxLength
