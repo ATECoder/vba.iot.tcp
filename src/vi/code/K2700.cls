@@ -5,8 +5,8 @@ END
 Attribute VB_Name = "K2700"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
-Attribute VB_PredeclaredId = True
-Attribute VB_Exposed = False
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = True
 Option Explicit
 
 Private Const thisModuleName As String = "K2700"
@@ -16,10 +16,15 @@ Private Const Mux20Cards As String = "7700,7710"
 ' reference to the IEEE488 session
 Private m_session As Ieee488Session
 
+Private m_options As String
 Private m_hasMux40A As Boolean
 Private m_hasMux40B As Boolean
 Private m_hasMux20A As Boolean
 Private m_hasMux20B As Boolean
+Private m_card1 As String
+Private m_card2 As String
+Private m_card1ScanList As String
+Private m_card2ScanList As String
 
 ''' <summary>   Initializes the k2700 . </summary>
 Private Sub Class_Initialize()
@@ -90,36 +95,62 @@ Public Function Initialize(ByVal host As String, ByVal port As Long, _
     Me.OpenConnection host, port, timeoutMs
 
     ' this only works with the Prologix device
-    ' Me.Session.SelectiveDeviceClear
+    Me.Session.SelectiveDeviceClear
     Me.Session.ResetKnownState
     Me.Session.ClearExecutionState
     
-    Dim availableCards As String: availableCards = Me.Session.QueryOptions
+    ' read the instrument options and parse the card names and types.
     
-    Dim card1 As String: card1 = StringExtensions.Pop(availableCards, ",")
-    Dim card2 As String: card2 = StringExtensions.Pop(availableCards, ",")
+    Me.ReadCards
     
-    m_hasMux20A = 0 < InStr(1, Mux20Cards, card1, vbTextCompare)
-    m_hasMux20B = 0 < InStr(1, Mux20Cards, card2, vbTextCompare)
+    ' define scan list for resistance measurments on all cards.
+   
+    Me.DefineResistanceScanLists
+   
+    ' turn on continuous resistance auto range
+    Me.ContinuousResistanceAutoRange
     
-    m_hasMux40A = 0 < InStr(1, Mux40Cards, card1, vbTextCompare)
-    m_hasMux40B = 0 < InStr(1, Mux40Cards, card2, vbTextCompare)
+    Initialize = True
     
+End Function
+
+''' <summary>   Gets the options value and sets the cards. </summary>
+Public Function ReadCards()
+
+    m_options = Me.Session.QueryOptions
+    
+    Me.Card1 = StringExtensions.Pop(m_options, ",")
+    Me.Card2 = StringExtensions.Pop(m_options, ",")
+    
+End Function
+
+''' <summary>   Sets the complete scan lists for resistance measurements on all cards. </summary>
+Public Function DefineResistanceScanLists()
+
     If Me.HasMux40A Then
-       Me.Session.WriteLine ":FUNC 'RES',(@101:140)"
+        m_card1ScanList = ":FUNC 'RES',(@101:140)"
+        Me.Session.WriteLine m_card1ScanList
     End If
     
     If Me.HasMux40B Then
-      Me.Session.WriteLine ":FUNC 'RES',(@201:240)"
+        m_card2ScanList = ":FUNC 'RES',(@201:240)"
+        Me.Session.WriteLine m_card2ScanList
     End If
     
     If Me.HasMux20A Then
-      Me.Session.WriteLine ":FUNC 'RES',(@101:120)"
+        m_card1ScanList = ":FUNC 'RES',(@101:120)"
+        Me.Session.WriteLine m_card1ScanList
     End If
     
     If Me.HasMux20B Then
-      Me.Session.WriteLine ":FUNC 'RES',(@201:220)"
+        m_card2ScanList = ":FUNC 'RES',(@201:220)"
+        Me.Session.WriteLine m_card2ScanList
     End If
+
+End Function
+
+''' <summary>   Sets the instrument to continous auto range resistance measurement. </summary>
+Public Function ContinuousResistanceAutoRange()
 
     ' set resistance defaults
     Me.Session.WriteLine ":RES:RANG:AUTO ON"
@@ -133,18 +164,73 @@ Public Function Initialize(ByVal host As String, ByVal port As Long, _
     Me.Session.WriteLine ":FRES:RANG:AUTO ON"
     Me.Session.WriteLine ":FRES:NPLC 1"
     Me.Session.WriteLine ":INIT:CONT On"
-    
-    Initialize = True
-    
+
 End Function
 
+''' <summary>   Gets the options value. </summary>
+''' <value> A String. </value>
+Public Property Get Options() As String
+        
+    Options = m_options
+
+End Property
+
+''' <summary>   Gets the top card. </summary>
+''' <value> A String. </value>
+Public Property Get Card1() As String
+        
+    Card1 = m_card1
+
+End Property
+
+''' <summary>   Sets the top card. </summary>
+''' <param name="value">   The name of the top card. </param>
+''' <value> A String. </value>
+Public Property Let Card1(ByVal value As String)
+    m_card1 = value
+    m_hasMux20A = 0 < InStr(1, Mux20Cards, value, vbTextCompare)
+    m_hasMux40A = 0 < InStr(1, Mux40Cards, value, vbTextCompare)
+End Property
+
+''' <summary>   Gets the top card scan list. </summary>
+''' <value> A String. </value>
+Public Property Get Card1ScanList() As String
+        
+    Card1ScanList = m_card1ScanList
+
+End Property
+
+''' <summary>   Gets the bottom card. </summary>
+''' <value> A String. </value>
+Public Property Get Card2() As String
+        
+    Card2 = m_card2
+
+End Property
+
+''' <summary>   Sets the bottom card. </summary>
+''' <param name="value">   The name of the bottom card. </param>
+''' <value> A String. </value>
+Public Property Let Card2(ByVal value As String)
+    m_card2 = value
+    m_hasMux40B = 0 < InStr(1, Mux40Cards, value, vbTextCompare)
+    m_hasMux20B = 0 < InStr(1, Mux20Cards, value, vbTextCompare)
+End Property
+
+''' <summary>   Gets the bottom card scan list. </summary>
+''' <value> A String. </value>
+Public Property Get Card2ScanList() As String
+        
+    Card2ScanList = m_card2ScanList
+
+End Property
 
 ''' <summary>   Returns true if the instrument as a 40 channel multiplexer
 ''' such as the 7702 board in the first position. </summary>
 ''' <value> A Boolean. </value>
 Public Property Get HasMux40A() As Boolean
         
-        HasMux40A = m_hasMux40A
+    HasMux40A = m_hasMux40A
 
 End Property
 
@@ -153,7 +239,7 @@ End Property
 ''' <value> A Boolean. </value>
 Public Property Get HasMux40B() As Boolean
 
-        HasMux40B = m_hasMux40B
+    HasMux40B = m_hasMux40B
 
 End Property
 
@@ -162,7 +248,7 @@ End Property
 ''' <value> A Boolean. </value>
 Public Property Get HasMux20A() As Boolean
 
-        HasMux20A = m_hasMux20A
+    HasMux20A = m_hasMux20A
 
 End Property
 
@@ -171,7 +257,7 @@ End Property
 ''' <value> A Boolean. </value>
 Public Property Get HasMux20B() As Boolean
 
-        HasMux20B = m_hasMux20B
+    HasMux20B = m_hasMux20B
 
 End Property
 

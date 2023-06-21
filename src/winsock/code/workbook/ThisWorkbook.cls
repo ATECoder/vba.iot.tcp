@@ -46,7 +46,7 @@ End Sub
 Private Sub Workbook_Open()
 
     ' hide and turn off code saving on the referenced workbooks
-    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = False
+    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = True
     Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
     
     ' turn on code exporting for this work book

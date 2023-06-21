@@ -26,29 +26,34 @@ End Property
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
     
-    ' hide and turn off code saving on the referenced workbooks
-    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = False
-    Workbooks("cc.isr.core.xlsm").Windows(1).Visible = False
-    
-    cc_isr_Winsock.ThisWorkbook.ExportCodeBeforeClosing = False
-    Workbooks("cc.isr.winsock.xlsm").Windows(1).Visible = False
-    
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
     
-    ' turn on exporting and display for this workbook
-    Me.ExportCodeBeforeClosing = True
-    ThisWorkbook.Windows(1).Visible = True
-    
 End Sub
 
-''' <summary>   Handles the workbook before close event. </summary>
+''' <summary>   Handles the workbook after save event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
-Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
+Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     On Error Resume Next
     If Me.ExportCodeBeforeClosing Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
 End Sub
 
+''' <summary>   Handles the workbook open event. </summary>
+''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
+Private Sub Workbook_Open()
+
+    ' hide and turn off code saving on the referenced workbooks
+    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = False
+    Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
+    
+    cc_isr_Winsock.ThisWorkbook.ExportCodeBeforeClosing = False
+    Application.Windows(Workbooks("cc.isr.winsock.xlsm").name).Visible = False
+    
+    ' turn on code exporting for this work book
+    ThisWorkbook.ExportCodeBeforeClosing = True
+    Application.Windows(ThisWorkbook.name).Visible = True
+
+End Sub
 

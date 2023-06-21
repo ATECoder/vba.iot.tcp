@@ -85,7 +85,6 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
         ' Call opc
-        
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
     
