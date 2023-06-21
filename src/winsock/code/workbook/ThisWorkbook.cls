@@ -32,9 +32,9 @@ Private Sub Workbook_Activate()
     
 End Sub
 
-''' <summary>   Handles the workbook before close event. </summary>
+''' <summary>   Handles the workbook after save event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
-Private Sub Workbook_BeforeClose(ByRef cancel As Boolean)
+Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     On Error Resume Next
     If Me.ExportCodeBeforeClosing Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
