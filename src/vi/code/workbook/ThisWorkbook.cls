@@ -8,6 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
+
 Private m_exportCodeAfterSave As Boolean
 
 ''' <summary>   Gets the option for exporting code files after save. </summary>
@@ -24,7 +25,6 @@ End Property
 ''' <summary>   Handles the Workbook activate event. </summary>
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
-    On Error Resume Next
     
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
@@ -44,6 +44,13 @@ End Sub
 ''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()
 
+    ' hide and turn off code saving on the referenced workbooks
+    cc_isr_Core.ThisWorkbook.ExportCodeAfterSave = True
+    Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
+    
+    cc_isr_Winsock.ThisWorkbook.ExportCodeAfterSave = True
+    Application.Windows(Workbooks("cc.isr.winsock.xlsm").name).Visible = False
+    
     ' turn on code exporting for this work book
     ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True

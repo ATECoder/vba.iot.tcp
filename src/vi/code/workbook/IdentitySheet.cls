@@ -26,17 +26,17 @@ Private Sub ReadIdentityButton_Click()
     
     ' scpi.preset
     
-    ReadIdentity host, port, repeatCount
-   
+    ' read identity user session read.
+    Ieee488SessionReadIdentity host, port, repeatCount
+    
 End Sub
 
-
-''' <summary>   Uses the 2700 Virtual instrument to send the identity query and reads back the identity
+''' <summary>   Uses the IEEE 4888 session to send the identity query and reads back the identity
 ''' from the instrument. </summary>
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
     
@@ -49,17 +49,17 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch()
     Dim totalMilliseconds As Double
     
-    Dim device As New K2700
+    Dim Session As New Ieee488Session
     
-    device.OpenConnection host, port
+    Session.OpenConnection host, port
     
     ' report the socket number
-    Range("E2").value = device.Session.ViSession.SocketId
+    Range("E2").value = Session.SocketId
    
     ' report the connection state
-    Range("F2").value = device.Connected
+    Range("F2").value = Session.Connected
     
-    If device.Connected Then
+    If Session.Connected Then
     
         Dim command As String
         command = "*IDN?"
@@ -73,18 +73,19 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             loopCount = loopCount + 1
             sw.Restart
             
-            device.Session.QueryIdentity
+            Session.QueryIdentity
             
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(device.Session.Identity)
-            Range("I2").value = device.Session.Identity
+            Range("H2").value = Len(Session.Identity)
+            Range("I2").value = Session.Identity
     
         Loop
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
         ' Call opc
+        
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
     
@@ -103,14 +104,14 @@ Finally:
     End If
     
     On Error Resume Next
-    If Not device Is Nothing Then
-        If device.Connected Then
-            device.CloseConnection
+    If Not Session Is Nothing Then
+        If Session.Connected Then
+            Session.CloseConnection
         End If
     End If
     
     ' terminate the session
-    Set device = Nothing
+    Set Session = Nothing
     
     If Len(errorMessage) > 0 Then
         MsgBox errorMessage

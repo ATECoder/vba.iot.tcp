@@ -101,6 +101,9 @@ End Property
 ''' <returns>   The number of sent characters. </returns>
 Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
+    If Me.UsingPrologix Then
+        m_viSession.WriteLine "++auto 0", True
+    End If
     WriteLine = m_viSession.WriteLine(message, appendTermination)
 
 End Function
@@ -113,6 +116,9 @@ End Function
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
     
+    If Me.UsingPrologix Then
+        m_viSession.WriteLine "++auto 1", True
+    End If
     Read = m_viSession.Read(maxLength, trimEnd)
 
 End Function
@@ -122,7 +128,12 @@ End Function
 ''' <returns>   The received string. </returns>
 Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    QueryLine = m_viSession.QueryLine(message, appendTermination)
+    If Me.WriteLine(message, appendTermination) > 0 Then
+        QueryLine = Me.Read()
+    Else
+        QueryLine = ""
+    End If
+    ' QueryLine = m_viSession.QueryLine(message, appendTermination)
 
 End Function
 

@@ -9,17 +9,17 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-Private m_exportCodebBeforeClosing As Boolean
+Private m_exportCodeAfterSave As Boolean
 
-''' <summary>   Gets the option for exporting code files when closing. </summary>
-Public Property Get ExportCodeBeforeClosing() As Boolean
-    ExportCodeBeforeClosing = m_exportCodebBeforeClosing
+''' <summary>   Gets the option for exporting code files after save. </summary>
+Public Property Get ExportCodeAfterSave() As Boolean
+    ExportCodeAfterSave = m_exportCodeAfterSave
 End Property
 
-''' <summary>   Enables or disables exporting code files when closing. </summary>
-''' <para name="value">   True to enable exporting code files when closing. </param>
-Public Property Let ExportCodeBeforeClosing(ByVal value As Boolean)
-    m_exportCodebBeforeClosing = value
+''' <summary>   Enables or disables exporting code files after save. </summary>
+''' <para name="value">   True to enable exporting code files after save. </param>
+Public Property Let ExportCodeAfterSave(ByVal value As Boolean)
+    m_exportCodeAfterSave = value
 End Property
 
 ''' <summary>   Handles the Workbook activate event. </summary>
@@ -35,7 +35,7 @@ End Sub
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     On Error Resume Next
-    If Me.ExportCodeBeforeClosing Then
+    If Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
 End Sub
@@ -45,14 +45,14 @@ End Sub
 Private Sub Workbook_Open()
 
     ' hide and turn off code saving on the referenced workbooks
-    cc_isr_Core.ThisWorkbook.ExportCodeBeforeClosing = False
+    cc_isr_Core.ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
     
-    cc_isr_Winsock.ThisWorkbook.ExportCodeBeforeClosing = False
+    cc_isr_Winsock.ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(Workbooks("cc.isr.winsock.xlsm").name).Visible = False
     
     ' turn on code exporting for this work book
-    ThisWorkbook.ExportCodeBeforeClosing = True
+    ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True
 
 End Sub

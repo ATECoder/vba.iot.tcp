@@ -9,54 +9,23 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-''' <summary>   Creates a new instance of the <see cref="MacroInfo"/> class to share
-''' with external workbooks. </summary>
+''' <summary>   Creates a new instance of the <see cref="Ieee488Session"/> class to
+''' share with external workbooks. </summary>
 ''' <remarks>
 ''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
-''' <returns>   A new instance of the <see cref="MacroInfo"/> class. </returns>
-Public Function CreateMacroInfo() As MacroInfo
-    Set CreateMacroInfo = New MacroInfo
+''' <returns>   A new instance of the <see cref="Ieee488Session"/> class. </returns>
+Public Function CreateIeee488Session() As Ieee488Session
+    Set CreateIeee488Session = New Ieee488Session
 End Function
 
-''' <summary>   Creates a new instance of the <see cref="ModuleInfo"/> class to share
-''' with external workbooks. </summary>
+''' <summary>   Creates a new instance of the <see cref="ViSession"/> class to
+''' share with external workbooks. </summary>
 ''' <remarks>
 ''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
-''' <returns>   A new instance of the <see cref="ModuleInfo"/> class. </returns>
-Public Function CreateModuleInfo() As ModuleInfo
-    Set CreateModuleInfo = New ModuleInfo
+''' <returns>   A new instance of the <see cref="ViSession"/> class. </returns>
+Public Function CreateViSession() As ViSession
+    Set CreateViSession = New ViSession
 End Function
-
-''' <summary>   Creates an instance of the <see cref="stdTimer"/> class. </summary>
-''' <param name="iMilliseconds">   [Long] Number of milliseconds to raise Tick Event between </param>
-''' <param name="callback">        [stdICallable=Nothing] Callback object. Must contain a Run() method. </param>
-''' <returns> {stdTimer} The frequency isn't guaranteed but it will be as close as humanly possible. </returns>
-''' <returns>   A new instance of the <see cref="stdTimer"/> class. </returns>
-Public Function CreateStdTimer(ByVal iMilliseconds As Long, Optional ByVal callback As Object = Nothing) As stdTimer
-  Set CreateStdTimer = New stdTimer
-  Call CreateStdTimer.protInit(iMilliseconds, callback)
-End Function
-
-''' <summary>   Creates a new instance of the <see cref="StopWatch"/> class to share
-''' with external workbooks. </summary>
-''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
-''' </remarks>
-''' <returns>   A new instance of the <see cref="StopWatch"/> class. </returns>
-Public Function CreateStopWatch() As StopWatch
-    Set CreateStopWatch = New StopWatch
-End Function
-
-''' <summary>   Creates a new instance of the <see cref="StringBuilder"/> class to share
-''' with external workbooks. </summary>
-''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
-''' </remarks>
-''' <returns>   A new instance of the <see cref="StringBuilder"/> class. </returns>
-Public Function CreateStringBuilder() As StringBuilder
-    Set CreateStringBuilder = New StringBuilder
-End Function
-
 
