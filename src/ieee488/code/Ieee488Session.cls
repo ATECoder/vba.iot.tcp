@@ -9,10 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-Private Const PrologixPortNumber As Integer = 1234
 Private m_viSession As ViSession
 Private m_identity As String
-Private m_usingPrologix As Boolean
 
 ''' <summary> Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
@@ -66,7 +64,6 @@ End Property
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
-    m_usingPrologix = port = PrologixPortNumber
     OpenConnection = m_viSession.OpenConnection(host, port, timeoutMs)
    
 End Function
@@ -78,13 +75,6 @@ Public Function CloseConnection() As Boolean
     CloseConnection = m_viSession.CloseConnection
     
 End Function
-
-''' <summary>   Returns true if the TCP Connection uses the Prologix
-''' GPIB-Lan interface device. </summary>
-''' <value>   True if using the Prologix GPIB-Lan interface device. </value>
-Public Property Get UsingPrologix() As Boolean
-    UsingPrologix = m_usingPrologix
-End Property
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
 ''' <value>   The socket identifying descriptor. </value>
@@ -101,9 +91,6 @@ End Property
 ''' <returns>   The number of sent characters. </returns>
 Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    If Me.UsingPrologix Then
-        m_viSession.WriteLine "++auto 0", True
-    End If
     WriteLine = m_viSession.WriteLine(message, appendTermination)
 
 End Function
@@ -116,9 +103,6 @@ End Function
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
     
-    If Me.UsingPrologix Then
-        m_viSession.WriteLine "++auto 1", True
-    End If
     Read = m_viSession.Read(maxLength, trimEnd)
 
 End Function
@@ -128,12 +112,7 @@ End Function
 ''' <returns>   The received string. </returns>
 Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    If Me.WriteLine(message, appendTermination) > 0 Then
-        QueryLine = Me.Read()
-    Else
-        QueryLine = ""
-    End If
-    ' QueryLine = m_viSession.QueryLine(message, appendTermination)
+    QueryLine = m_viSession.QueryLine(message, appendTermination)
 
 End Function
 
@@ -190,7 +169,7 @@ End Function
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function LocalLockout() As Integer
     
-    If Me.UsingPrologix Then
+    If Me.ViSession.UsingPrologix Then
         LocalLockout = Me.WriteLine("++llo")
     Else
         LocalLockout = 0
@@ -203,7 +182,7 @@ End Function
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function GoToLocal() As Integer
     
-    If Me.UsingPrologix Then
+    If Me.ViSession.UsingPrologix Then
         GoToLocal = Me.WriteLine("++loc")
     Else
         GoToLocal = 0
@@ -216,7 +195,7 @@ End Function
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function SelectiveDeviceClear() As Integer
     
-    If Me.UsingPrologix Then
+    If Me.ViSession.UsingPrologix Then
         SelectiveDeviceClear = Me.WriteLine("++clr")
     Else
         SelectiveDeviceClear = 0
@@ -230,7 +209,7 @@ End Function
 ''' <returns>   The status byte. </returns>
 Public Function ReadStatusByte(Optional ByVal canQuery As Boolean = False) As Integer
     
-    If Me.UsingPrologix Then
+    If Me.ViSession.UsingPrologix Then
         ReadStatusByte = CInt(Me.QueryLine("++spoll"))
     Else
         ' querying the service request status could cause
@@ -246,7 +225,7 @@ End Function
 ''' <returns>   The status byte. </returns>
 Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
-    If Me.UsingPrologix Then
+    If Me.ViSession.UsingPrologix Then
         SRQ = 1 = CInt(Me.QueryLine("++srq"))
     Else
         SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus)

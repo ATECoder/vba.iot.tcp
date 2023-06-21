@@ -8,24 +8,21 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
+Private m_K2700 As K2700
 
-''' <summary>   Creates a new instance of the <see cref="Ieee488Session"/> class to
+''' <summary>   Creates a new instance of the <see cref="K2700"/> class to
 ''' share with external workbooks. </summary>
 ''' <remarks>
 ''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
-''' <returns>   A new instance of the <see cref="Ieee488Session"/> class. </returns>
-Public Function CreateIeee488Session() As Ieee488Session
-    Set CreateIeee488Session = New Ieee488Session
+''' <returns>   A new instance of the <see cref="K2700"/> class. </returns>
+Public Function CreateK2700() As K2700
+    Set CreateK2700 = New K2700
 End Function
 
-''' <summary>   Creates a new instance of the <see cref="ViSession"/> class to
-''' share with external workbooks. </summary>
-''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
-''' </remarks>
-''' <returns>   A new instance of the <see cref="ViSession"/> class. </returns>
-Public Function CreateViSession() As ViSession
-    Set CreateViSession = New ViSession
-End Function
-
+''' <summary>   Gets a singleton instance of the <see cref="K2700"/> class. </summary>
+''' <value>   A singleton instance of the <see cref="K2700"/> class. </returns>
+Public Property Get K2700() As K2700
+    If m_K2700 Is Nothing Then Set m_K2700 = Me.CreateK2700()
+    Set K2700 = m_K2700
+End Property

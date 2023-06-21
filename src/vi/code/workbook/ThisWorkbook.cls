@@ -29,6 +29,9 @@ Private Sub Workbook_Activate()
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
     
+    ' activate the sheets to initialize values.
+    K2700Sheet.Activate
+    
 End Sub
 
 ''' <summary>   Handles the workbook after save event. </summary>
@@ -51,9 +54,13 @@ Private Sub Workbook_Open()
     cc_isr_Winsock.ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(Workbooks("cc.isr.winsock.xlsm").name).Visible = False
     
+    cc_isr_Ieee488.ThisWorkbook.ExportCodeAfterSave = True
+    Application.Windows(Workbooks("cc.isr.ieee488.xlsm").name).Visible = False
+    
     ' turn on code exporting for this work book
     ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True
 
 End Sub
+
 

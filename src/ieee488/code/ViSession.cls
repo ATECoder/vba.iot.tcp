@@ -8,11 +8,12 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
-
+Private Const PrologixPortNumber As Integer = 1234
 Private m_readTermination As String
 Private m_writeTermination As String
 Private m_receiveTimeout As Long
 Private m_tcpClient As TcpClient
+Private m_usingPrologix As Boolean
 
 ''' <summary>   Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
@@ -109,6 +110,8 @@ End Sub
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
    
+    m_usingPrologix = port = PrologixPortNumber
+    
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
    
     m_tcpClient.ConnectTo host, port
@@ -129,26 +132,48 @@ Public Function CloseConnection() As Boolean
     
 End Function
 
+''' <summary>   Returns true if the TCP Connection uses the Prologix
+''' GPIB-Lan interface device. </summary>
+''' <value>   True if using the Prologix GPIB-Lan interface device. </value>
+Public Property Get UsingPrologix() As Boolean
+    UsingPrologix = m_usingPrologix
+End Property
+
 ''' <summary>   Sends a message. </summary>
+''' <remarks>   If using the Prologix device at port 1234, this
+''' method first sets the Prologix to auto off (++auto 0) to prevent it from
+''' setting the device to talk prematurely which might cause the device
+''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
 ''' <param name="message">   The message. </param>
 ''' <returns>   The number of sent characters. </returns>
 Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+    
+    If Me.UsingPrologix Then
+        m_tcpClient.SendMessage "++auto 0" & Me.WriteTermination
+    End If
     If appendTermination Then
         message = message & Me.WriteTermination
     End If
     WriteLine = m_tcpClient.SendMessage(message)
+
 End Function
 
 ''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
+''' <remarks>   If using the Prologix device at port 1234, this
+''' method first sets the Prologix to auto on (++auto 1) assuming auto was turned off on
+''' the previous read on <see cref="WriteLine"/>. </remarks>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
 ''' <returns>   The received string. </returns>
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
-   
+    
+    If Me.UsingPrologix Then
+        m_tcpClient.SendMessage "++auto 1" & Me.WriteTermination
+    End If
     Read = m_tcpClient.ReceiveRaw(maxLength, trimEnd, Me.ReadTermination)
-  
+
 End Function
     
 ''' <summary>   Sends a message and receives a reply. </summary>

@@ -135,6 +135,7 @@ Private Sub ToggleConnectionButton_Click()
     If device.Connected Then
         
         device.CloseConnection
+        Set m_session = device.Session
         
         Range("C2").value = ""
         Range("D2").value = ""
@@ -146,7 +147,8 @@ Private Sub ToggleConnectionButton_Click()
         Range("D2").value = port
         
         device.OpenConnection host, port
-         
+        Set m_session = device.Session
+        
         ' report the socket number
         Range("E2").value = m_session.ViSession.SocketId
     End If

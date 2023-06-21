@@ -2,6 +2,10 @@
 All notable changes to these libraries will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+##### [1.0.8572] - 2023-06-21
+* Add VI sheets for the 2700 and IEEE488 devices. 
+* Fix error -420 issue at the VI Session level.
+
 ##### [1.0.8567] - 2023-06-17
 * Create code workbooks to be used use as references in top level workbooks.
 * Add methods to the path extensions.
