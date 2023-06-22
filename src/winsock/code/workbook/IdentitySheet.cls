@@ -244,7 +244,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     Range("H2").value = ""
     Range("I2").value = ""
 
-    Dim sw As New StopWatch
+    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
     Dim totalMilliseconds As Double
     
     Dim client As TcpClient

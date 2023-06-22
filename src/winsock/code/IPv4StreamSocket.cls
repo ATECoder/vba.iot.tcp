@@ -14,6 +14,10 @@ Private Const SEND_PARTIAL_MESSAGE_ERROR = -2
 Private Const RECEIVE_ERROR = -1
 Private Const DefaultTimeoutMs = 500
 
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="s">                     [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.
 '''                                      The connection is actually made with the socket that is returned by accept. </param>
@@ -231,11 +235,14 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
     Dim connectResult As Long
     connectResult = connect_(m_socketId, address, Len(address))
     If connectResult = wsock32.ws32_SOCKET_ERROR Then
+        m_connected = False
         Err.Raise UserDefinedErrors.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
                   UserDefinedErrors.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
-        m_connected = False
     Else
         m_connected = True
+        
+        OnConnectionChanged Me.Connected
+
     End If
     
     OpenConnection = m_connected
@@ -250,12 +257,16 @@ Public Function CloseConnection() As Boolean
     result = closesocket_(m_socketId)
     m_socketId = 0
     If result = wsock32.ws32_SOCKET_ERROR Then
+        CloseConnection = False
         Err.Raise UserDefinedErrors.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
                   UserDefinedErrors.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.lastError)
-        CloseConnection = False
     Else
         m_connected = False
+        
         CloseConnection = True
+        
+        OnConnectionChanged Me.Connected
+        
     End If
 
 End Function
@@ -528,3 +539,16 @@ End Sub
 Public Property Get ReceiveTimeout() As Long
     ReceiveTimeout = m_receiveTimeout
 End Property
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+

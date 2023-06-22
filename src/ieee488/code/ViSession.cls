@@ -15,6 +15,11 @@ Private m_receiveTimeout As Long
 Private m_tcpClient As TcpClient
 Private m_usingPrologix As Boolean
 
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+
 ''' <summary>   Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
     m_readTermination = vbLf
@@ -118,6 +123,8 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optiona
     
     Me.SetReceiveTimeout timeoutMs
     
+    OnConnectionChanged Me.Connected
+
     OpenConnection = Me.Connected
    
 End Function
@@ -129,6 +136,8 @@ Public Function CloseConnection() As Boolean
     CloseConnection = m_tcpClient.Disconnect
     
     Set m_tcpClient = Nothing
+    
+    OnConnectionChanged Me.Connected
     
 End Function
 
@@ -186,4 +195,18 @@ Public Function QueryLine(ByVal message As String, Optional ByVal appendTerminat
         QueryLine = ""
     End If
 End Function
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+
+
 

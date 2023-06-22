@@ -12,6 +12,10 @@ Option Explicit
 Private m_viSession As ViSession
 Private m_identity As String
 
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
 ''' <summary> Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
     
@@ -66,6 +70,8 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optiona
    
     OpenConnection = m_viSession.OpenConnection(host, port, timeoutMs)
    
+    OnConnectionChanged Me.Connected
+   
 End Function
 
 ''' <summary>   Closes the TCP Client connection. </summary>
@@ -74,6 +80,8 @@ Public Function CloseConnection() As Boolean
 
     CloseConnection = m_viSession.CloseConnection
     
+    OnConnectionChanged Me.Connected
+
 End Function
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
@@ -310,4 +318,18 @@ Public Function ResetKnownState() As Integer
     ResetKnownState = Me.ViSession.WriteLine(Ieee488Syntax.ResetKnownStateCommand)
     
 End Function
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+
+
 

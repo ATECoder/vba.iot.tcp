@@ -11,6 +11,10 @@ Option Explicit
 
 Private m_tcpServerSocket As IPv4StreamSocket
 
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
 ''' <summary>   Gets the Tcp Server socket. </summary>
 ''' <value>   A IPv4StreamSocket. </value>
 Public Property Get TcpServerSocket() As IPv4StreamSocket
@@ -23,27 +27,35 @@ End Property
 ''' <returns>   True if the socket is bound. </returns>
 Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10) As Boolean
 
-    On Error GoTo Finally
+    On Error GoTo ErrHandler
     
     Set m_tcpServerSocket = New IPv4StreamSocket
     
     ' bind the socket to the specified port for listening on any address
+    ' an exception is raised on failure.
     
     m_tcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, port
     
+    OnConnectionChanged Me.Connected
+    
     ' get the socket to start listening
+    ' an exception is raised on failure.
     
     BindTo = m_tcpServerSocket.StartListening(backlog)
     
-Finally:
+ExitHandler:
+
+    Exit Function
+    
+ErrHandler:
 
     If Me.Connected Then
         Me.TcpServerSocket.CloseConnection
     End If
     Set m_tcpServerSocket = Nothing
     
-    Err.Raise Err
-
+    OnConnectionChanged Me.Connected
+    
 End Function
 
 ''' <summary>   Returns the connection state of the client. </summary>
@@ -78,3 +90,18 @@ Public Sub Dispose()
     End If
     Set m_tcpServerSocket = Nothing
 End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+
+
+

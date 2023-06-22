@@ -11,6 +11,10 @@ Option Explicit
 
 Private m_tcpClientSocket As IPv4StreamSocket
 
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
 Private Sub Class_Terminate()
     Me.Dispose
 End Sub
@@ -35,6 +39,8 @@ Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
 
     m_tcpClientSocket.OpenConnection host, port
     
+    OnConnectionChanged Me.Connected
+    
 End Function
 
 ''' <summary>   Returns the connection state of the client. </summary>
@@ -54,6 +60,8 @@ Public Function Disconnect() As Boolean
     Me.TcpClientSocket.CloseConnection
     
     Set m_tcpClientSocket = Nothing
+       
+    OnConnectionChanged Me.Connected
         
     Disconnect = True
 
@@ -112,4 +120,17 @@ Public Sub Dispose()
     End If
     Set m_tcpClientSocket = Nothing
 End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+
 
