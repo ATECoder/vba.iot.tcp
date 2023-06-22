@@ -26,3 +26,14 @@ Public Property Get K2700() As K2700
     If m_K2700 Is Nothing Then Set m_K2700 = Me.CreateK2700()
     Set K2700 = m_K2700
 End Property
+
+''' <summary>   Gets an instance of the <see cref="ResistanceNumberEventArgs"/> class. </summary>
+''' <para name="resistanceNo">   [integer] The resistance number. </param>
+''' <para name="resistance">     [double] The resistance. </param>
+''' <value>   An instance of the <see cref="ResistanceNumberEventArgs"/> class. </returns>
+Public Property Get CreateResistanceNumberEventArgs(ByVal resistanceNo As Integer, ByVal resistanceValue As Double) As ResistanceNumberEventArgs
+    Set CreateResistanceNumberEventArgs = New ResistanceNumberEventArgs
+    CreateResistanceNumberEventArgs.Initialize resistanceNo, resistanceValue
+End Property
+
+

@@ -49,4 +49,13 @@ Public Function CreateWinsock() As Winsock
     Set CreateWinsock = New Winsock
 End Function
 
+''' <summary>   Gets an instance of the <see cref="ConnectionChangedEventArgs"/> class. </summary>
+''' <para name="isConnected">   [boolean] True if connected. </param>
+''' <value>   An instance of the <see cref="ConnectionChangedEventArgs"/> class. </returns>
+Public Property Get CreateConnectionChangedEventArgs(ByVal isConnected As Boolean) As ConnectionChangedEventArgs
+    Set CreateConnectionChangedEventArgs = New ConnectionChangedEventArgs
+    CreateConnectionChangedEventArgs.Initialize isConnected
+End Property
+
+
 

@@ -26,6 +26,14 @@ Private m_card2 As String
 Private m_card1ScanList As String
 Private m_card2ScanList As String
 
+''' <summary>   The event that is raised upon completion of a a resistance measurement. </summary>
+''' <param name="eventArgs">   An <see cref="ResistanceNumberEventArgs"/> event args. </param>
+Public Event ResistanceNumberMeasured(ByRef eventArgs As ResistanceNumberEventArgs)
+
+''' <summary>   The event that is raised upon change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
 ''' <summary>   Initializes the k2700 . </summary>
 Private Sub Class_Initialize()
     Debug.Print "initializing k2700"
@@ -70,7 +78,13 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
        
     Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
 
+    ' open the connection
+    
     OpenConnection = m_session.OpenConnection(host, port, timeoutMs)
+    
+    ' raise the connection changed event.
+    
+    OnConnectionChanged Me.Connected
 
 End Function
 
@@ -79,6 +93,15 @@ End Function
 Public Function CloseConnection() As Boolean
 
     CloseConnection = m_session.CloseConnection
+    
+    ' set session to nothing which teslls us that the session
+    ' is no longer connected
+    
+    m_session = Nothing
+    
+    ' raise the connection changed event.
+    
+    OnConnectionChanged Me.Connected
     
 End Function
 
@@ -265,7 +288,7 @@ End Property
 ''' <summary>   Returns the channel list. </summary>
 ''' <param name="resistanceNumber">   The resistance number. </param>
 ''' <returns>  The channel list to close. </returns>
-Public Function BuildChannelList(ByVal resistanceNumber As Integer) As String
+Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
 
     Const thisProcedureName = "BuildChannelList"
     
@@ -276,7 +299,7 @@ Public Function BuildChannelList(ByVal resistanceNumber As Integer) As String
     
     ' Check if we need to close the bottom or top
     ' channle.
-    If resistanceNumber <= 20 Then
+    If ResistanceNumber <= 20 Then
     
         If Me.HasMux40A Then
           
@@ -288,7 +311,7 @@ Public Function BuildChannelList(ByVal resistanceNumber As Integer) As String
         
         End If
     
-    ElseIf resistanceNumber <= 40 Then
+    ElseIf ResistanceNumber <= 40 Then
       
         If Me.HasMux40A Then
         
@@ -302,7 +325,7 @@ Public Function BuildChannelList(ByVal resistanceNumber As Integer) As String
         
         End If
       
-    ElseIf resistanceNumber > 40 Then
+    ElseIf ResistanceNumber > 40 Then
     
         If Me.HasMux40B Then
             routeCommand = ":ROUT:MULT:CLOS (@244,245)"
@@ -331,7 +354,7 @@ End Function
 ''' <summary>   Returns the scan list for a specific resistance. </summary>
 ''' <param name="resistanceNumber">   The resistance number. </param>
 ''' <returns>  The scan list. </returns>
-Public Function BuildScanList(ByVal resistanceNumber As Integer) As String
+Public Function BuildScanList(ByVal ResistanceNumber As Integer) As String
 
     Const thisProcedureName = "BuildScanList"
     
@@ -343,37 +366,37 @@ Public Function BuildScanList(ByVal resistanceNumber As Integer) As String
     
     ' Check if we need to close the bottom or top
     ' channle.
-    If resistanceNumber <= 20 Then
+    If ResistanceNumber <= 20 Then
     
         ' Get channel string
         If Me.HasMux40A Or Me.HasMux20A Then
         
-            resistaceChannel = "1" & Right$("0" & Format$(resistanceNumber), 2)
+            resistaceChannel = "1" & Right$("0" & Format$(ResistanceNumber), 2)
             scanList = "(@" & resistaceChannel & ")"
         
         End If
       
-    ElseIf resistanceNumber <= 40 Then
+    ElseIf ResistanceNumber <= 40 Then
       
         If Me.HasMux40A Then
         
             ' Get channel string
-            resistaceChannel = "1" & Right$("0" & Format$(resistanceNumber), 2)
+            resistaceChannel = "1" & Right$("0" & Format$(ResistanceNumber), 2)
             scanList = "(@" & resistaceChannel & ")"
         
         ElseIf Me.HasMux20B Then
           
             ' Get channel string
-            resistaceChannel = "2" & Right$("0" & Format$(resistanceNumber - 20), 2)
+            resistaceChannel = "2" & Right$("0" & Format$(ResistanceNumber - 20), 2)
             
             scanList = "(@" & resistaceChannel & ")"
         
         End If
       
-    ElseIf resistanceNumber > 40 Then
+    ElseIf ResistanceNumber > 40 Then
     
         ' Get channel string
-        resistaceChannel = "2" & Right$("0" & Format$(resistanceNumber - 40), 2)
+        resistaceChannel = "2" & Right$("0" & Format$(ResistanceNumber - 40), 2)
         
         If Me.HasMux40B Then
             scanList = "(@" & resistaceChannel & ")"
@@ -398,4 +421,73 @@ err_Handler:
     Err.Raise Err.Number
 
 End Function
+
+''' <summary>   Gets the front (True) or rear (False) input state. </summary>
+''' <value>   True if front input; otherwise, rear input. </value>
+Public Property Get IsFrontInput() As Boolean
+
+    IsFrontInput = 0 < CInt(Me.Session.QueryLine("SYST:FRSW?"))
+
+End Property
+
+''' <summary>   Performs a single scan on the given resistance from the rear panel. </summary>
+''' <remarks>
+''' Use this method to get a single value from the instrument using the back panel switches
+''' </remarks>
+''' <param name="resistanceNo">   The resistance number. </param>
+''' <returns>    The measured resistance of -1 if the resistance number is out
+''' of range for this device. </returns>
+Public Function ScanReadResistance(ByVal resistanceNo As Integer) As Double
+
+    ' get the channels to close
+    Dim resistanceScanList As String: resistanceScanList = K2700.BuildScanList(resistanceNo)
+    
+    If Len(resistanceScanList) > 0 Then
+    
+        ' set the device to measure 4 wire resistance
+        ' K2700.Session.WriteLine "*RST"
+        K2700.Session.WriteLine ":TRIG:SOUR IMM"
+        K2700.Session.WriteLine ":INIT:CONT OFF"
+        K2700.Session.WriteLine ":SAMP:COUN 1"
+        K2700.Session.WriteLine ":TRIG:COUN 1"
+        
+        ' get the channel list
+        K2700.Session.WriteLine ":FUNC 'RES'"
+        K2700.Session.WriteLine ":ROUT:CLOS " & resistanceScanList
+        K2700.Session.WriteLine ":INIT"
+        K2700.Session.WriteLine ":READ?"
+        
+        Dim resistanceReading As String: resistanceReading = K2700.Session.Read
+        
+        ' convert the measured resistance to double
+        ScanReadResistance = CDbl(resistanceReading)
+    
+    Else
+        ScanReadResistance = -1
+    
+    End If
+
+End Function
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Resistance Number Measured
+
+''' <summary>   Raises the <see cref="ResistanceNumberMeasured"/> event. </summary>
+''' <para name="resistanceNo">   [integer] The resistance number. </param>
+''' <para name="resistance">     [double] The resistance. </param>
+Private Sub OnResistanceNumberMeasured(ByVal resistanceNo As Integer, ByVal resistance As Double)
+    RaiseEvent ResistanceNumberMeasured( _
+            cc_isr_VI.Constructor.CreateResistanceNumberEventArgs(resistanceNo, resistanceValue))
+End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+' Connection Changed
+
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    RaiseEvent ConnectionChanged( _
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
 
