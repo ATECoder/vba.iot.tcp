@@ -142,3 +142,17 @@ Public Function JoinAll(ByVal Create As Boolean, ParamArray pathParts() As Varia
     JoinAll = joinedPath
         
 End Function
+
+''' <summary> Gets the parent folder path from the specified path. </summary>
+''' <param name="path">       The path. </param>
+''' <returns> A string. </returns>
+Public Function GetParentFolderName(ByVal path As String) As String
+    
+    GetParentFolderName = path
+    If Not StringExtensions.IsNullOrEmpty(path) Then
+        path = TrimPath(path)
+        Dim fso As FileSystemObject: Set fso = New FileSystemObject
+        GetParentFolderName = fso.GetParentFolderName(path)
+    End If
+    
+End Function

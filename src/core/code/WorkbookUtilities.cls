@@ -27,17 +27,19 @@ Public Sub ExportProjectCodeFiles(ByRef project As VBProject, Optional ByVal sub
     Dim fileCount As Integer
     
     ' set and, optionally, create the folder.
-    Dim path As String
-    path = PathExtensions.Join(ActiveWorkbook.path, subFolder, True)
+    Dim path As String: path = PathExtensions.GetParentFolderName(project.FileName)
+    path = PathExtensions.Join(path, subFolder, True)
     
     Dim filePath As String
+    Dim destPath As String
     
     For Each component In project.VBComponents
         DoEvents
         Dim name As String: name = component.name
         extension = GetFileExtension(component)
         If Not StringExtensions.IsNullOrEmpty(extension) Then
-            filePath = PathExtensions.JoinFile(Me.GetWorkbookPath(component, path, "workbook"), component.name & extension)
+            destPath = Me.GetWorkbookPath(component, path, "workbook")
+            filePath = PathExtensions.JoinFile(destPath, component.name & extension)
             fileCount = fileCount + 1
             component.Export FileName:=filePath
         End If

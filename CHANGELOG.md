@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * Completed implementation of the identity project.
 
 ##### [1.0.8558] - 2023-06-06
-* initial commit.
+* initial commit. 
 
 &copy;  2023 Integrated Scientific Resources, Inc. All rights reserved.
 
