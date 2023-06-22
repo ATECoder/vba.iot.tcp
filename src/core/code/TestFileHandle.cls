@@ -32,25 +32,32 @@ Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
     fso.DeleteFile Me.FileName
 End Sub
 
+''' <summary> </summary>
 Public Sub Delete(ByRef fileHandle As TestFileHandle)
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
     fso.DeleteFile fileHandle.FileName
 End Sub
 
-
+''' <summary> </summary>
+''' <value> </value>
 Public Property Get FileName() As String
     FileName = m_fileName
 End Property
 
+''' <summary> </summary>
 Public Property Let FileName(ByVal value As String)
     m_fileName = value
 End Property
 
+''' <summary> </summary>
+''' <value> </value>
 Public Property Get FileStream() As TextStream
     Set FileStream = m_fileStream
 End Property
 
+''' <summary> </summary>
+''' <value> </value>
 Public Property Set FileStream(ByVal value As TextStream)
     Set m_fileStream = value
 End Property

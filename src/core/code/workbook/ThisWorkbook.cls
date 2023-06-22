@@ -11,6 +11,7 @@ Option Explicit
 Private m_exportCodeAfterSave As Boolean
 
 ''' <summary>   Gets the option for exporting code files after save. </summary>
+''' <value> </value>
 Public Property Get ExportCodeAfterSave() As Boolean
     ExportCodeAfterSave = m_exportCodeAfterSave
 End Property
