@@ -63,4 +63,12 @@ Private Sub Workbook_Open()
 
 End Sub
 
+''' <summary>   Handles the workbook before close event. </summary>
+''' <remarks>   Disposes of worksheet objects. </remarks>
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    ' disposes of sheet objects.
+    K2700Sheet.Dispose
+    Ieee488Sheet.Dispose
+End Sub
+
 

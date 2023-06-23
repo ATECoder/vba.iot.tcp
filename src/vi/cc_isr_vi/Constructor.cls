@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
-Private m_K2700 As K2700
+Private m_k2700 As K2700
 
 ''' <summary>   Creates a new instance of the <see cref="K2700"/> class to
 ''' share with external workbooks. </summary>
@@ -23,8 +23,8 @@ End Function
 ''' <summary>   Gets a singleton instance of the <see cref="K2700"/> class. </summary>
 ''' <value>   A singleton instance of the <see cref="K2700"/> class. </returns>
 Public Property Get K2700() As K2700
-    If m_K2700 Is Nothing Then Set m_K2700 = Me.CreateK2700()
-    Set K2700 = m_K2700
+    If m_k2700 Is Nothing Then Set m_k2700 = Me.CreateK2700()
+    Set K2700 = m_k2700
 End Property
 
 ''' <summary>   Gets an instance of the <see cref="ResistanceNumberEventArgs"/> class. </summary>

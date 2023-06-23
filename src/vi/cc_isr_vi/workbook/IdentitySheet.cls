@@ -13,20 +13,20 @@ Option Explicit
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
 
-    Dim host As String
-    Dim port As Integer
+    Dim Host As String
+    Dim Port As Integer
     Dim repeatCount As Integer
     
     repeatCount = Range("B1").value
-    host = Range("B2").value
-    port = Range("B3").value
+    Host = Range("B2").value
+    Port = Range("B3").value
     
-    Range("C2").value = host
-    Range("D2").value = port
+    Range("C2").value = Host
+    Range("D2").value = Port
     
     ' scpi.preset
     
-    ReadIdentity host, port, repeatCount
+    ReadIdentity Host, Port, repeatCount
    
 End Sub
 
@@ -36,7 +36,7 @@ End Sub
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+Private Sub ReadIdentity(ByVal Host As String, ByVal Port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
     
@@ -51,10 +51,10 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     
     Dim device As New K2700
     
-    device.OpenConnection host, port
+    device.OpenConnection Host, Port
     
     ' report the socket number
-    Range("E2").value = device.Session.ViSession.SocketId
+    Range("E2").value = device.Session.VISession.SocketId
    
     ' report the connection state
     Range("F2").value = device.Connected

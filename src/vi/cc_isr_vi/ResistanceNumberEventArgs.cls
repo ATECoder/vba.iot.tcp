@@ -16,7 +16,7 @@ Private m_resistance As Double
 ''' <para name="resistance">     [double] The resistance. </param>
 Public Sub Initialize(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
     m_resistanceNumber = resistanceNo
-    m_resistance = resistance
+    m_resistance = Resistance
 End Sub
 
 ''' <summmary>   Gets the resistance number. </summary>
@@ -27,7 +27,7 @@ End Property
 
 ''' <summmary>   Gets the resistance. </summary>
 ''' <value>   A double. </value>
-Public Property Get resistance() As Double
-    resistance = m_resistance
+Public Property Get Resistance() As Double
+    Resistance = m_resistance
 End Property
 

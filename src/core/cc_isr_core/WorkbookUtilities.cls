@@ -18,16 +18,32 @@ Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
 End Sub
 
 ''' <summary>   Exports code files of the specified project to the active workbook path. </summary>
-''' <para name="project">     The VB Project which code files to export. </param>
-''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
-Public Sub ExportProjectCodeFiles(ByRef project As VBProject, Optional ByVal subFolder As String = "code")
+''' <para name="project">          [VBProject, The VB Project which code files to export. </param>
+''' <para name="useProjectName">   [Optional, Boolean, True] true to use the project name for the subfolder. </param>
+''' <para name="subFolder">        [Optional, String, 'code'] Specifies the sub-folder were the files
+'''                                are to be stored. </param>
+''' <para name="mustExist">        [Optional, Boolean, True] true if the folder must exists in order to prevent
+'''                                unintended storage into the default folder. </param>
+Public Sub ExportProjectCodeFiles(ByRef project As VBProject, _
+        Optional ByVal useProjectName As Boolean = True, _
+        Optional ByVal subFolder As String = "code", _
+        Optional ByVal mustExist As Boolean = True)
 
     Dim component As VBIDE.VBComponent
     Dim extension As String
     Dim fileCount As Integer
     
+    ' set the subfolder tot he project name in lower case
+    If useProjectName Then subFolder = LCase$(project.name)
+    
     ' set and, optionally, create the folder.
     Dim path As String: path = PathExtensions.GetParentFolderName(project.FileName)
+    
+    ' abort if the folder must exist but does not exist.
+    If mustExist And Not PathExtensions.FolderExists(PathExtensions.Join(path, subFolder, False)) Then
+        Exit Sub
+    End If
+    
     path = PathExtensions.Join(path, subFolder, True)
     
     Dim filePath As String

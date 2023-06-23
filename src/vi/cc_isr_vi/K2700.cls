@@ -76,14 +76,14 @@ End Property
 ''' <param name="port">        The port that the server is listening on. </param>
 ''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
+Public Function OpenConnection(ByVal Host As String, ByVal Port As Long, _
         Optional ByVal timeoutMs As Long = 500) As Boolean
        
     Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
 
     ' open the connection
     
-    OpenConnection = m_session.OpenConnection(host, port, timeoutMs)
+    OpenConnection = m_session.OpenConnection(Host, Port, timeoutMs)
     
     ' raise the connection changed event.
     
@@ -115,10 +115,10 @@ End Function
 ''' <param name="port">        The port that the server is listening on. </param>
 ''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the device was initialized. </returns>
-Public Function Initialize(ByVal host As String, ByVal port As Long, _
+Public Function Initialize(ByVal Host As String, ByVal Port As Long, _
         Optional ByVal timeoutMs As Long = 500) As Boolean
 
-    Me.OpenConnection host, port, timeoutMs
+    Me.OpenConnection Host, Port, timeoutMs
 
     ' this only works with the Prologix device
     Me.Session.SelectiveDeviceClear
@@ -397,6 +397,36 @@ Public Property Get IsFrontInputs() As Boolean
 
 End Property
 
+''' <summary>   Configures single resistnace reading. </summary>
+Public Function ConfigureSingleResistanceReading()
+
+    ' set the device to measure 4 wire resistance
+    ' Me.Session.WriteLine "*RST"
+    Me.Session.WriteLine ":TRIG:SOUR IMM"
+    Me.Session.WriteLine ":INIT:CONT OFF"
+    Me.Session.WriteLine ":SAMP:COUN 1"
+    Me.Session.WriteLine ":TRIG:COUN 1"
+    Me.Session.WriteLine ":FUNC 'RES'"
+
+End Function
+
+''' <summary>   Performs a single read from the front panel. </summary>
+Public Function ReadFrontResistance(Optional resistanceNo As Integer = 0) As Double
+
+    Me.Session.WriteLine ":INIT"
+    Me.Session.WriteLine ":READ?"
+    
+    Dim resistanceReading As String: resistanceReading = Me.Session.Read
+    
+    ' convert the measured resistance to double
+    Dim resistanceValue As Double: resistanceValue = CDbl(resistanceReading)
+    
+    OnResistanceNumberMeasured resistanceNo, resistanceValue
+
+    ReadFrontResistance = resistanceValue
+
+End Function
+
 ''' <summary>   Performs a single scan on the given resistance from the rear panel. </summary>
 ''' <remarks>
 ''' Use this method to get a single value from the instrument using the back panel switches
@@ -404,22 +434,14 @@ End Property
 ''' <param name="resistanceNo">   The resistance number. </param>
 ''' <returns>    The measured resistance of -1 if the resistance number is out
 ''' of range for this device. </returns>
-Public Function ScanReadResistance(ByVal resistanceNo As Integer) As Double
+Public Function ReadRearResistance(ByVal resistanceNo As Integer) As Double
 
     ' get the channels to close
     Dim resistanceScanList As String: resistanceScanList = Me.BuildScanList(resistanceNo)
     
     If Len(resistanceScanList) > 0 Then
     
-        ' set the device to measure 4 wire resistance
-        ' Me.Session.WriteLine "*RST"
-        Me.Session.WriteLine ":TRIG:SOUR IMM"
-        Me.Session.WriteLine ":INIT:CONT OFF"
-        Me.Session.WriteLine ":SAMP:COUN 1"
-        Me.Session.WriteLine ":TRIG:COUN 1"
-        
         ' get the channel list
-        Me.Session.WriteLine ":FUNC 'RES'"
         Me.Session.WriteLine ":ROUT:CLOS " & resistanceScanList
         Me.Session.WriteLine ":INIT"
         Me.Session.WriteLine ":READ?"
@@ -431,10 +453,10 @@ Public Function ScanReadResistance(ByVal resistanceNo As Integer) As Double
         
         OnResistanceNumberMeasured resistanceNo, resistanceValue
     
-        ScanReadResistance = resistanceValue
+        ReadRearResistance = resistanceValue
     
     Else
-        ScanReadResistance = -1
+        ReadRearResistance = -1
     
     End If
 
@@ -530,10 +552,10 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
                 Me.Session.WriteLine ":FETCH?"
               
                 ' read the data
-                Dim resistance As Double: resistance = CDbl(Me.Session.Read)
+                Dim Resistance As Double: Resistance = CDbl(Me.Session.Read)
     
                 ' raise the resistance measured event.
-                OnResistanceNumberMeasured resistanceNo, resistance
+                OnResistanceNumberMeasured resistanceNo, Resistance
               
             End If
         
