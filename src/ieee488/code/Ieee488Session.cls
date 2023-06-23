@@ -14,7 +14,7 @@ Private m_identity As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary> Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
@@ -235,7 +235,7 @@ Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
     If Me.ViSession.UsingPrologix Then
         SRQ = 1 = CInt(Me.QueryLine("++srq"))
-    Else
+    ElseIf canQuery Then
         SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus)
     End If
     

@@ -17,7 +17,7 @@ Private m_usingPrologix As Boolean
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 
 ''' <summary>   Initializes an IEEE488 Session. </summary>

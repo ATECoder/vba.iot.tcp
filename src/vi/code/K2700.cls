@@ -26,13 +26,16 @@ Private m_card2 As String
 Private m_card1ScanList As String
 Private m_card2ScanList As String
 
+''' <summary> True if the DMM external trigger mode was initiated. </summary>
+Private m_extTrigInitiated As Boolean
+
 ''' <summary>   The event that is raised upon completion of a a resistance measurement. </summary>
 ''' <param name="eventArgs">   An <see cref="ResistanceNumberEventArgs"/> event args. </param>
 Public Event ResistanceNumberMeasured(ByRef eventArgs As ResistanceNumberEventArgs)
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   Initializes the k2700 . </summary>
 Private Sub Class_Initialize()
@@ -290,11 +293,6 @@ End Property
 ''' <returns>  The channel list to close. </returns>
 Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
 
-    Const thisProcedureName = "BuildChannelList"
-    
-    ' Trap errors to the error handler
-    On Error GoTo err_Handler
-    
     Dim routeCommand As String
     
     ' Check if we need to close the bottom or top
@@ -336,67 +334,49 @@ Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
     ' set the return value
     BuildChannelList = routeCommand
 
-' ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-exit_Handler:
-    Exit Function
-  
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-err_Handler:
-  
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
-    
-    ' raise error
-    Err.Raise Err.Number
-
 End Function
 
 ''' <summary>   Returns the scan list for a specific resistance. </summary>
-''' <param name="resistanceNumber">   The resistance number. </param>
+''' <param name="resistanceNo">   The resistance number. </param>
 ''' <returns>  The scan list. </returns>
-Public Function BuildScanList(ByVal ResistanceNumber As Integer) As String
+Public Function BuildScanList(ByVal resistanceNo As Integer) As String
 
-    Const thisProcedureName = "BuildScanList"
-    
-    ' Trap errors to the error handler
-    On Error GoTo err_Handler
-    
     Dim scanList As String
     Dim resistaceChannel As String
     
     ' Check if we need to close the bottom or top
     ' channle.
-    If ResistanceNumber <= 20 Then
+    If resistanceNo <= 20 Then
     
         ' Get channel string
         If Me.HasMux40A Or Me.HasMux20A Then
         
-            resistaceChannel = "1" & Right$("0" & Format$(ResistanceNumber), 2)
+            resistaceChannel = "1" & Right$("0" & Format$(resistanceNo), 2)
             scanList = "(@" & resistaceChannel & ")"
         
         End If
       
-    ElseIf ResistanceNumber <= 40 Then
+    ElseIf resistanceNo <= 40 Then
       
         If Me.HasMux40A Then
         
             ' Get channel string
-            resistaceChannel = "1" & Right$("0" & Format$(ResistanceNumber), 2)
+            resistaceChannel = "1" & Right$("0" & Format$(resistanceNo), 2)
             scanList = "(@" & resistaceChannel & ")"
         
         ElseIf Me.HasMux20B Then
           
             ' Get channel string
-            resistaceChannel = "2" & Right$("0" & Format$(ResistanceNumber - 20), 2)
+            resistaceChannel = "2" & Right$("0" & Format$(resistanceNo - 20), 2)
             
             scanList = "(@" & resistaceChannel & ")"
         
         End If
       
-    ElseIf ResistanceNumber > 40 Then
+    ElseIf resistanceNo > 40 Then
     
         ' Get channel string
-        resistaceChannel = "2" & Right$("0" & Format$(ResistanceNumber - 40), 2)
+        resistaceChannel = "2" & Right$("0" & Format$(resistanceNo - 40), 2)
         
         If Me.HasMux40B Then
             scanList = "(@" & resistaceChannel & ")"
@@ -407,26 +387,13 @@ Public Function BuildScanList(ByVal ResistanceNumber As Integer) As String
     ' set the return value
     BuildScanList = scanList
 
-' ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
-exit_Handler:
-    Exit Function
-  
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-err_Handler:
-  
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, thisModuleName
-    
-    ' raise error
-    Err.Raise Err.Number
-
 End Function
 
-''' <summary>   Gets the front (True) or rear (False) input state. </summary>
+''' <summary>   Gets the front (True) or rear (False) inputs. </summary>
 ''' <value>   True if front input; otherwise, rear input. </value>
-Public Property Get IsFrontInput() As Boolean
+Public Property Get IsFrontInputs() As Boolean
 
-    IsFrontInput = 0 < CInt(Me.Session.QueryLine("SYST:FRSW?"))
+    IsFrontInputs = 0 < CInt(Me.Session.QueryLine("SYST:FRSW?"))
 
 End Property
 
@@ -440,27 +407,31 @@ End Property
 Public Function ScanReadResistance(ByVal resistanceNo As Integer) As Double
 
     ' get the channels to close
-    Dim resistanceScanList As String: resistanceScanList = K2700.BuildScanList(resistanceNo)
+    Dim resistanceScanList As String: resistanceScanList = Me.BuildScanList(resistanceNo)
     
     If Len(resistanceScanList) > 0 Then
     
         ' set the device to measure 4 wire resistance
-        ' K2700.Session.WriteLine "*RST"
-        K2700.Session.WriteLine ":TRIG:SOUR IMM"
-        K2700.Session.WriteLine ":INIT:CONT OFF"
-        K2700.Session.WriteLine ":SAMP:COUN 1"
-        K2700.Session.WriteLine ":TRIG:COUN 1"
+        ' Me.Session.WriteLine "*RST"
+        Me.Session.WriteLine ":TRIG:SOUR IMM"
+        Me.Session.WriteLine ":INIT:CONT OFF"
+        Me.Session.WriteLine ":SAMP:COUN 1"
+        Me.Session.WriteLine ":TRIG:COUN 1"
         
         ' get the channel list
-        K2700.Session.WriteLine ":FUNC 'RES'"
-        K2700.Session.WriteLine ":ROUT:CLOS " & resistanceScanList
-        K2700.Session.WriteLine ":INIT"
-        K2700.Session.WriteLine ":READ?"
+        Me.Session.WriteLine ":FUNC 'RES'"
+        Me.Session.WriteLine ":ROUT:CLOS " & resistanceScanList
+        Me.Session.WriteLine ":INIT"
+        Me.Session.WriteLine ":READ?"
         
-        Dim resistanceReading As String: resistanceReading = K2700.Session.Read
+        Dim resistanceReading As String: resistanceReading = Me.Session.Read
         
         ' convert the measured resistance to double
-        ScanReadResistance = CDbl(resistanceReading)
+        Dim resistanceValue As Double: resistanceValue = CDbl(resistanceReading)
+        
+        OnResistanceNumberMeasured resistanceNo, resistanceValue
+    
+        ScanReadResistance = resistanceValue
     
     Else
         ScanReadResistance = -1
@@ -469,13 +440,136 @@ Public Function ScanReadResistance(ByVal resistanceNo As Integer) As Double
 
 End Function
 
+''' <summary> Sets the instrument to read front inputs resistance using external trigger. </summary>
+''' <remarks>   Typically, readings will be fetched when the instrument requests service. </remarks>
+Public Sub SetExternalTriggerResistanceMode()
+
+    ' make sure that the instrument is ready to accept
+    ' input from the front panel
+    
+    If Not Me.IsFrontInputs Then
+        Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_VI.K2700.SetExternalTriggerResistanceMode", _
+                  UserDefinedErrors.InvalidOperationError.Description & _
+                  " The instrument Inputs must be set for Front inputs"
+    End If
+    
+    ' Clear the device
+    Me.Session.SelectiveDeviceClear
+    Me.Session.ClearExecutionState
+    
+    ' set external triggering
+    Me.Session.WriteLine ":INIT:CONT Off"
+    Me.Session.WriteLine ":FUNC 'FRES'"
+    Me.Session.WriteLine ":FRES:RANG:AUTO ON"
+    Me.Session.WriteLine ":FRES:NPLC 1"
+    Me.Session.WriteLine ":SAMP:COUN 1"
+    Me.Session.WriteLine ":TRIG:COUN 1"
+    Me.Session.WriteLine ":TRIG:SOUR EXT"
+    
+    ' enable idle operation SRQ
+    Me.Session.WriteLine ":STAT:OPER:ENAB 1024"
+    Me.Session.WriteLine "*CLS; *SRE 128"
+    
+    ' clear the flag indicating that the external
+    ' trigger mode was not initiated
+    m_extTrigInitiated = False
+  
+End Sub
+
+''' <summary>   Monitors an external trigger reading resistances from the front panel. </summary>
+''' <remarks>   Call this method from a timer event. </remarks>
+''' <param name="resistanceNo">   The resistance number. </param>
+Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As Boolean)
+
+    ' allow other events to occur
+    DoEvents
+    
+    ' check if the option button is on
+    If isDone Then
+    
+        ' if we are done,
+        
+        ' reset the instrument
+          
+        ' abort triggering
+        
+        ' this only works with the Prologix device
+        Me.Session.SelectiveDeviceClear
+        
+        ' should we do system:preset here?
+        Me.Session.ClearExecutionState
+        
+        ' set the device to measure 4 wire resistance
+        Me.Session.WriteLine ":INIT:CONT OFF"
+        Me.Session.WriteLine ":FUNC 'FRES'"
+        Me.Session.WriteLine "TRIG:SOUR IMM"
+    
+        ' restore continuous reading
+        Me.Session.WriteLine ":INIT:CONT ON"
+            
+    Else
+    
+        ' if not done, check we need to prime the external
+        ' trigger mode.
+        If m_extTrigInitiated Then
+        
+            ' if awaiting the externial trigger (external trigger mode
+            ' was initiated), check if service is requested
+            ' check if we can use this instead:
+            
+            If Me.Session.QueryServiceRequestStatus <> 0 Then
+          
+                ' clear teh trigger initaition status to indicate
+                ' that it needs to be primed on the next timer event
+                m_extTrigInitiated = False
+            
+                ' clear the serial poll bit of this device
+                Me.Session.QueryServiceRequestStatus
+                
+                ' fetch the data
+                Me.Session.WriteLine ":FETCH?"
+              
+                ' read the data
+                Dim resistance As Double: resistance = CDbl(Me.Session.Read)
+    
+                ' raise the resistance measured event.
+                OnResistanceNumberMeasured resistanceNo, resistance
+              
+            End If
+        
+        Else
+    
+            ' we need to initiate the next wait for an external trigger.
+            
+            ' clear the trigger register
+            Me.Session.WriteLine ":TRIG:SOUR IMM"
+            Me.Session.WriteLine "::TRIG:SOUR EXT"
+            
+            ' clear the screen
+            Me.Session.WriteLine ":FRES:NPLC 1"
+              
+            ' clear the serial poll register
+            Me.Session.QueryServiceRequestStatus
+            
+            ' initiate awaiting for the external trigger
+            Me.Session.WriteLine ":INIT; *CLS"
+            
+            ' and say so
+            m_extTrigInitiated = True
+        
+        End If
+        
+    End If
+
+End Sub
+
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 ' Resistance Number Measured
 
 ''' <summary>   Raises the <see cref="ResistanceNumberMeasured"/> event. </summary>
-''' <para name="resistanceNo">   [integer] The resistance number. </param>
-''' <para name="resistance">     [double] The resistance. </param>
-Private Sub OnResistanceNumberMeasured(ByVal resistanceNo As Integer, ByVal resistance As Double)
+''' <para name="resistanceNo">      [integer] The resistance number. </param>
+''' <para name="resistanceValue">   [double] The resistance. </param>
+Private Sub OnResistanceNumberMeasured(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
     RaiseEvent ResistanceNumberMeasured( _
             cc_isr_VI.Constructor.CreateResistanceNumberEventArgs(resistanceNo, resistanceValue))
 End Sub
