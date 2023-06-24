@@ -307,12 +307,12 @@ End Sub
 
 ''' <summary>   Handles the Write button click event. </summary>
 Private Sub WriteButton_Click()
-    Range(m_sentMessageCell).value = ""
-    Dim msg As String: msg = Me.CommandsComboBox.value
+    Me.SentMessage = ""
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
     Me.RestartStopWatch
-    Me.Session.WriteLine msg
+    Me.Session.WriteLine messageToSend
     Me.ReadStopWatch
-    Range(m_sentMessageCell).value = msg
+    Me.SentMessage = messageToSend
     If Me.AutoStatusReadCheckBox.value Then
         Me.ReadStatusByteButton_Click
     End If
@@ -320,29 +320,32 @@ End Sub
 
 ''' <summary>   Handles the Read button click event. </summary>
 Private Sub ReadButton_Click()
-    Range(m_receivedMessageCell).value = ""
+    Me.ReceivedMessage = ""
+    Dim messageReceived As String
     Me.RestartStopWatch
-    Dim msg As String: msg = Me.Session.Read
+    messageReceived = Me.Session.Read
     Me.ReadStopWatch
-    Range(m_receivedMessageLengthCell).value = msg
-    Range(m_receivedMessageCell).value = Len(msg)
+    Me.ReceivedMessage = messageReceived
 End Sub
 
 ''' <summary>   Handles the Read Status Byte button click event. </summary>
 Friend Sub ReadStatusByteButton_Click()
     Me.RestartStopWatch
-    Range(m_statusByteCell).value = Me.Session.ReadStatusByte
+    Me.StatusByte = Me.Session.ReadStatusByte
     Me.ReadStopWatch
 End Sub
 
 ''' <summary>   Handles the Query button click event. </summary>
 Private Sub QueryButton_Click()
+    Me.ReceivedMessage = ""
     Me.SentMessage = ""
-    Dim msg As String: msg = Me.CommandsComboBox.value
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
+    Dim messageReceived As String
     Me.RestartStopWatch
-    Me.ReceivedMessage = Me.Session.QueryLine(msg)
+    messageReceived = Me.Session.QueryLine(messageToSend)
     Me.ReadStopWatch
-    Me.SentMessage = msg
+    Me.ReceivedMessage = messageReceived
+    Me.SentMessage = messageToSend
 End Sub
 
 ''' <summary>   clears the data acquisition readings. </summary>
@@ -619,6 +622,16 @@ End Property
 ''' <summary>   Sets the sent message. </summary>
 Friend Property Let SentMessage(ByVal value As String)
     Range(m_sentMessageCell).value = value
+End Property
+
+''' <summary>   Gets the status byte. </summary>
+Friend Property Get StatusByte() As Integer
+    StatusByte = Range(m_statusByteCell).value
+End Property
+
+''' <summary>   Sets the status byte. </summary>
+Friend Property Let StatusByte(ByVal value As Integer)
+    Range(m_statusByteCell).value = value
 End Property
 
 ''' <summary>   Indicates that front inputs are required for this mode. </summary>

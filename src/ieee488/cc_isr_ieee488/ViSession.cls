@@ -19,7 +19,6 @@ Private m_usingPrologix As Boolean
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
 Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-
 ''' <summary>   Initializes an IEEE488 Session. </summary>
 Private Sub Class_Initialize()
     m_readTermination = vbLf
@@ -57,12 +56,22 @@ Public Property Get CanConnect() As Boolean
 End Property
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
-''' <returns>   The socket identifying descriptor. </returns>
+''' <value>   The socket identifying descriptor. </value>
 Public Property Get SocketId() As Long
     If Me.Connected Then
         SocketId = m_tcpClient.TcpClientSocket.SocketId
     Else
         SocketId = -1
+    End If
+End Property
+
+''' <summary>   Returns the socket address as IP plus port. </summary>
+''' <value>   The socket address. </value>
+Public Property Get SocketAddress() As String
+    If Me.Connected Then
+        SocketAddress = m_tcpClient.TcpClientSocket.SocketAddress
+    Else
+        SocketAddress = ""
     End If
 End Property
 
@@ -190,6 +199,7 @@ End Function
 ''' <returns>   The received string. </returns>
 Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     If Me.WriteLine(message, appendTermination) > 0 Then
+        DoEvents
         QueryLine = Me.Read()
     Else
         QueryLine = ""

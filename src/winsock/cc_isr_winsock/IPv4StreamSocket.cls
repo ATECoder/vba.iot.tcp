@@ -135,7 +135,9 @@ Private Declare PtrSafe Function setsockopt_ Lib "wsock32.dll" Alias "setsockopt
 Private Declare PtrSafe Function recv_ Lib "wsock32.dll" Alias "recv" ( _
         ByVal s As Long, ByVal buffer As String, ByVal bufferLength As Long, ByVal flags As Long) As Long
 
-
+Private m_socketPort As Long
+Private m_socketHost As String
+Private m_socketAddress As String
 Private m_socketId As Long
 Private m_connected As Boolean
 Private m_listening As Boolean
@@ -150,6 +152,9 @@ Private Sub Class_Initialize()
     
     ' this is required to initialize Winsock.  It will only ran once.
     Winsock.Initialize
+    
+    m_socketHost = ""
+    m_socketAddress = ""
     
     On Error GoTo 0
 
@@ -182,14 +187,38 @@ Private Sub Class_Terminate()
 
 End Sub
 
+#If False Then
+#End If
+
+''' <summary>   Returns the port the server is listening to. </summary>
+''' <value>   [Long] The port the server listens to. </value>
+Public Property Get SocketPort() As Long
+    SocketPort = m_socketPort
+End Property
+
+''' <summary>   Gets the IPv4 dotted-decimal host address. </summary>
+''' <value>   [String] The IPv4 dotted-decimal host address. </value>
+Public Property Get SocketHost() As String
+    SocketHost = m_socketHost
+End Property
+
+''' <summary>   Gets the socket address consisting of the IPv4 dotted-decimal host
+''' and the port the server is listening too. </summary>
+''' <value>   [String] The IPv4 dotted-decimal host address and port delimited with a colon. </value>
+Public Property Get SocketAddress() As String
+    SocketAddress = m_socketAddress
+End Property
+
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
-''' <returns>   The socket identifying descriptor. </returns>
+''' <value>   The socket identifying descriptor. </value>
 Public Property Get SocketId() As Long
+Attribute FullName.VB_Description = "A descriptor identifying the socket"
+Attribute FullName.VB_UserMemId = 0
     SocketId = m_socketId
 End Property
 
 ''' <summary>   Returns the connection state of the socket. </summary>
-''' <returns>   True if the socket is connected; otherwise, False. </returns>
+''' <value>   True if the socket is connected; otherwise, False. </value>
 Public Property Get Connected() As Boolean
     Connected = m_connected
 End Property
@@ -244,6 +273,10 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
         OnConnectionChanged Me.Connected
 
     End If
+    
+    m_socketPort = port
+    m_socketHost = host
+    m_socketAddress = host & ":" & CStr(port)
     
     OpenConnection = m_connected
 
@@ -343,11 +376,11 @@ Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
     End If
     
     Dim socket_id As Long
-    Dim socketAddress As wsock32.ws32_SocketAddress
+    Dim SocketAddress As wsock32.ws32_SocketAddress
     
     ' get a connected socket id
     
-    socket_id = accept_(serverSocket.SocketId, socketAddress, wsock32.ws32_SocketAddressLen)
+    socket_id = accept_(serverSocket.SocketId, SocketAddress, wsock32.ws32_SocketAddressLen)
     
     If socket_id = wsock32.ws32_INVALID_SOCKET Then
         Err.Raise UserDefinedErrors.SocketAcceptError.Code, "IdentityReader.IPv4StreamSocket.AcceptTcpClient", _

@@ -47,7 +47,7 @@ Public Property Get Connected() As Boolean
     If m_viSession Is Nothing Then
         Connected = False
     Else
-        Connected = m_viSession.Connected
+        Connected = Me.ViSession.Connected
     End If
 
 End Property
@@ -68,7 +68,7 @@ End Property
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
-    OpenConnection = m_viSession.OpenConnection(host, port, timeoutMs)
+    OpenConnection = Me.ViSession.OpenConnection(host, port, timeoutMs)
    
     OnConnectionChanged Me.Connected
    
@@ -78,7 +78,7 @@ End Function
 ''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
-    CloseConnection = m_viSession.CloseConnection
+    CloseConnection = Me.ViSession.CloseConnection
     
     OnConnectionChanged Me.Connected
 
@@ -88,7 +88,7 @@ End Function
 ''' <value>   The socket identifying descriptor. </value>
 Public Property Get SocketId() As Long
     If Me.Connected Then
-        SocketId = m_viSession.SocketId
+        SocketId = Me.ViSession.SocketId
     Else
         SocketId = -1
     End If
@@ -99,7 +99,26 @@ End Property
 ''' <returns>   The number of sent characters. </returns>
 Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    WriteLine = m_viSession.WriteLine(message, appendTermination)
+    WriteLine = Me.ViSession.WriteLine(message, appendTermination)
+    
+    If Me.ViSession.UsingPrologix Then
+    
+        ' read the status byte and check for errors.
+        Dim statusByte As Integer: statusByte = Me.ReadStatusByte()
+    
+        ' check if we have an error.
+        If ServiceRequests.ErrorAvailable = (statusByte And ServiceRequests.ErrorAvailable) Then
+        
+            ' raise the write error adding some information
+            Err.Raise UserDefinedErrors.SocketSendError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
+                      UserDefinedErrors.SocketSendError.Description & _
+                      " SRQ=0x" & Hex(statusByte) & _
+                      ". Error Available (0x" & Hex(ServiceRequests.ErrorAvailable) & _
+                      ") after sending " & message & " to the instrument at " & _
+                      Me.ViSession.SocketAddress & "."
+        End If
+    
+    End If
 
 End Function
 
@@ -111,7 +130,28 @@ End Function
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
     
-    Read = m_viSession.Read(maxLength, trimEnd)
+    If Me.ViSession.UsingPrologix Then
+        
+        ' check if we have data to read.
+    
+        ' read the status byte and check for errors.
+        Dim statusByte As Integer: statusByte = Me.ReadStatusByte()
+    
+        ' check if message available.
+        If 0 = (statusByte And ServiceRequests.MessageAvailable) Then
+        
+            ' raise the write error adding some information
+            Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
+                      UserDefinedErrors.InvalidOperationError.Description & _
+                      " SRQ=0x" & Hex(statusByte) & _
+                      ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
+                      ") trying reading the instrument at " & Me.ViSession.SocketAddress & "."
+        
+        End If
+    
+    End If
+    
+    Read = Me.ViSession.Read(maxLength, trimEnd)
 
 End Function
     
@@ -120,7 +160,12 @@ End Function
 ''' <returns>   The received string. </returns>
 Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    QueryLine = m_viSession.QueryLine(message, appendTermination)
+    If Me.WriteLine(message, appendTermination) > 0 Then
+        DoEvents
+        QueryLine = Me.Read()
+    Else
+        QueryLine = ""
+    End If
 
 End Function
 
@@ -133,7 +178,7 @@ End Property
 ''' <summary> Clears Status (CLS) command. </summary>
 ''' <returns> the number of characters that were sent. </returns>
 Public Function ClearExecutionState() As Integer
-    ClearExecutionState = Me.ViSession.WriteLine(Ieee488Syntax.ClearExecutionStateCommand)
+    ClearExecutionState = Me.WriteLine(Ieee488Syntax.ClearExecutionStateCommand)
 End Function
 
 ''' <summary>   Returns the identity. </summary>
@@ -148,27 +193,27 @@ End Property
 ''' <summary>   Returns the instrument identity using the *IDN? query command. </summary>
 ''' <returns>   A string. </returns>
 Public Function QueryIdentity() As String
-    m_identity = Me.ViSession.QueryLine(Ieee488Syntax.IdentityQueryCommand)
+    m_identity = Me.QueryLine(Ieee488Syntax.IdentityQueryCommand)
     QueryIdentity = m_identity
 End Function
 
 ''' <summary> Operation Complete (*OPC) command. </summary>
 ''' <returns> The number of characters that were sent. </returns>
 Public Function OperationComplete() As Integer
-    OperationComplete = Me.ViSession.WriteLine(Ieee488Syntax.OperationCompleteCommand)
+    OperationComplete = Me.WriteLine(Ieee488Syntax.OperationCompleteCommand)
 End Function
 
 ''' <summary>   Returns 1 if operation was completed; otherwise 0. </summary>
 ''' <returns>   A string. 1 if completed; otherwise 0. </returns>
 Public Function QueryOperationCompleted() As String
-    QueryOperationCompleted = Me.ViSession.QueryLine(Ieee488Syntax.OperationCompletedQueryCommand)
+    QueryOperationCompleted = Me.QueryLine(Ieee488Syntax.OperationCompletedQueryCommand)
 End Function
 
 ''' <summary>   Returns option (instrument specific). </summary>
 ''' <returns>   A string. </returns>
 Public Function QueryOptions() As String
     
-    QueryOptions = Me.ViSession.QueryLine(Ieee488Syntax.OptionsQueryCommand)
+    QueryOptions = Me.QueryLine(Ieee488Syntax.OptionsQueryCommand)
     
 End Function
 
@@ -245,7 +290,7 @@ End Function
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function Wait() As Integer
     
-    Wait = Me.ViSession.WriteLine(Ieee488Syntax.WaitCommand)
+    Wait = Me.WriteLine(Ieee488Syntax.WaitCommand)
     
 End Function
 
@@ -256,7 +301,7 @@ Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Integer
     
     Dim command As String
     command = StringExtensions.StringFormat(StandardEventEnableCommandFormat, StandardEvents)
-    EnableStandardEvents = Me.ViSession.WriteLine(command)
+    EnableStandardEvents = Me.WriteLine(command)
     
 End Function
 
@@ -265,7 +310,7 @@ End Function
 Public Function QueryStandardEventsEnable() As Integer
     
     Dim StandardEvents As String
-    StandardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
+    StandardEvents = Me.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
     QueryStandardEventsEnable = CInt(StandardEvents)
 
 End Function
@@ -275,7 +320,7 @@ End Function
 Public Function QueryStandardEventsStatus() As Integer
     
     Dim StandardEvents As String
-    StandardEvents = Me.ViSession.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
+    StandardEvents = Me.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
     QueryStandardEventsStatus = CInt(StandardEvents)
     
 End Function
@@ -287,7 +332,7 @@ Public Function EnableServiceRequest(ByVal serviceRequest As Integer) As Integer
     
     Dim command As String
     command = StringExtensions.StringFormat(ServiceRequestEnableCommandFormat, serviceRequest)
-    EnableServiceRequest = Me.ViSession.WriteLine(command)
+    EnableServiceRequest = Me.WriteLine(command)
     
 End Function
 
@@ -296,7 +341,7 @@ End Function
 Public Function QueryServiceRequestEnable() As Integer
     
     Dim serviceRequest As String
-    serviceRequest = Me.ViSession.QueryLine(Ieee488Syntax.ServiceRequestEnableQueryCommand)
+    serviceRequest = Me.QueryLine(Ieee488Syntax.ServiceRequestEnableQueryCommand)
     QueryServiceRequestEnable = CInt(serviceRequest)
     
 End Function
@@ -306,7 +351,7 @@ End Function
 Public Function QueryServiceRequestStatus() As Integer
     
     Dim serviceRequest As String
-    serviceRequest = Me.ViSession.QueryLine(Ieee488Syntax.ServiceRequestQueryCommand)
+    serviceRequest = Me.QueryLine(Ieee488Syntax.ServiceRequestQueryCommand)
     QueryServiceRequestStatus = CInt(serviceRequest)
     
 End Function
@@ -315,7 +360,7 @@ End Function
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function ResetKnownState() As Integer
     
-    ResetKnownState = Me.ViSession.WriteLine(Ieee488Syntax.ResetKnownStateCommand)
+    ResetKnownState = Me.WriteLine(Ieee488Syntax.ResetKnownStateCommand)
     
 End Function
 
@@ -328,8 +373,4 @@ Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
 End Sub
-
-
-
-
 
