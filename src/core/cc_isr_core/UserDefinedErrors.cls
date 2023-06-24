@@ -278,7 +278,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
     Dim errorSource As String: errorSource = Err.source
     
     ' check if the error occurred in this procedure
-    If (errorSource = ThisWorkbook.name) Or (Len(errorSource) = 0) Then
+    If (errorSource = ActiveWorkbook.name) Or (Len(errorSource) = 0) Then
     
         ' if the source string is the application title,
         ' the error occurred in the procedure.  Because

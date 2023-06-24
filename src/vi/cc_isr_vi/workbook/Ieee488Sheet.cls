@@ -23,6 +23,7 @@ Private Const m_elapsedTimeCell As String = "J2"
 Private Const m_elapsedTimeFormat As String = "0.0"
 Private Const m_connectedCell As String = "F2"
 Private Const m_identityCell As String = "I2"
+Private Const m_errorMessageCell As String = "B4"
 
 Private WithEvents m_session As cc_isr_Ieee488.Ieee488Session
 Attribute m_session.VB_VarHelpID = -1
@@ -39,12 +40,6 @@ Public Property Get Session() As cc_isr_Ieee488.Ieee488Session
         PopulateCommandsComboBox
     End If
     Set Session = m_session
-End Property
-
-''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Ieee488.VISession"/>. </summary>
-''' <value>   The singleton instance of the <see cref="cc_isr_Ieee488.VISession"/>. </value>
-Public Property Get VISession() As cc_isr_Ieee488.VISession
-    Set VISession = Me.Session.VISession
 End Property
 
 ''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </summary>
@@ -82,33 +77,6 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
 
 End Sub
 
-''' <summary>   Handles the Toggle connection button click event. </summary>
-Private Sub ConnectToggleButton_Click()
-
-    Me.RestartStopWatch
-
-    Dim Host As String
-    Dim Port As Integer
-    Dim timeout As Integer
-    
-    timeout = Me.ReceiveTimeout
-    Host = Me.Host
-    Port = Me.Port
-    
-    If Not ConnectToggleButton.value And Me.Session.Connected Then
-        
-        Me.Session.CloseConnection
-        
-    ElseIf ConnectToggleButton.value And Not Me.Session.Connected Then
-    
-        Me.Session.OpenConnection Me.Host, Me.Port, timeout
-    
-    End If
-    
-    Me.ReadStopWatch
-    
-End Sub
-
 ''' <summary>   Populates the Commands combo box. </summary>
 Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.Clear
@@ -144,25 +112,251 @@ Friend Sub ReadStopWatch()
     Range(m_elapsedTimeCell).value = Format(Me.StopWatch.ElapsedMilliseconds, m_elapsedTimeFormat)
 End Sub
 
+''' <summary>   Write line handling an error messages. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Private Sub WriteLine(ByVal message As String)
+
+    Const thisProcedureName = "WriteLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.Session.WriteLine message
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Query a message from the instrument handling any errors. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Private Function QueryLine(ByVal message As String) As String
+
+    Const thisProcedureName = "QueryLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    QueryLine = Me.Session.QueryLine(message)
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+''' <summary>   Read from the instrument handling any errors. </summary>
+Private Function Read() As String
+
+    Const thisProcedureName = "Read"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Read = Me.Session.Read()
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+''' <summary>   Handles the Toggle connection button click event. </summary>
+Private Sub ConnectToggleButton_Click()
+
+    Me.RestartStopWatch
+
+    Dim Host As String
+    Dim Port As Integer
+    Dim timeout As Integer
+    
+    timeout = Me.ReceiveTimeout
+    Host = Me.Host
+    Port = Me.Port
+    
+    If Not ConnectToggleButton.value And Me.Session.Connected Then
+        
+        Me.Session.CloseConnection
+        
+    ElseIf ConnectToggleButton.value And Not Me.Session.Connected Then
+    
+        Me.Session.OpenConnection Me.Host, Me.Port, timeout
+    
+    End If
+    
+    Me.ReadStopWatch
+    
+End Sub
+
 ''' <summary>   Handles the Clear Know State button click event. </summary>
 Private Sub CLSButton_Click()
+    
+    Const thisProcedureName = "CLSButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
     Me.Session.ClearExecutionState
     Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Handles the Reset Known State button click event. </summary>
 Private Sub RSTButton_Click()
+    
+    Const thisProcedureName = "RSTButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
     Me.Session.ResetKnownState
     Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>  Handles the Selective device clear button click event. </summary>
 Private Sub SDCButton_Click()
+    
+    Const thisProcedureName = "SDCButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
     Me.Session.SelectiveDeviceClear
     Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+''' <summary>   Handles the Read Status Byte button click event. </summary>
+Friend Sub ReadStatusByteButton_Click()
+    
+    Const thisProcedureName = "ReadStatusByteButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    Me.StatusByte = Me.Session.ReadStatusByte
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Handles the Write button click event. </summary>
@@ -170,7 +364,7 @@ Private Sub WriteButton_Click()
     Me.SentMessage = ""
     Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
     Me.RestartStopWatch
-    Me.Session.WriteLine messageToSend
+    Me.WriteLine messageToSend
     Me.ReadStopWatch
     Me.SentMessage = messageToSend
     If Me.AutoStatusReadCheckBox.value Then
@@ -183,16 +377,9 @@ Private Sub ReadButton_Click()
     Me.ReceivedMessage = ""
     Dim messageReceived As String
     Me.RestartStopWatch
-    messageReceived = Me.Session.Read
+    messageReceived = Me.Read
     Me.ReadStopWatch
     Me.ReceivedMessage = messageReceived
-End Sub
-
-''' <summary>   Handles the Read Status Byte button click event. </summary>
-Friend Sub ReadStatusByteButton_Click()
-    Me.RestartStopWatch
-    Me.StatusByte = Me.Session.ReadStatusByte
-    Me.ReadStopWatch
 End Sub
 
 ''' <summary>   Handles the Query button click event. </summary>
@@ -202,7 +389,7 @@ Private Sub QueryButton_Click()
     Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
     Dim messageReceived As String
     Me.RestartStopWatch
-    messageReceived = Me.Session.QueryLine(messageToSend)
+    messageReceived = Me.QueryLine(messageToSend)
     Me.ReadStopWatch
     Me.ReceivedMessage = messageReceived
     Me.SentMessage = messageToSend
@@ -265,7 +452,7 @@ Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connec
         ' report the socket number
         Range(m_connectedHostCell).value = Me.Host
         Range(m_connectedPortCell).value = Me.Port
-        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
+        Range(m_connectedSocketIdCell).value = Me.Session.SocketId
     
     Else
     

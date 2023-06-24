@@ -24,6 +24,8 @@ Private Const m_elapsedTimeCell As String = "J2"
 Private Const m_elapsedTimeFormat As String = "0.0"
 Private Const m_connectedCell As String = "F2"
 Private Const m_identityCell As String = "I2"
+Private Const m_errorMessageCell As String = "B5"
+
 Private Const m_card1Cell As String = "C15"
 Private Const m_card2Cell As String = "C16"
 Private Const m_card1ScanListCell As String = "C17"
@@ -32,7 +34,7 @@ Private Const m_inputsCell As String = "C20"
 Private Const m_resistanceNoCell As String = "C21"
 Private Const m_resistanceCell As String = "D21"
 Private Const m_resistanceCountCell As String = "D21"
-Private Const m_externalTriggerStatusCell As String = "C4"
+Private Const m_externalTriggerStatusCell As String = "C26"
 
 Private Const m_resistanceNoTopRow As Integer = 2
 Private Const m_resistanceNoCol As String = "K"
@@ -105,6 +107,98 @@ Public Property Get StopWatch() As cc_isr_Core.StopWatch
     End If
     Set StopWatch = m_stopWatch
 End Property
+
+''' <summary>   Write line handling an error messages. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Private Sub WriteLine(ByVal message As String)
+
+    Const thisProcedureName = "WriteLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.Session.WriteLine message
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Query a message from the instrument handling any errors. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Private Function QueryLine(ByVal message As String) As String
+
+    Const thisProcedureName = "QueryLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    QueryLine = Me.Session.QueryLine(message)
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+''' <summary>   Read from the instrument handling any errors. </summary>
+Private Function Read() As String
+
+    Const thisProcedureName = "WriteLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Read = Me.Session.Read()
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
 
 ''' <summary>   Handles the Toggle connection button click event. </summary>
 Private Sub ConnectToggleButton_Click()
@@ -218,10 +312,10 @@ Private Sub ReadResistanceButton_Click()
     End If
     
     If Me.FrontReadRequired And Not Me.K2700.IsFrontInputs Then
-        MsgBox "Please release the front panel INPUTS button to its FRONT (F) position"
+        Range(m_errorMessageCell).value = "Please release the front panel INPUTS button to its FRONT (F) position"
         GoTo exit_Handler
     ElseIf Not Me.FrontReadRequired And Me.K2700.IsFrontInputs Then
-        MsgBox "Please depress the front panel INPUTS button to its REAR (R) position"
+        Range(m_errorMessageCell).value = "Please depress the front panel INPUTS button to its REAR (R) position"
         GoTo exit_Handler
     End If
 
@@ -281,7 +375,7 @@ err_Handler:
     UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
     
     ' display the error message
-    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -389,7 +483,7 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
             Me.ExternalTrigEnabled = False
             
             ' display the proper message
-            MsgBox "Please release the front panel INPUTS button to its FRONT (F) position"
+            Range(m_errorMessageCell).value = "Please release the front panel INPUTS button to its FRONT (F) position"
               
             ' and get out
             GoTo exit_Handler
@@ -435,7 +529,7 @@ err_Handler:
     UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
     
     ' display the error message
-    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -490,7 +584,7 @@ err_Handler:
     UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
     
     ' display the error message
-    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -570,7 +664,7 @@ err_Handler:
     UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
     
     ' display the error message
-    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
