@@ -9,6 +9,24 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_repeatCountCell As String = "B1"
+Private Const m_inputHostCell As String = "B2"
+Private Const m_inputPortCell As String = "B3"
+Private Const m_receiveTimeoutCell As String = "B4"
+Private Const m_errorMessageCell As String = "B5"
+
+Private Const m_socketAddressCell As String = "C2"
+Private Const m_connectedSocketIdCell As String = "D2"
+Private Const m_connectedCell As String = "E2"
+Private Const m_sentMessageCell As String = "F2"
+Private Const m_receivedMessageLengthCell As String = "G2"
+Private Const m_receivedMessageCell As String = "H2"
+Private Const m_statusByteCell As String = "F3"
+Private Const m_averageElapsedTimeCell As String = "H3"
+Private Const m_elapsedTimeCell As String = "H4"
+Private Const m_elapsedTimeFormat As String = "0.0"
+Private Const m_identityCell As String = "H2"
+
 ''' <summary>   Reads the identity form the instrument with the
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
@@ -16,23 +34,22 @@ Private Sub ReadIdentityButton_Click()
     Dim host As String
     Dim port As Integer
     Dim repeatCount As Integer
+    Dim timeout As Integer
     
-    repeatCount = Range("B1").value
-    host = Range("B2").value
-    port = Range("B3").value
-    
-    Range("C2").value = host
-    Range("D2").value = port
+    timeout = Range(m_receiveTimeoutCell).value
+    repeatCount = Range(m_repeatCountCell).value
+    host = Range(m_inputHostCell).value
+    port = Range(m_inputPortCell).value
     
 #If True Then
     ' read identity using basic winsock.
-    ReadIdentity host, port, repeatCount
+    ReadIdentity host, port, repeatCount, timeout
 #ElseIf False Then
     ' read identity using the Tcp Client.
-    TcpClientReadIdentity host, port, repeatCount
+    TcpClientReadIdentity host, port, repeatCount, timeout
 #Else
     ' read identity using winsock with buffer.
-    ReadIdentityUsingBuffer host, port, repeatCount
+    ReadIdentityUsingBuffer host, port, repeatCount, timeout
 #End If
     
 End Sub
@@ -41,15 +58,17 @@ End Sub
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
 
     On Error GoTo Finally
     
-    Range("E2").value = ""
-    Range("F2").value = ""
-    Range("G2").value = ""
-    Range("H2").value = ""
-    Range("I2").value = ""
+    Range(m_socketAddressCell) = ""
+    Range(m_connectedSocketIdCell).value = ""
+    Range(m_connectedCell).value = ""
+    Range(m_sentMessageCell).value = ""
+    Range(m_receivedMessageLengthCell).value = ""
+    Range(m_receivedMessageCell).value = ""
+    Range(m_elapsedTimeCell).value = ""
 
     Dim maximumLength As Integer
     maximumLength = 1024
@@ -62,19 +81,22 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     Dim totalMilliseconds As Double
     
     ' report the socket number
-    Range("E2").value = socket.SocketId
+    Range(m_connectedSocketIdCell).value = socket.SocketId
     
     socket.OpenConnection host, port
     
     ' report the connection state
-    Range("F2").value = socket.Connected
+    Range(m_connectedCell).value = socket.Connected
     
     If socket.Connected Then
     
+        Range(m_socketAddressCell).value = socket.SocketAddress
+    
         Dim command As String
         command = "*IDN?"
-        Range("G2").value = command
+        Range(m_sentMessageCell).value = command
         
+        Dim sentCount As Integer
         Dim loopCount As Integer
         Do While loopCount < repeatCount
             
@@ -84,7 +106,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             sw.Restart
             
             ' send the command
-            socket.SendMessage command & vbLf
+            sentCount = socket.SendMessage(command & vbLf)
         
             ' receive the reading
             Dim Identity As String
@@ -92,20 +114,16 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(Identity)
-            Range("I2").value = Identity
+            Range(m_receivedMessageLengthCell).value = Len(Identity)
+            Range(m_receivedMessageCell).value = Identity
     
         Loop
   
-        ' command = ":SYST:PRES"
-        ' count = SendMessage(command)
-        ' Call OPC
-        
-        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
-        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     Else
-        MsgBox "connection failed without reporting an exception"
+        Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
     
 Finally:
@@ -127,7 +145,7 @@ Finally:
     Set socket = Nothing
     
     If Len(errorMessage) > 0 Then
-        MsgBox errorMessage
+        Range(m_errorMessageCell).value = errorMessage
     End If
 
 End Sub
@@ -137,15 +155,17 @@ End Sub
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
 
     On Error GoTo Finally
     
-    Range("E2").value = ""
-    Range("F2").value = ""
-    Range("G2").value = ""
-    Range("H2").value = ""
-    Range("I2").value = ""
+    Range(m_socketAddressCell) = ""
+    Range(m_connectedSocketIdCell).value = ""
+    Range(m_connectedCell).value = ""
+    Range(m_sentMessageCell).value = ""
+    Range(m_receivedMessageLengthCell).value = ""
+    Range(m_receivedMessageCell).value = ""
+    Range(m_elapsedTimeCell).value = ""
 
     Dim maximumLength As Integer
     maximumLength = 1024
@@ -158,18 +178,18 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     Dim totalMilliseconds As Double
     
     ' report the socket number
-    Range("E2").value = socket.SocketId
+    Range(m_connectedSocketIdCell).value = socket.SocketId
     
     socket.OpenConnection host, port
     
     ' report the connection state
-    Range("F2").value = socket.Connected
+    Range(m_connectedCell).value = socket.Connected
     
     If socket.Connected Then
     
         Dim command As String
         command = "*IDN?"
-        Range("G2").value = command
+        Range(m_sentMessageCell).value = command
         
         Dim loopCount As Integer
         Do While loopCount < repeatCount
@@ -187,20 +207,16 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = readCount
-            Range("I2").value = buffer
+            Range(m_receivedMessageLengthCell).value readCount
+            Range(m_receivedMessageCell).value = buffer
     
         Loop
   
-        ' command = ":SYST:PRES"
-        ' count = SendMessage(command)
-        ' Call OPC
-        
-        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
-        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     Else
-        MsgBox "connection failed without reporting an exception"
+        Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
     
 Finally:
@@ -222,7 +238,7 @@ Finally:
     Set socket = Nothing
     
     If Len(errorMessage) > 0 Then
-        MsgBox errorMessage
+        Range(m_errorMessageCell).value = errorMessage
     End If
 
 End Sub
@@ -232,15 +248,17 @@ End Sub
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
 
     On Error GoTo Finally
     
-    Range("E2").value = ""
-    Range("F2").value = ""
-    Range("G2").value = ""
-    Range("H2").value = ""
-    Range("I2").value = ""
+    Range(m_socketAddressCell) = ""
+    Range(m_connectedSocketIdCell).value = ""
+    Range(m_connectedCell).value = ""
+    Range(m_sentMessageCell).value = ""
+    Range(m_receivedMessageLengthCell).value = ""
+    Range(m_receivedMessageCell).value = ""
+    Range(m_elapsedTimeCell).value = ""
 
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
     Dim totalMilliseconds As Double
@@ -251,16 +269,16 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     client.ConnectTo host, port
     
     ' report the socket number
-    Range("E2").value = client.TcpClientSocket.SocketId
+    Range(m_connectedSocketIdCell).value = socket.SocketId
    
     ' report the connection state
-    Range("F2").value = client.TcpClientSocket.Connected
+    Range(m_connectedCell).value = socket.Connected
     
     If client.TcpClientSocket.Connected Then
     
         Dim command As String
         command = "*IDN?"
-        Range("G2").value = command
+        Range(m_sentMessageCell).value = command
         
         Dim loopCount As Integer
         Do While loopCount < repeatCount
@@ -279,8 +297,8 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(Identity)
-            Range("I2").value = Identity
+            Range(m_receivedMessageLengthCell).value = Len(Identity)
+            Range(m_receivedMessageCell).value = Identity
     
         Loop
   
@@ -288,11 +306,11 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         ' count = SendMessage(command)
         ' Call OPC
         
-        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
-        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     Else
-        MsgBox "connection failed without reporting an exception"
+        Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
     
 Finally:
@@ -316,7 +334,7 @@ Finally:
     Set client = Nothing
     
     If Len(errorMessage) > 0 Then
-        MsgBox errorMessage
+        Range(m_errorMessageCell).value = errorMessage
     End If
 
 End Sub

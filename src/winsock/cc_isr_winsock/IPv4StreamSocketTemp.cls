@@ -187,6 +187,9 @@ Private Sub Class_Terminate()
 
 End Sub
 
+#If False Then
+#End If
+
 ''' <summary>   Returns the port the server is listening to. </summary>
 ''' <value>   [Long] The port the server listens to. </value>
 Public Property Get SocketPort() As Long
@@ -209,8 +212,8 @@ End Property
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
 ''' <value>   The socket identifying descriptor. </value>
 Public Property Get SocketId() As Long
-Attribute SocketId.VB_Description = "A descriptor identifying the socket"
-Attribute SocketId.VB_UserMemId = 0
+Attribute FullName.VB_Description = "A descriptor identifying the socket"
+Attribute FullName.VB_UserMemId = 0
     SocketId = m_socketId
 End Property
 
@@ -566,8 +569,8 @@ Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
 End Sub
 
 ''' <summary>   Gets the socket receive timeout in milliseconds. </summary>
-Public Property Get receiveTimeout() As Long
-    receiveTimeout = m_receiveTimeout
+Public Property Get ReceiveTimeout() As Long
+    ReceiveTimeout = m_receiveTimeout
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +

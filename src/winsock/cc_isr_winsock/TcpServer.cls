@@ -74,7 +74,7 @@ End Property
 Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
 
     Dim connectedTcpClientSocket As IPv4StreamSocket
-    connectedTcpClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
+    Set connectedTcpClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
     
     Dim client As TcpClient
     Set client = New TcpClient
