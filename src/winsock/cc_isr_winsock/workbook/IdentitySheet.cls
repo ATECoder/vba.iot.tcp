@@ -24,13 +24,11 @@ Private Sub ReadIdentityButton_Click()
     Range("C2").value = host
     Range("D2").value = port
     
-    ' scpi.preset
-    
 #If True Then
     ' read identity using basic winsock.
     ReadIdentity host, port, repeatCount
 #ElseIf False Then
-    ' read identity using the Tcp Clienar.
+    ' read identity using the Tcp Client.
     TcpClientReadIdentity host, port, repeatCount
 #Else
     ' read identity using winsock with buffer.
@@ -101,7 +99,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
-        ' Call opc
+        ' Call OPC
         
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
@@ -196,7 +194,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
-        ' Call opc
+        ' Call OPC
         
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
@@ -288,7 +286,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
-        ' Call opc
+        ' Call OPC
         
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"

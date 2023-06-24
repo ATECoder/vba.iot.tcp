@@ -10,13 +10,13 @@ Attribute VB_Exposed = True
 Option Explicit
 Private m_connected As Boolean
 
-''' <summmary>   Initializes the event arguments. </summary>
+''' <summary>   Initializes the event arguments. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Public Sub Initialize(ByVal isConnected As Boolean)
     m_connected = isConnected
 End Sub
 
-''' <summmary>   Gets the connection state. </summary>
+''' <summary>   Gets the connection state. </summary>
 ''' <value>   A Boolean. </value>
 Public Property Get Connected() As Boolean
     Connected = m_connected
