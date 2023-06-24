@@ -24,8 +24,6 @@ Private Sub ReadIdentityButton_Click()
     Range("C2").value = host
     Range("D2").value = port
     
-    ' scpi.preset
-    
     ' read identity user session read.
     Ieee488SessionReadIdentity host, port, repeatCount
     
@@ -84,7 +82,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
-        ' Call opc
+        ' Call OPC
         
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"

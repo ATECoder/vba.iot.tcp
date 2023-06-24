@@ -23,7 +23,7 @@ Private Sub Class_Initialize()
     
 End Sub
 
-''' <summary> Termiantes an IEEE488 Session. </summary>
+''' <summary> Terminates an IEEE488 Session. </summary>
 Private Sub Class_Terminate()
     
     Me.Dispose
@@ -41,7 +41,7 @@ Public Sub Dispose()
 End Sub
 
 ''' <summary>   Returns the connection state of the client. </summary>
-''' <vaule>   True if the TCP Client socket is connected; otherwise, False. </value>
+''' <value>   True if the TCP Client socket is connected; otherwise, False. </value>
 Public Property Get Connected() As Boolean
     
     If m_viSession Is Nothing Then
@@ -145,7 +145,7 @@ Public Property Get Identity() As String
     Identity = m_identity
 End Property
 
-''' <summary>   Returns the instrument identity using hte *IDN? query command. </summary>
+''' <summary>   Returns the instrument identity using the *IDN? query command. </summary>
 ''' <returns>   A string. </returns>
 Public Function QueryIdentity() As String
     m_identity = Me.ViSession.QueryLine(Ieee488Syntax.IdentityQueryCommand)
@@ -158,8 +158,8 @@ Public Function OperationComplete() As Integer
     OperationComplete = Me.ViSession.WriteLine(Ieee488Syntax.OperationCompleteCommand)
 End Function
 
-''' <summary>   Returns 1 if operation was coompleted; otherwize 0. </summary>
-''' <returns>   A string. 1 if complete; otehrwise 0. </returns>
+''' <summary>   Returns 1 if operation was completed; otherwise 0. </summary>
+''' <returns>   A string. 1 if completed; otherwise 0. </returns>
 Public Function QueryOperationCompleted() As String
     QueryOperationCompleted = Me.ViSession.QueryLine(Ieee488Syntax.OperationCompletedQueryCommand)
 End Function
@@ -250,7 +250,7 @@ Public Function Wait() As Integer
 End Function
 
 ''' <summary> Enables standard events using the (*ESE {0}) command. </summary>
-''' <param name="standardEvents">   The stadnard event bits to enable. <param>
+''' <param name="standardEvents">   The standard event bits to enable. <param>
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Integer
     
@@ -281,7 +281,7 @@ Public Function QueryStandardEventsStatus() As Integer
 End Function
 
 ''' <summary>   Enables Service Request using the (*SRE {0}) command. </summary>
-''' <param name="ServiceRequest">   The stadnard event bits to enable. <param>
+''' <param name="ServiceRequest">   The standard event bits to enable. <param>
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function EnableServiceRequest(ByVal serviceRequest As Integer) As Integer
     
