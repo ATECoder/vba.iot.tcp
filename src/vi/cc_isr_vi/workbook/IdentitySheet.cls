@@ -28,8 +28,6 @@ Private Sub ReadIdentityButton_Click()
     Range("C2").value = Host
     Range("D2").value = Port
     
-    ' scpi.preset
-    
     ReadIdentity Host, Port, repeatCount
    
 End Sub
@@ -90,7 +88,7 @@ Private Sub ReadIdentity(ByVal Host As String, ByVal Port As Long, ByVal repeatC
   
         ' command = ":SYST:PRES"
         ' count = SendMessage(command)
-        ' Call opc
+        ' Call OPC
         Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
         Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
     

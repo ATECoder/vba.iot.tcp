@@ -11,7 +11,7 @@ Option Explicit
 Private m_resistanceNumber As Integer
 Private m_resistance As Double
 
-''' <summmary>   Initializes the event arguments. </summary>
+''' <summary>   Initializes the event arguments. </summary>
 ''' <para name="resistanceNo">   [integer] The resistance number. </param>
 ''' <para name="resistance">     [double] The resistance. </param>
 Public Sub Initialize(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
@@ -19,13 +19,13 @@ Public Sub Initialize(ByVal resistanceNo As Integer, ByVal resistanceValue As Do
     m_resistance = Resistance
 End Sub
 
-''' <summmary>   Gets the resistance number. </summary>
+''' <summary>   Gets the resistance number. </summary>
 ''' <value>   A integer. </value>
 Public Property Get ResistanceNumber() As Integer
     ResistanceNumber = m_resistanceNumber
 End Property
 
-''' <summmary>   Gets the resistance. </summary>
+''' <summary>   Gets the resistance. </summary>
 ''' <value>   A double. </value>
 Public Property Get Resistance() As Double
     Resistance = m_resistance

@@ -97,7 +97,7 @@ Public Function CloseConnection() As Boolean
 
     CloseConnection = m_session.CloseConnection
     
-    ' set session to nothing which teslls us that the session
+    ' set session to nothing which tells us that the session
     ' is no longer connected
     
     m_session = Nothing
@@ -129,7 +129,7 @@ Public Function Initialize(ByVal Host As String, ByVal Port As Long, _
     
     Me.ReadCards
     
-    ' define scan list for resistance measurments on all cards.
+    ' define scan list for resistance measurements on all cards.
    
     Me.DefineResistanceScanLists
    
@@ -175,7 +175,7 @@ Public Function DefineResistanceScanLists()
 
 End Function
 
-''' <summary>   Sets the instrument to continous auto range resistance measurement. </summary>
+''' <summary>   Sets the instrument to continuous auto range resistance measurement. </summary>
 Public Function ContinuousResistanceAutoRange()
 
     ' set resistance defaults
@@ -295,8 +295,7 @@ Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
 
     Dim routeCommand As String
     
-    ' Check if we need to close the bottom or top
-    ' channle.
+    ' Check if we need to close the bottom or top channel.
     If ResistanceNumber <= 20 Then
     
         If Me.HasMux40A Then
@@ -344,8 +343,7 @@ Public Function BuildScanList(ByVal resistanceNo As Integer) As String
     Dim scanList As String
     Dim resistaceChannel As String
     
-    ' Check if we need to close the bottom or top
-    ' channle.
+    ' Check if we need to close the bottom or top channel.
     If resistanceNo <= 20 Then
     
         ' Get channel string
@@ -397,7 +395,7 @@ Public Property Get IsFrontInputs() As Boolean
 
 End Property
 
-''' <summary>   Configures single resistnace reading. </summary>
+''' <summary>   Configures single resistance reading. </summary>
 Public Function ConfigureSingleResistanceReading()
 
     ' set the device to measure 4 wire resistance
@@ -535,13 +533,13 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
         ' trigger mode.
         If m_extTrigInitiated Then
         
-            ' if awaiting the externial trigger (external trigger mode
+            ' if awaiting the external trigger (external trigger mode
             ' was initiated), check if service is requested
             ' check if we can use this instead:
             
             If Me.Session.QueryServiceRequestStatus <> 0 Then
           
-                ' clear teh trigger initaition status to indicate
+                ' clear the trigger initiation status to indicate
                 ' that it needs to be primed on the next timer event
                 m_extTrigInitiated = False
             

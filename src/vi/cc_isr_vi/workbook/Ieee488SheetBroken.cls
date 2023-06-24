@@ -258,7 +258,7 @@ Friend Property Let ReceivedMessage(ByVal value As String)
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
 
-''' <summary>   Gerts the sent message. </summary>
+''' <summary>   Gets the sent message. </summary>
 Friend Property Get SentMessage() As String
     SentMessage = Range(m_sentMessageCell).value
 End Property

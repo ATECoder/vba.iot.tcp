@@ -231,7 +231,7 @@ Friend Property Let ReceivedMessage(ByVal value As String)
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
 
-''' <summary>   Gerts the sent message. </summary>
+''' <summary>   Gets the sent message. </summary>
 Friend Property Get SentMessage() As String
     SentMessage = Range(m_sentMessageCell).value
 End Property
@@ -247,7 +247,7 @@ Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connec
 
     Me.Initialize eventArgs
 
-    If afirmative Then
+    If eventArgs.Connected Then
     
         ' report the socket number
         Range(m_connectedHostCell).value = Me.Host

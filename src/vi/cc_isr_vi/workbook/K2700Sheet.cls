@@ -32,6 +32,7 @@ Private Const m_inputsCell As String = "C20"
 Private Const m_resistanceNoCell As String = "C21"
 Private Const m_resistanceCell As String = "D21"
 Private Const m_resistanceCountCell As String = "D21"
+Private Const m_externalTriggerStatusCell As String = "C4"
 
 Private Const m_resistanceNoTopRow As Integer = 2
 Private Const m_resistanceNoCol As String = "K"
@@ -392,7 +393,7 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
       
         End If
   
-        Range("C4") = "Extrent Trigger On"
+        Range(m_externalTriggerStatusCell) = "External Trigger On"
 
         ' set the instrument for externally triggered measurements
         Me.K2700.SetExternalTriggerResistanceMode
@@ -459,7 +460,7 @@ Private Sub ExtTrigToggleButton_Click()
         
         End If
     
-        Range("C4") = "Extrent Trigger On"
+        Range(m_externalTriggerStatusCell) = "External Trigger On"
         
         ' set triggered mode
         SetExternalTriggerMode Me.TimerInerval
@@ -499,7 +500,7 @@ End Sub
 ''' <remarks>
 ''' Use this method to check if turn on or off manual triggering mode of the instrument. <para>
 ''' 10/16/00  David Hary  1.00.00 Add a beep </para>
-''' 2023-06-23 David Hary 1.0.8574 Use the device revent to update the resistances.
+''' 2023-06-23 David Hary 1.0.8574 Use the device event handler to update the resistances.
 ''' </remarks>
 Private Sub HandleTimerEvent()
 
@@ -540,7 +541,7 @@ Private Sub HandleTimerEvent()
     ' if we ended manual mode, enable the rest of the buttons
     If isDone Then
         ' EnableButtons
-        Range("C4") = "Extrent Trigger off"
+        Range(m_externalTriggerStatusCell) = "External Trigger off"
         
         Me.ExtTrigToggleButton.Enabled = True
         Me.ReadResistanceButton.Enabled = True
@@ -610,7 +611,7 @@ Friend Property Let ReceivedMessage(ByVal value As String)
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
 
-''' <summary>   Gerts the sent message. </summary>
+''' <summary>   Gets the sent message. </summary>
 Friend Property Get SentMessage() As String
     SentMessage = Range(m_sentMessageCell).value
 End Property
@@ -630,7 +631,7 @@ Friend Property Get ExternalTrigEnabled() As Boolean
     ExternalTrigEnabled = Me.ExtTrigToggleButton.value
 End Property
 
-''' <summary>   Enables or disables external triggerring. </summary>
+''' <summary>   Enables or disables external triggering. </summary>
 Friend Property Let ExternalTrigEnabled(ByVal value As Boolean)
     Me.ExtTrigToggleButton.value = value
 End Property
@@ -706,7 +707,7 @@ Private Sub m_k2700_ResistanceNumberMeasured(ByRef eventArgs As cc_isr_VI.Resist
     
     If Me.AutoIncrementResistanceNoEnabled Then
     
-        ' increment the resistnace for the next reading
+        ' increment the resistance for the next reading
         m_currentResistanceNo = eventArgs.ResistanceNumber + 1
         If m_currentResistanceNo > Me.ResistanceCount Then
             m_currentResistanceNo = 1
@@ -723,7 +724,7 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
 
     Me.Initialize eventArgs
 
-    If afirmative Then
+    If eventArgs.Connected Then
     
         ' report the socket number
         Range(m_connectedHostCell).value = Me.Host
