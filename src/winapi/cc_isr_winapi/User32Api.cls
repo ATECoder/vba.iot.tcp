@@ -75,8 +75,8 @@ Private Declare PtrSafe Function KillTimer_ Lib "user32" Alias "KillTimer" ( _
 '''                              one line, you can separate the lines using a carriage return and/or linefeed character between each line. </param>
 ''' <param name="caption">       [in, optional] The dialog box title. If this parameter is NULL, the default
 '''                              title is Error. </param>
-''' <param name="behaviour">     [in] The contents and behavior of the dialog box. This parameter can be a combination
-'''                              of flags from the following groups of flags. </param>
+''' <param name="behavior">      [in] The contents and behavior of the dialog box. This parameter can be a combination
+'''                               of flags from the following groups of flags. </param>
 ''' <returns> An integer value that indicates which button the user clicked. </returns>
 Public Function MessageBox(ByVal ownerWindow As Long, ByVal message As String, ByVal caption As String, _
         ByVal behavior As Long) As Long
@@ -84,11 +84,12 @@ Public Function MessageBox(ByVal ownerWindow As Long, ByVal message As String, B
 End Function
     
 ''' <summary>   Displays a modeless message box allowing other events to proceed. </summary>
-''' <param name="message">     A String expression that specifies the message. </param>
-''' <param name="caption">     The dialog box title. </param>
-''' <param name="behaviour">   [Optional, VbOKOnly] The message dialog style that specifies
-'''                            the buttons and icons which to display with the message. </param>
-''' <returns> A messsage dialog result that indicates which button the user clicked. </returns>
+''' <param name="message">           A String expression that specifies the message. </param>
+''' <param name="caption">           The dialog box title. </param>
+''' <param name="messageBoxStyle">   [Optional, VbMsgBoxStyle, VbOKOnly] The message dialog
+'''                                  style that specifies the buttons and icons which to
+'''                                  display with the message. </param>
+''' <returns> A message dialog result that indicates which button the user clicked. </returns>
 Public Function DisplayMessageBox(ByVal message As String, caption, _
                                   Optional ByVal messageBoxStyle As VbMsgBoxStyle = vbOKOnly) As VbMsgBoxResult
 
