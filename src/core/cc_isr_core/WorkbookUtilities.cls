@@ -292,8 +292,8 @@ Public Function EnumerateComponentMacros(ByRef module As ModuleInfo, _
 
 End Function
 
-''' <summary>   Removesthe specified reference. <summary>
-''' <param name="project">         A reference tothe VBProject. </param>
+''' <summary>   Removes the specified reference. <summary>
+''' <param name="project">         A reference to the VBProject. </param>
 ''' <param name="referenceName">   The nae of the reference. </param>
 ''' <returns>   True if the reference was removed. </returns>
 Public Function RemoveReference(ByRef project As VBProject, ByVal referenceName As String) As Boolean
