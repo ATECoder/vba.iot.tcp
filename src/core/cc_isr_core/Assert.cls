@@ -10,15 +10,17 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <summary>   Indicates whether the assertion was successful. </summary>
+''' <value>   A Boolean. </value>
 Public AssertSuccessful As Boolean
 
 ''' <summary>   The outcome message of this assertion. </summary>
+''' <value>   A String. </value>
 Public AssertMessage As String
 
 ''' <summary>   Asserts that values are equal. If not, this will return a failed assertion. </summary>
-''' <param name="expected">   The value the caller expects to have. </param
-''' <param name="actual">   The actual value. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="expected">   [Vatiant] The value the caller expects to have. </param
+''' <param name="actual">     [Vatiant] The actual value. </param
+''' <param name="message">    [String] A message to show in case the assertion failed. </param
 ''' <returns>   An <see cref="Assert"/>   instant of True if values are equal; otherwise, False. </returns>
 Public Function AreEqual(ByRef expected As Variant, ByRef actual As Variant, ByRef message As String) As Assert
     Set AreEqual = IsTrue(Not expected <> actual, message)
@@ -31,9 +33,9 @@ Public Function AreEqual(ByRef expected As Variant, ByRef actual As Variant, ByR
 End Function
 
 ''' <summary>   Asserts that values are not equal. If not, this will return a failed assertion. </summary>
-''' <param name="expected">   The value the caller expects to have. </param
-''' <param name="actual">   The actual value. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="expected">   [Vatiant] The value the caller expects to have. </param
+''' <param name="actual">     [Vatiant] The actual value. </param
+''' <param name="message">    [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if values are not equal; otherwise, false. </returns>
 Public Function AreNotEqual(ByRef expected As Variant, ByRef actual As Variant, ByRef message As String) As Assert
     Set AreNotEqual = IsTrue(expected <> actual, message)
@@ -46,25 +48,25 @@ Public Function AreNotEqual(ByRef expected As Variant, ByRef actual As Variant, 
 End Function
 
 ''' <summary>   Asserts that the given value is null. </summary>
-''' <param name="actual">   The actual value. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="actual">    [Vatiant] The actual value. </param
+''' <param name="message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="actual"/>   is null; otherwise, false. </returns>
 Public Function IsNull(ByRef actual As Variant, ByRef message As String) As Assert
     Set IsNull = IsFalse(IsObject(actual), message)
 End Function
 
 ''' <summary>   Asserts that the given value is not null. </summary>
-''' <param name="actual">   The actual value. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="actual">    [Vatiant] The actual value. </param
+''' <param name="message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="actual"/>   is not null; otherwise, false. </returns>
 Public Function IsNotNull(ByRef actual As Variant, ByRef message As String) As Assert
     Set IsNotNull = IsTrue(IsObject(actual), message)
 End Function
 
 ''' <summary>   Asserts that the given value is true. </summary>
-''' <param name="truthy">   A value that can be seen as truthy. Very likely should be boolean,
-'''                       but maybe you like to live dangerously. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="truthy">    [Vatiant] A value that can be seen as truthy. Very likely should be boolean,
+'''                          but maybe you like to live dangerously. </param
+''' <param name="message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="truthy"/>   is true; otherwise, false. </returns>
 Public Function IsTrue(ByRef truthy As Variant, ByRef message As String) As Assert
     Set IsTrue = New Assert
@@ -78,9 +80,9 @@ Public Function IsTrue(ByRef truthy As Variant, ByRef message As String) As Asse
 End Function
 
 ''' <summary>   Asserts that the given value is False. </summary>
-''' <param name="falsy">   A value that can be seen as falsy. Very likely should be boolean,
-'''                       but maybe you like to live dangerously. </param
-''' <param name="message">   A message to show in case the assertion failed. </param
+''' <param name="falsy">     [Vatiant] A value that can be seen as falsy. Very likely should be boolean,
+'''                          but maybe you like to live dangerously. </param
+''' <param name="message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   False if <paramref name="falsy"/>   is False; otherwise, false. </returns>
 Public Function IsFalse(ByRef falsy As Variant, ByRef message As String) As Assert
     Set IsFalse = New Assert
