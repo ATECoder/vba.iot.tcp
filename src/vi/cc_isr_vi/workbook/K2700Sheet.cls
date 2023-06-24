@@ -9,10 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-Private Const m_timerIntervalCell As String = "B4"
 Private Const m_receiveTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
+Private Const m_timerIntervalCell As String = "B4"
 Private Const m_connectedHostCell As String = "C2"
 Private Const m_connectedPortCell As String = "D2"
 Private Const m_connectedSocketIdCell As String = "E2"
@@ -54,8 +54,6 @@ Private m_stopWatch As cc_isr_Core.StopWatch
 Public Property Get K2700() As cc_isr_VI.K2700
     If m_k2700 Is Nothing Then
         Set m_k2700 = cc_isr_VI.Constructor.K2700
-        ' this toggles the enabled status of the controls.
-        Me.ConnectedCheckBox_Click
         ' populate the combo box commands
         PopulateCommandsComboBox
     End If
@@ -75,6 +73,29 @@ Public Sub Dispose()
     Set m_k2700 = Nothing
 End Sub
 
+''' <summary>   Initialize this worksheet. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+    Dim affirmative As Boolean: affirmative = eventArgs.Connected
+    
+    ' report the connection state
+    Range(m_connectedCell).value = affirmative
+        
+    Me.RSTButton.Enabled = affirmative
+    Me.SDCButton.Enabled = affirmative
+    Me.CLSButton.Enabled = affirmative
+    Me.ReadCardsButton.Enabled = affirmative
+    Me.QueryButton.Enabled = affirmative
+    Me.ReadButton.Enabled = affirmative
+    Me.ReadStatusByteButton.Enabled = affirmative
+    Me.WriteButton.Enabled = affirmative
+    Me.SetScansButton.Enabled = affirmative
+    Me.QueryInputsButton.Enabled = affirmative
+    Me.ReadResistanceButton.Enabled = affirmative
+    
+End Sub
+
 ''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </summary>
 ''' <value>   The singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </value>
 Public Property Get StopWatch() As cc_isr_Core.StopWatch
@@ -84,9 +105,33 @@ Public Property Get StopWatch() As cc_isr_Core.StopWatch
     Set StopWatch = m_stopWatch
 End Property
 
-''' <summary>   Handles the activation of this worksheet. </summary>
-Friend Sub Worksheet_Activate()
+''' <summary>   Handles the Toggle connection button click event. </summary>
+Private Sub ConnectToggleButton_Click()
+
+    Me.RestartStopWatch
+
+    Dim Host As String
+    Dim Port As Integer
+    Dim timeout As Integer
+    
+    timeout = Me.ReceiveTimeout
+    Host = Me.Host
+    Port = Me.Port
+    
+    If Not ConnectToggleButton.value And Me.K2700.Connected Then
+        
+        Me.K2700.CloseConnection
+        
+    ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
+    
+        Me.K2700.OpenConnection Me.Host, Me.Port, timeout
+    
+    End If
+    
+    Me.ReadStopWatch
+    
 End Sub
+
 
 ''' <summary>   Populates the Commands combo box. </summary>
 Friend Sub PopulateCommandsComboBox()
@@ -129,44 +174,6 @@ End Sub
 Private Sub CLSButton_Click()
     Me.RestartStopWatch
     Me.Session.ClearExecutionState
-    Me.ReadStopWatch
-End Sub
-
-''' <summary>   Handles the connect check box click event. </summary>
-Friend Sub ConnectedCheckBox_Click()
-    
-    Dim affirmative As Boolean
-    
-    If m_k2700 Is Nothing Then
-        affirmative = False
-    Else
-        affirmative = m_k2700.Connected
-    End If
-    
-    Me.ConnectedCheckBox.value = affirmative
-    
-    ' report the connection state
-    Range(m_connectedCell).value = affirmative
-        
-    Me.QueryIdentityButton.Enabled = affirmative
-    Me.RSTButton.Enabled = affirmative
-    Me.SDCButton.Enabled = affirmative
-    Me.CLSButton.Enabled = affirmative
-    Me.ReadCardsButton.Enabled = affirmative
-    Me.QueryButton.Enabled = affirmative
-    Me.ReadButton.Enabled = affirmative
-    Me.ReadStatusByteButton.Enabled = affirmative
-    Me.WriteButton.Enabled = affirmative
-    Me.SetScansButton.Enabled = affirmative
-    Me.QueryInputsButton.Enabled = affirmative
-    Me.ReadResistanceButton.Enabled = affirmative
-    
-End Sub
-
-''' <summary>   Queries the device Identity string. </summary>
-Private Sub QueryIdentityButton_Click()
-    Me.RestartStopWatch
-    Range(m_identityCell).value = Me.Session.QueryIdentity
     Me.ReadStopWatch
 End Sub
 
@@ -295,44 +302,6 @@ Private Sub SetScansButton_Click()
     Me.ReadStopWatch
     Range(m_card1ScanListCell).value = Me.K2700.Card1ScanList
     Range(m_card2ScanListCell).value = Me.K2700.Card2ScanList
-End Sub
-
-''' <summary>   Handles the Toggle connection button click event. </summary>
-Private Sub ToggleConnectionButton_Click()
-
-    Me.RestartStopWatch
-
-    Dim Host As String
-    Dim Port As Integer
-    Dim timeout As Integer
-    
-    timeout = Me.ReceiveTimeout
-    Host = Me.Host
-    Port = Me.Port
-    
-    If Me.K2700.Connected Then
-        
-        Me.K2700.CloseConnection
-        Set Me.Session = Me.K2700.Session
-        
-        Range(m_connectedHostCell).value = ""
-        Range(m_connectedPortCell).value = ""
-        Range(m_connectedSocketIdCell).value = ""
-        
-    Else
-    
-        Range(m_connectedHostCell).value = Host
-        Range(m_connectedPortCell).value = Port
-        
-        Me.K2700.OpenConnection Host, Port, timeout
-        
-        ' report the socket number
-        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
-    End If
-    
-    Me.ReadStopWatch
-    Me.ConnectedCheckBox_Click
-    
 End Sub
 
 ''' <summary>   Handles the Write button click event. </summary>
@@ -751,6 +720,23 @@ End Sub
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+    Me.Initialize eventArgs
+
+    If afirmative Then
+    
+        ' report the socket number
+        Range(m_connectedHostCell).value = Me.Host
+        Range(m_connectedPortCell).value = Me.Port
+        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
+    
+    Else
+    
+        Range(m_connectedHostCell).value = ""
+        Range(m_connectedPortCell).value = ""
+        Range(m_connectedSocketIdCell).value = ""
+        
+    End If
 
 End Sub
 

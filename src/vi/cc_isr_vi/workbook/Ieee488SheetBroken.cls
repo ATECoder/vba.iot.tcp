@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Ieee488Sheet"
+Attribute VB_Name = "Ieee488SheetBroken"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -25,16 +25,15 @@ Private Const m_connectedCell As String = "F2"
 Private Const m_identityCell As String = "I2"
 
 Private WithEvents m_session As cc_isr_Ieee488.Ieee488Session
-Attribute m_session.VB_VarHelpID = -1
 Private m_stopWatch As StopWatch
 
 ''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Ieee488.Ieee488Session"/>. </summary>
 ''' <value>   The singleton instance of the <see cref="cc_isr_Ieee488.Ieee488Session"/>. </value>
 Public Property Get Session() As cc_isr_Ieee488.Ieee488Session
     If m_session Is Nothing Then
-        
         Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
-    
+        ' this toggles the enabled status of the controls.
+        Me.ConnectedCheckBox_Click
         ' populate the combo box commands
         PopulateCommandsComboBox
     End If
@@ -63,50 +62,7 @@ Public Sub Dispose()
     Set m_session = Nothing
 End Sub
 
-''' <summary>   Initialize this worksheet. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
-
-    Dim affirmative As Boolean: affirmative = eventArgs.Connected
-    
-    ' report the connection state
-    Range(m_connectedCell).value = affirmative
-        
-    Me.RSTButton.Enabled = affirmative
-    Me.SDCButton.Enabled = affirmative
-    Me.CLSButton.Enabled = affirmative
-    Me.QueryButton.Enabled = affirmative
-    Me.ReadButton.Enabled = affirmative
-    Me.ReadStatusByteButton.Enabled = affirmative
-    Me.WriteButton.Enabled = affirmative
-
-End Sub
-
-''' <summary>   Handles the Toggle connection button click event. </summary>
-Private Sub ConnectToggleButton_Click()
-
-    Me.RestartStopWatch
-
-    Dim Host As String
-    Dim Port As Integer
-    Dim timeout As Integer
-    
-    timeout = Me.ReceiveTimeout
-    Host = Me.Host
-    Port = Me.Port
-    
-    If Not ConnectToggleButton.value And Me.Session.Connected Then
-        
-        Me.Session.CloseConnection
-        
-    ElseIf ConnectToggleButton.value And Not Me.Session.Connected Then
-    
-        Me.Session.OpenConnection Me.Host, Me.Port, timeout
-    
-    End If
-    
-    Me.ReadStopWatch
-    
+Friend Sub Worksheet_Activate()
 End Sub
 
 ''' <summary>   Populates the Commands combo box. </summary>
@@ -151,6 +107,40 @@ Private Sub CLSButton_Click()
     Me.ReadStopWatch
 End Sub
 
+
+Friend Sub ConnectedCheckBox_Click()
+    
+    Dim affirmative As Boolean
+    
+    If m_session Is Nothing Then
+        affirmative = False
+    Else
+        affirmative = m_session.Connected
+    End If
+    
+    ConnectedCheckBox.value = affirmative
+    
+    ' report the connection state
+    Range(m_connectedCell).value = affirmative
+        
+    Me.QueryIdentityButton.Enabled = affirmative
+    Me.RSTButton.Enabled = affirmative
+    Me.SDCButton.Enabled = affirmative
+    Me.CLSButton.Enabled = affirmative
+    Me.QueryButton.Enabled = affirmative
+    Me.ReadButton.Enabled = affirmative
+    Me.ReadStatusByteButton.Enabled = affirmative
+    Me.WriteButton.Enabled = affirmative
+    
+End Sub
+
+''' <summary>   Queries the device Identity string. </summary>
+Private Sub QueryIdentityButton_Click()
+    Me.RestartStopWatch
+    Range(m_identityCell).value = Me.Session.QueryIdentity
+    Me.ReadStopWatch
+End Sub
+
 ''' <summary>   Handles the Reset Known State button click event. </summary>
 Private Sub RSTButton_Click()
     Me.RestartStopWatch
@@ -163,6 +153,43 @@ Private Sub SDCButton_Click()
     Me.RestartStopWatch
     Me.Session.SelectiveDeviceClear
     Me.ReadStopWatch
+End Sub
+
+''' <summary>   Handles the Toggle connection button click event. </summary>
+Private Sub ToggleConnectionButton_Click()
+
+    Me.RestartStopWatch
+
+    Dim Host As String
+    Dim Port As Integer
+    Dim timeout As Integer
+    
+    timeout = Me.ReceiveTimeout
+    Host = Me.Host
+    Port = Me.Port
+    
+    If Me.Session.Connected Then
+        
+        Me.Session.CloseConnection
+        
+        Range(m_connectedHostCell).value = ""
+        Range(m_connectedPortCell).value = ""
+        Range(m_connectedSocketIdCell).value = ""
+        
+    Else
+    
+        Range(m_connectedHostCell).value = Host
+        Range(m_connectedPortCell).value = Port
+        
+        Me.Session.OpenConnection Host, Port, timeout
+         
+        ' report the socket number
+        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
+    End If
+    
+    Me.ReadStopWatch
+    Me.ConnectedCheckBox_Click
+    
 End Sub
 
 ''' <summary>   Handles the Write button click event. </summary>
@@ -244,23 +271,6 @@ End Property
 ''' <summary>   Handles the session <see cref="cc_isr_VI.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
-
-    Me.Initialize eventArgs
-
-    If afirmative Then
-    
-        ' report the socket number
-        Range(m_connectedHostCell).value = Me.Host
-        Range(m_connectedPortCell).value = Me.Port
-        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
-    
-    Else
-    
-        Range(m_connectedHostCell).value = ""
-        Range(m_connectedPortCell).value = ""
-        Range(m_connectedSocketIdCell).value = ""
-        
-    End If
 
 End Sub
 

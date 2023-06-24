@@ -9,6 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+''' <summary>   Initialize this worksheet. </summary>
+Public Sub Initialize()
+End Sub
+
 ''' <summary>   Reads the identity form the instrument with the
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
@@ -45,6 +49,8 @@ Private Sub ReadIdentity(ByVal Host As String, ByVal Port As Long, ByVal repeatC
     Range("G2").value = ""
     Range("H2").value = ""
     Range("I2").value = ""
+    Range("I3").value = ""
+    Range("I4").value = ""
 
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch()
     Dim totalMilliseconds As Double

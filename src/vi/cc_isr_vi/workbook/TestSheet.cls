@@ -9,6 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+''' <summary>   Initialize this worksheet. </summary>
+Public Sub Initialize()
+End Sub
+
 ''' <summary>   Populates a combo box with the list of tests. </summary>
 Private Sub ListTestsButton_Click()
     Dim module As ModuleInfo

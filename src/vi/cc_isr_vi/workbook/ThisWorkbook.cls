@@ -30,7 +30,10 @@ Private Sub Workbook_Activate()
     cc_isr_Core.UserDefinedErrors.Initialize
     
     ' activate the sheets to initialize values.
-    K2700Sheet.Activate
+    K2700Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
+    Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
+    IdentitySheet.Initialize
+    TestSheet.Initialize
     
 End Sub
 
