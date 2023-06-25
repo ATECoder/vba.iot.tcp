@@ -205,13 +205,13 @@ Private Sub ConnectToggleButton_Click()
 
     Me.RestartStopWatch
 
-    Dim Host As String
-    Dim Port As Integer
+    Dim host As String
+    Dim port As Integer
     Dim timeout As Integer
     
     timeout = Me.ReceiveTimeout
-    Host = Me.Host
-    Port = Me.Port
+    host = Me.host
+    port = Me.port
     
     If Not ConnectToggleButton.value And Me.K2700.Connected Then
         
@@ -219,7 +219,7 @@ Private Sub ConnectToggleButton_Click()
         
     ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
     
-        Me.K2700.OpenConnection Me.Host, Me.Port, timeout
+        Me.K2700.OpenConnection Me.host, Me.port, timeout
     
     End If
     
@@ -308,7 +308,7 @@ Private Sub ReadResistanceButton_Click()
     
     ' reinitialize if device not defined
     If Not Me.K2700.Connected Then
-        Me.K2700.Initialize Me.Host, Me.Port, Me.ReceiveTimeout
+        Me.K2700.Initialize Me.host, Me.port, Me.ReceiveTimeout
     End If
     
     If Me.FrontReadRequired And Not Me.K2700.IsFrontInputs Then
@@ -470,7 +470,7 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
         
         ' reinitialize if device not defined
         If Not Me.K2700.Connected Then
-            Me.K2700.Initialize Me.Host, Me.Port, Me.ReceiveTimeout
+            Me.K2700.Initialize Me.host, Me.port, Me.ReceiveTimeout
         End If
         
         ' make sure that the instrument is ready to accept
@@ -673,13 +673,13 @@ err_Handler:
 End Sub
 
 ''' <summary>   Gets the host dotted IP Address. </summary>
-Friend Property Get Host() As String
-    Host = Range(m_inputHostCell).value
+Friend Property Get host() As String
+    host = Range(m_inputHostCell).value
 End Property
 
 ''' <summary>   Gets the port number. </summary>
-Friend Property Get Port() As Integer
-    Port = CInt(Range(m_inputPortCell).value)
+Friend Property Get port() As Integer
+    port = CInt(Range(m_inputPortCell).value)
 End Property
 
 ''' <summary> Get the receive timeout. </summary>
@@ -834,8 +834,8 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
     If eventArgs.Connected Then
     
         ' report the socket number
-        Range(m_connectedHostCell).value = Me.Host
-        Range(m_connectedPortCell).value = Me.Port
+        Range(m_connectedHostCell).value = Me.host
+        Range(m_connectedPortCell).value = Me.port
         Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
     
     Else

@@ -9,6 +9,24 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_repeatCountCell As String = "B1"
+Private Const m_inputHostCell As String = "B2"
+Private Const m_inputPortCell As String = "B3"
+Private Const m_receiveTimeoutCell As String = "B4"
+Private Const m_errorMessageCell As String = "B5"
+
+Private Const m_socketAddressCell As String = "C2"
+Private Const m_connectedSocketIdCell As String = "D2"
+Private Const m_connectedCell As String = "E2"
+Private Const m_sentMessageCell As String = "F2"
+Private Const m_receivedMessageLengthCell As String = "G2"
+Private Const m_receivedMessageCell As String = "H2"
+Private Const m_statusByteCell As String = "F3"
+Private Const m_averageElapsedTimeCell As String = "H3"
+Private Const m_elapsedTimeCell As String = "H4"
+Private Const m_elapsedTimeFormat As String = "0.0"
+Private Const m_identityCell As String = "H2"
+
 ''' <summary>   Initialize this worksheet. </summary>
 Public Sub Initialize()
 End Sub
@@ -17,18 +35,17 @@ End Sub
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
 
-    Dim Host As String
-    Dim Port As Integer
+    Dim host As String
+    Dim port As Integer
     Dim repeatCount As Integer
+    Dim timeout As Integer
     
-    repeatCount = Range("B1").value
-    Host = Range("B2").value
-    Port = Range("B3").value
-    
-    Range("C2").value = Host
-    Range("D2").value = Port
-    
-    ReadIdentity Host, Port, repeatCount
+    timeout = Range(m_receiveTimeoutCell).value
+    repeatCount = Range(m_repeatCountCell).value
+    host = Range(m_inputHostCell).value
+    port = Range(m_inputPortCell).value
+   
+    ReadIdentity host, port, repeatCount
    
 End Sub
 
@@ -38,36 +55,37 @@ End Sub
 ''' <param name="host">   The host IPv4 dotted address. </param>
 ''' <param name="port">   the host port number. </param>
 ''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal Host As String, ByVal Port As Long, ByVal repeatCount As Integer)
+Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
 
     On Error GoTo Finally
     
-    Range("E2").value = ""
-    Range("F2").value = ""
-    Range("G2").value = ""
-    Range("H2").value = ""
-    Range("I2").value = ""
-    Range("I3").value = ""
-    Range("I4").value = ""
+    Range(m_socketAddressCell) = ""
+    Range(m_connectedSocketIdCell).value = ""
+    Range(m_connectedCell).value = ""
+    Range(m_sentMessageCell).value = ""
+    Range(m_receivedMessageLengthCell).value = ""
+    Range(m_receivedMessageCell).value = ""
+    Range(m_elapsedTimeCell).value = ""
+    Range(m_errorMessageCell).value = ""
 
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch()
     Dim totalMilliseconds As Double
     
     Dim device As New K2700
     
-    device.OpenConnection Host, Port
+    device.OpenConnection host, port
     
     ' report the socket number
-    Range("E2").value = device.Session.VISession.SocketId
+    Range(m_connectedSocketIdCell).value = device.Session.VISession.SocketId
    
     ' report the connection state
-    Range("F2").value = device.Connected
+    Range(m_connectedCell).value = device.Connected
     
     If device.Connected Then
     
         Dim command As String
         command = "*IDN?"
-        Range("G2").value = command
+        Range(m_sentMessageCell).value = command
         
         Dim loopCount As Integer
         Do While loopCount < repeatCount
@@ -81,19 +99,16 @@ Private Sub ReadIdentity(ByVal Host As String, ByVal Port As Long, ByVal repeatC
             
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range("H2").value = Len(device.Session.Identity)
-            Range("I2").value = device.Session.Identity
+            Range(m_receivedMessageLengthCell).value = Len(device.Session.Identity)
+            Range(m_receivedMessageCell).value = device.Session.Identity
     
         Loop
   
-        ' command = ":SYST:PRES"
-        ' count = SendMessage(command)
-        ' Call OPC
-        Range("I3").value = Format(totalMilliseconds / loopCount, "0.0") + " ms"
-        Range("I4").value = Format(totalMilliseconds, "0.0") + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     Else
-        MsgBox "connection failed without reporting an exception"
+        Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
     
 Finally:
@@ -117,7 +132,7 @@ Finally:
     Set device = Nothing
     
     If Len(errorMessage) > 0 Then
-        MsgBox errorMessage
+        Range(m_errorMessageCell).value = errorMessage
     End If
 
 End Sub

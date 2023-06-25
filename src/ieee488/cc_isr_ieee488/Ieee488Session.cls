@@ -141,7 +141,7 @@ Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
         If 0 = (statusByte And ServiceRequests.MessageAvailable) Then
         
             ' raise the write error adding some information
-            Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
+            Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
                       UserDefinedErrors.InvalidOperationError.Description & _
                       " SRQ=0x" & Hex(statusByte) & _
                       ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
@@ -183,11 +183,11 @@ End Function
 
 ''' <summary>   Returns the identity. </summary>
 ''' <value>   A string. </returns>
-Public Property Get Identity() As String
+Public Property Get identity() As String
     If StringExtensions.IsNullOrEmpty(m_identity) And Me.ViSession.Connected Then
         m_identity = Me.QueryIdentity
     End If
-    Identity = m_identity
+    identity = m_identity
 End Property
 
 ''' <summary>   Returns the instrument identity using the *IDN? query command. </summary>
@@ -223,7 +223,7 @@ End Function
 Public Function LocalLockout() As Integer
     
     If Me.ViSession.UsingPrologix Then
-        LocalLockout = Me.WriteLine("++llo")
+        LocalLockout = Me.ViSession.WriteLine("++llo")
     Else
         LocalLockout = 0
     End If
@@ -236,7 +236,7 @@ End Function
 Public Function GoToLocal() As Integer
     
     If Me.ViSession.UsingPrologix Then
-        GoToLocal = Me.WriteLine("++loc")
+        GoToLocal = Me.ViSession.WriteLine("++loc")
     Else
         GoToLocal = 0
     End If
@@ -249,7 +249,7 @@ End Function
 Public Function SelectiveDeviceClear() As Integer
     
     If Me.ViSession.UsingPrologix Then
-        SelectiveDeviceClear = Me.WriteLine("++clr")
+        SelectiveDeviceClear = Me.ViSession.WriteLine("++clr")
     Else
         SelectiveDeviceClear = 0
     End If
@@ -263,7 +263,9 @@ End Function
 Public Function ReadStatusByte(Optional ByVal canQuery As Boolean = False) As Integer
     
     If Me.ViSession.UsingPrologix Then
-        ReadStatusByte = CInt(Me.QueryLine("++spoll"))
+        ReadStatusByte = CInt(Me.ViSession.QueryLine("++spoll"))
+    ElseIf canQuery Then
+        ReadStatusByte = Me.QueryServiceRequestStatus()
     Else
         ' querying the service request status could cause
         ' a query unterminated error.
@@ -279,9 +281,11 @@ End Function
 Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
     If Me.ViSession.UsingPrologix Then
-        SRQ = 1 = CInt(Me.QueryLine("++srq"))
+        SRQ = 1 = CInt(Me.ViSession.QueryLine("++srq"))
     ElseIf canQuery Then
-        SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus)
+        SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus())
+    Else
+        SRQ = 0
     End If
     
 End Function

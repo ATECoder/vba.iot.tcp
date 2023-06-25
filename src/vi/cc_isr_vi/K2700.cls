@@ -76,14 +76,14 @@ End Property
 ''' <param name="port">        The port that the server is listening on. </param>
 ''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal Host As String, ByVal Port As Long, _
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
         Optional ByVal timeoutMs As Long = 500) As Boolean
        
     Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
 
     ' open the connection
     
-    OpenConnection = m_session.OpenConnection(Host, Port, timeoutMs)
+    OpenConnection = m_session.OpenConnection(host, port, timeoutMs)
     
     ' raise the connection changed event.
     
@@ -115,10 +115,10 @@ End Function
 ''' <param name="port">        The port that the server is listening on. </param>
 ''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the device was initialized. </returns>
-Public Function Initialize(ByVal Host As String, ByVal Port As Long, _
+Public Function Initialize(ByVal host As String, ByVal port As Long, _
         Optional ByVal timeoutMs As Long = 500) As Boolean
 
-    Me.OpenConnection Host, Port, timeoutMs
+    Me.OpenConnection host, port, timeoutMs
 
     ' this only works with the Prologix device
     Me.Session.SelectiveDeviceClear

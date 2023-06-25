@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const PROLOGIX_PORT_NO As Integer = 1234
+
 Private Const m_repeatCountCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
@@ -41,16 +43,16 @@ Private Sub ReadIdentityButton_Click()
     host = Range(m_inputHostCell).value
     port = Range(m_inputPortCell).value
     
-#If True Then
-    ' read identity using basic winsock.
-    ReadIdentity host, port, repeatCount, timeout
-#ElseIf False Then
-    ' read identity using the Tcp Client.
-    TcpClientReadIdentity host, port, repeatCount, timeout
-#Else
-    ' read identity using winsock with buffer.
-    ReadIdentityUsingBuffer host, port, repeatCount, timeout
-#End If
+    If Me.UsingWinsockReadRawButton.value Then
+        ' read identity using basic winsock.
+        ReadIdentity host, port, repeatCount, timeout
+    ElseIf Me.UsingTcpClientOptionButton Then
+        ' read identity using the Tcp Client.
+        TcpClientReadIdentity host, port, repeatCount, timeout
+    ElseIf Me.UsingWinsockBufferReadOptionButton Then
+        ' read identity using winsock with buffer.
+        ReadIdentityUsingBuffer host, port, repeatCount, timeout
+    End If
     
 End Sub
 
@@ -69,11 +71,13 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     Range(m_receivedMessageLengthCell).value = ""
     Range(m_receivedMessageCell).value = ""
     Range(m_elapsedTimeCell).value = ""
+    Range(m_errorMessageCell).value = ""
 
     Dim maximumLength As Integer
     maximumLength = 1024
     Dim buffer As String * 1024
     
+    Dim sentCount As Integer
     Dim readCount As Integer
     
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
@@ -93,9 +97,24 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         Range(m_socketAddressCell).value = socket.SocketAddress
     
         Dim command As String
+    
+        If port = PROLOGIX_PORT_NO Then
+        
+            ' set auto read after write
+            ' Prologix GPIB-ETHERNET controller can be configured to automatically address
+            ' instruments to talk after sending them a command in order to read their response. The
+            ' feature called, Read-After-Write, saves the user from having to issue read commands
+            ' repeatedly.
+            command = "++auto 1"
+
+            ' send the command
+            sentCount = socket.SendMessage(command & vbLf)
+
+        End If
+        
         command = "*IDN?"
         Range(m_sentMessageCell).value = command
-        
+       
         Dim sentCount As Integer
         Dim loopCount As Integer
         Do While loopCount < repeatCount
@@ -166,11 +185,13 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     Range(m_receivedMessageLengthCell).value = ""
     Range(m_receivedMessageCell).value = ""
     Range(m_elapsedTimeCell).value = ""
+    Range(m_errorMessageCell).value = ""
 
     Dim maximumLength As Integer
     maximumLength = 1024
     Dim buffer As String * 1024
     
+    Dim sentCount As Integer
     Dim readCount As Integer
     
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
@@ -188,6 +209,21 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     If socket.Connected Then
     
         Dim command As String
+    
+        If port = PROLOGIX_PORT_NO Then
+        
+            ' set auto read after write
+            ' Prologix GPIB-ETHERNET controller can be configured to automatically address
+            ' instruments to talk after sending them a command in order to read their response. The
+            ' feature called, Read-After-Write, saves the user from having to issue read commands
+            ' repeatedly.
+            command = "++auto 1"
+
+            ' send the command
+            sentCount = socket.SendMessage(command & vbLf)
+
+        End If
+        
         command = "*IDN?"
         Range(m_sentMessageCell).value = command
         
@@ -259,10 +295,12 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     Range(m_receivedMessageLengthCell).value = ""
     Range(m_receivedMessageCell).value = ""
     Range(m_elapsedTimeCell).value = ""
+    Range(m_errorMessageCell).value = ""
 
     Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
     Dim totalMilliseconds As Double
     
+    Dim sentCount As Integer
     Dim client As TcpClient
     Set client = New TcpClient
     
@@ -277,6 +315,21 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     If client.TcpClientSocket.Connected Then
     
         Dim command As String
+    
+        If port = PROLOGIX_PORT_NO Then
+        
+            ' set auto read after write
+            ' Prologix GPIB-ETHERNET controller can be configured to automatically address
+            ' instruments to talk after sending them a command in order to read their response. The
+            ' feature called, Read-After-Write, saves the user from having to issue read commands
+            ' repeatedly.
+            command = "++auto 1"
+
+            ' send the command
+            sentCount = client.SendMessage(command & vbLf)
+
+        End If
+        
         command = "*IDN?"
         Range(m_sentMessageCell).value = command
         
@@ -302,10 +355,6 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     
         Loop
   
-        ' command = ":SYST:PRES"
-        ' count = SendMessage(command)
-        ' Call OPC
-        
         Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     

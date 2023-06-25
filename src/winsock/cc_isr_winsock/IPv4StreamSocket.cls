@@ -12,7 +12,7 @@ Option Explicit
 Private Const SEND_MESSAGE_ERROR = -1
 Private Const SEND_PARTIAL_MESSAGE_ERROR = -2
 Private Const RECEIVE_ERROR = -1
-Private Const DefaultTimeoutMs = 500
+Private Const DEFAULT_TIMEOUT_MS = 500
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
@@ -169,7 +169,7 @@ Private Sub Class_Initialize()
         
         ' set the receive timeout to its default value
         
-        Me.SetReceiveTimeout DefaultTimeoutMs
+        Me.SetReceiveTimeout DEFAULT_TIMEOUT_MS
     End If
     
 End Sub
@@ -554,13 +554,19 @@ End Function
 Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
 
     Dim result As Long
-    result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, timeoutMs, 4)
-
-    If result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetReceiveTimeout", _
-                  UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
-    Else
-        m_receiveTimeout = timeoutMs
+    
+    ' check if the requested receive timeout is different from the
+    ' timeout that was already set.
+    If m_receiveTimeout <> timeoutMs Then
+    
+        result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, timeoutMs, 4)
+    
+        If result = wsock32.ws32_SOCKET_ERROR Then
+            Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetReceiveTimeout", _
+                      UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
+        Else
+            m_receiveTimeout = timeoutMs
+        End If
     End If
     
 End Sub

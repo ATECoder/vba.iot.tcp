@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
-Private Const PrologixPortNumber As Integer = 1234
+Private Const PROLOGIX_PORT_NO As Integer = 1234
 Private m_readTermination As String
 Private m_writeTermination As String
 Private m_receiveTimeout As Long
@@ -124,7 +124,7 @@ End Sub
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
    
-    m_usingPrologix = port = PrologixPortNumber
+    Me.UsingPrologix = port = PROLOGIX_PORT_NO
     
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
    
@@ -155,6 +155,12 @@ End Function
 ''' <value>   True if using the Prologix GPIB-Lan interface device. </value>
 Public Property Get UsingPrologix() As Boolean
     UsingPrologix = m_usingPrologix
+End Property
+
+''' <summary>   Set true if the TCP Connection uses the Prologix
+''' GPIB-Lan interface device. </summary>
+Public Property Let UsingPrologix(ByVal value As Boolean)
+    m_usingPrologix = value
 End Property
 
 ''' <summary>   Sends a message. </summary>
