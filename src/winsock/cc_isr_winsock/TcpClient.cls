@@ -15,6 +15,12 @@ Private m_tcpClientSocket As IPv4StreamSocket
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
 Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
+''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClientSocket"/>. </summary>
+Private Sub Class_Initialize()
+    Set m_tcpClientSocket = New IPv4StreamSocket
+End Sub
+
+''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClientSocket"/>. </summary>
 Private Sub Class_Terminate()
     Me.Dispose
 End Sub
@@ -31,13 +37,9 @@ End Property
 ''' <returns>   True if the socket is connected. </returns>
 Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
     
-    If host = "localhost" Then
-        host = "127.0.0.1"
-    End If
+    If host = "localhost" Then host = "127.0.0.1"
 
-    Set m_tcpClientSocket = New IPv4StreamSocket
-
-    m_tcpClientSocket.OpenConnection host, port
+    Me.TcpClientSocket.OpenConnection host, port
     
     OnConnectionChanged Me.Connected
     
@@ -59,17 +61,27 @@ Public Function Disconnect() As Boolean
 
     Me.TcpClientSocket.CloseConnection
     
-    Set m_tcpClientSocket = Nothing
-       
     OnConnectionChanged Me.Connected
         
-    Disconnect = True
+    Disconnect = Not Me.Connected
 
 End Function
 
 ''' <summary>   Initializes this TCP Client using the provided connected socket. </summary>
+''' <remarks>   Raises an invalid operation exception is a socket is already connected. </remarks>
 ''' <param name="connectedSocket ">   A connected INET stream socket. </param>
 Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
+    
+    If Me.Connected Then
+        Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Winsock.TcpClient.WinsockApi.Initialize", _
+                  UserDefinedErrors.InvalidOperationError.Description & _
+                  " This Tc Client is connected to " & Me.TcpClientSocket.SocketAddress & _
+                  " A new Tcp Client must be used when initialized using a connected socket at " & connectedSocket.SocketAddress & "."
+    End If
+    
+    ' remove this socket
+    If Not m_tcpClientSocket Is Nothing Then m_tcpClientSocket = Nothing
+    
     Set m_tcpClientSocket = connectedSocket
 End Sub
 
@@ -113,7 +125,7 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFF, _
   
 End Function
 
-''' <summary>   Closes and releases the socket. </summary>
+''' <summary>   Close the connection and releases the socket. </summary>
 Public Sub Dispose()
     If Me.Connected Then
         m_tcpClientSocket.CloseConnection

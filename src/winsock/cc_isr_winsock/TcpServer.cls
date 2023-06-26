@@ -15,6 +15,16 @@ Private m_tcpServerSocket As IPv4StreamSocket
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
 Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
+''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpServerSocket"/>. </summary>
+Private Sub Class_Initialize()
+    Set m_tcpServerSocket = New IPv4StreamSocket
+End Sub
+
+''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpServerSocket"/>. </summary>
+Private Sub Class_Terminate()
+    Me.Dispose
+End Sub
+
 ''' <summary>   Gets the Tcp Server socket. </summary>
 ''' <value>   A IPv4StreamSocket. </value>
 Public Property Get TcpServerSocket() As IPv4StreamSocket
@@ -29,19 +39,17 @@ Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 1
 
     On Error GoTo ErrHandler
     
-    Set m_tcpServerSocket = New IPv4StreamSocket
-    
     ' bind the socket to the specified port for listening on any address
     ' an exception is raised on failure.
     
-    m_tcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, port
+    Me.TcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, port
     
     OnConnectionChanged Me.Connected
     
     ' get the socket to start listening
     ' an exception is raised on failure.
     
-    BindTo = m_tcpServerSocket.StartListening(backlog)
+    BindTo = Me.TcpServerSocket.StartListening(backlog)
     
 ExitHandler:
 
@@ -52,7 +60,6 @@ ErrHandler:
     If Me.Connected Then
         Me.TcpServerSocket.CloseConnection
     End If
-    Set m_tcpServerSocket = Nothing
     
     OnConnectionChanged Me.Connected
     
@@ -64,7 +71,7 @@ Public Property Get Connected() As Boolean
     If m_tcpServerSocket Is Nothing Then
         Connected = False
     Else
-        Connected = m_tcpServerSocket.Connected
+        Connected = m.TcpServerSocket.Connected
     End If
 End Property
 
@@ -86,7 +93,7 @@ End Function
 ''' <summary>   Closes and releases the socket. </summary>
 Public Sub Dispose()
     If Me.Connected Then
-        m_tcpServerSocket.CloseConnection
+        Me.TcpServerSocket.CloseConnection
     End If
     Set m_tcpServerSocket = Nothing
 End Sub

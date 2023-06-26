@@ -1,7 +1,7 @@
 ### TODO
 
 #### Updates
-
+* IEEE488: Fix identity test sheet.
 * IEEE488 test sheet: ADD Go to local go to remote GPIB commands. Enable if Prologix.
 * test session: selective device clear and read status byte
 * test user 32 message box.
