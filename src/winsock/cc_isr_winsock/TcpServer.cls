@@ -71,7 +71,7 @@ Public Property Get Connected() As Boolean
     If m_tcpServerSocket Is Nothing Then
         Connected = False
     Else
-        Connected = m.TcpServerSocket.Connected
+        Connected = Me.TcpServerSocket.Connected
     End If
 End Property
 

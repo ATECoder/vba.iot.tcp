@@ -19,14 +19,15 @@ Private m_usingPrologix As Boolean
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
 Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-''' <summary>   Initializes an IEEE488 Session. </summary>
+''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Initialize()
+    Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_receiveTimeout = 500
 End Sub
 
-''' <summary>   Terminates an IEEE488 Session. </summary>
+''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Terminate()
     Me.Dispose
 End Sub
@@ -35,6 +36,9 @@ End Sub
 Public Sub Dispose()
     If Me.Connected Then
         Me.CloseConnection
+    End If
+    If Not m_tcpClient Is Nothing Then
+        m_tcpClient.Dispose
     End If
     Set m_tcpClient = Nothing
 End Sub
@@ -52,16 +56,19 @@ End Property
 ''' <summary>   Returns true if a connection can be made. </summary>
 ''' <returns>   True if a connection can be made. </returns>
 Public Property Get CanConnect() As Boolean
-    CanConnect = Not Me.Connected
+    CanConnect = Not Me.Connected And _
+                 Not m_tcpClient.TcpClientSocket Is Nothing
 End Property
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
-''' <value>   The socket identifying descriptor. </value>
+''' <value>   The socket identifying descriptor if connected; otherwise, -1. </value>
 Public Property Get SocketId() As Long
-    If Me.Connected Then
-        SocketId = m_tcpClient.TcpClientSocket.SocketId
+    If m_tcpClient Is Nothing Then
+        SocketId = cc_isr_Winsock.wsock32.ws32_INVALID_SOCKET
+    ElseIf m_tcpClient.TcpClientSocket Is Nothing Then
+        SocketId = cc_isr_Winsock.wsock32.ws32_INVALID_SOCKET
     Else
-        SocketId = -1
+        SocketId = m_tcpClient.TcpClientSocket.SocketId
     End If
 End Property
 
@@ -100,8 +107,8 @@ Public Property Let WriteTermination(value As String)
 End Property
 
 ''' <summary>   Gets the receive timeout in Milliseconds. </summary>
-''' <value>   A string. </value>
-Public Property Get ReceiveTimeout() As String
+''' <value>   A Long. </value>
+Public Property Get ReceiveTimeout() As Long
     ReceiveTimeout = m_receiveTimeout
 End Property
 
@@ -126,8 +133,6 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optiona
    
     Me.UsingPrologix = port = PROLOGIX_PORT_NO
     
-    Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
-   
     m_tcpClient.ConnectTo host, port
     
     Me.SetReceiveTimeout timeoutMs
@@ -143,8 +148,6 @@ End Function
 Public Function CloseConnection() As Boolean
 
     CloseConnection = m_tcpClient.Disconnect
-    
-    Set m_tcpClient = Nothing
     
     OnConnectionChanged Me.Connected
     

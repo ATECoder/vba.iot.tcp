@@ -80,7 +80,7 @@ Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
     End If
     
     ' remove this socket
-    If Not m_tcpClientSocket Is Nothing Then m_tcpClientSocket = Nothing
+    If Not m_tcpClientSocket Is Nothing Then Set m_tcpClientSocket = Nothing
     
     Set m_tcpClientSocket = connectedSocket
 End Sub

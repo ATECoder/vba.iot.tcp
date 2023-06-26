@@ -80,7 +80,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     
     If Session.Connected Then
     
-        Range(m_socketAddressCell).value = socket.SocketAddress
+        Range(m_socketAddressCell).value = Session.ViSession.SocketAddress
     
         Dim command As String
         command = "*IDN?"
