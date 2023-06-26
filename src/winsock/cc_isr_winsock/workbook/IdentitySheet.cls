@@ -49,7 +49,7 @@ Private Sub ReadIdentityButton_Click()
     ElseIf Me.UsingTcpClientOptionButton Then
         ' read identity using the Tcp Client.
         TcpClientReadIdentity host, port, repeatCount, timeout
-    ElseIf Me.UsingWinsockBufferReadOptionButton Then
+    ElseIf Me.UseWinsockWithBufferOptionButton Then
         ' read identity using winsock with buffer.
         ReadIdentityUsingBuffer host, port, repeatCount, timeout
     End If
@@ -115,7 +115,6 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         command = "*IDN?"
         Range(m_sentMessageCell).value = command
        
-        Dim sentCount As Integer
         Dim loopCount As Integer
         Do While loopCount < repeatCount
             
@@ -208,6 +207,9 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     
     If socket.Connected Then
     
+        ' display the socket address
+        Range(m_socketAddressCell).value = socket.SocketAddress
+        
         Dim command As String
     
         If port = PROLOGIX_PORT_NO Then
@@ -243,7 +245,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value readCount
+            Range(m_receivedMessageLengthCell).value = readCount
             Range(m_receivedMessageCell).value = buffer
     
         Loop
@@ -307,13 +309,16 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     client.ConnectTo host, port
     
     ' report the socket number
-    Range(m_connectedSocketIdCell).value = socket.SocketId
+    Range(m_connectedSocketIdCell).value = client.TcpClientSocket.SocketId
    
     ' report the connection state
-    Range(m_connectedCell).value = socket.Connected
+    Range(m_connectedCell).value = client.Connected
     
-    If client.TcpClientSocket.Connected Then
+    If client.Connected Then
     
+        ' display the socket address.
+        Range(m_socketAddressCell).value = client.TcpClientSocket.SocketAddress
+        
         Dim command As String
     
         If port = PROLOGIX_PORT_NO Then
