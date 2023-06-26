@@ -113,7 +113,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     If Me.ViSession.UsingPrologix Then
     
         ' read the status byte and check for errors.
-        Dim statusByte As Integer: statusByte = Me.SeriaPoll()
+        Dim statusByte As Integer: statusByte = Me.SerialPoll()
     
         ' check if we have an error.
         If ServiceRequests.ErrorAvailable = (statusByte And ServiceRequests.ErrorAvailable) Then
@@ -380,9 +380,9 @@ Public Function GetGpibAddress() As String
     If Me.ViSession.UsingPrologix Then
         GetGpibAddress = CInt(Me.ViSession.QueryLine("++addr"))
         Dim addresses() As String: addresses = Split("", " ")
-        If Len(addresses) = 1 Then
+        If 1 = UBound(addresses) - LBound(addresses) + 1 Then
             GetGpibAddress = addresses(1)
-            If Len(addresses) > 1 Then
+            If 1 < UBound(addresses) - LBound(addresses) + 1 Then
                 GetGpibAddress = GetGpibAddress & " " & addresses(2)
             End If
         End If
@@ -447,12 +447,7 @@ Public Function GetReadTimeout() As Integer
     
     If Me.ViSession.UsingPrologix Then
         If Me.Connected Then
-            
             m_readTimeout = CInt(Me.ViSession.QueryLine("++read_tmo_ms"))
-            
-            If timeoutMs <> m_readTimeout Then
-            End If
-            m_readTimeout = timeoutMs
         End If
     Else
         m_readTimeout = -1
@@ -485,15 +480,15 @@ Public Function SerialPoll(Optional ByVal primaryAddress As Integer = -1, _
     
     If Me.ViSession.UsingPrologix Then
         If primaryAddress >= 0 And secondaryAddress < 0 Then
-            SeriaPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress)))
+            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress)))
         ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
-            SeriaPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress) & _
-                        " " & CStr(secondaryAddress + 96)))
+            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress) & _
+                         " " & CStr(secondaryAddress + 96)))
         Else
-            SeriaPoll = CInt(Me.ViSession.QueryLine("++spoll"))
+            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll"))
         End If
     Else
-        SeriaPoll = 0
+        SerialPoll = 0
     End If
     
 End Function
