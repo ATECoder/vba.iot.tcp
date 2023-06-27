@@ -8,12 +8,20 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
-Private m_readTermination As String
-Private m_writeTermination As String
-Private m_tcpClient As TcpClient
-Private m_readAfterWriteEnabled As Boolean
+
 Private m_disableReadAfterWriteOnWrite As Boolean
+
+Private m_readAfterWriteEnabled As Boolean
+
+Private m_readTermination As String
+
+Private m_readTimeout As Integer
+
+Private m_tcpClient As TcpClient
+
+Private m_writeTermination As String
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 ''' <remarks>   This GPIB Lan class uses the Prologix GPIB-Ethernet Controller. </remarks>
@@ -42,64 +50,92 @@ Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As Stri
     m_writeTermination = writeTerm
     Me.DisableReadAfterWriteOnWrite = preventQueryUnterminated
     
-    Dim opt As Integer: opt = 5
+    Dim i As Integer
+    
+    ' from experiments it seems this needs to be set first.
+    Me.ReadAfterWriteEnabledGetter
+    For i = 1 To 10: DoEvents: Next
+    Me.ReadAfterWriteEnabledSetter True
+    For i = 1 To 10: DoEvents: Next
+    
+    If Not preventQueryUnterminated Then
+        ' if not preventing query unterminated, the read after write must be
+        ' disabled
+        Me.ReadAfterWriteEnabledSetter False
+        For i = 1 To 10: DoEvents: Next
+    End If
+    
+End Sub
+
+Private Sub InitReadAfterWrite()
+
+    Dim i As Integer
+    Dim opt As Integer: opt = 5 ' good options: 1, 2 ?, 5; bad options: 4, 3
     
     If opt = 1 Then
     
-        ' Identity query time:         120 - 160 ms
+        ' Identity query time:         40-50 ms
         ' Query Unterminated on write: YES
         ' Crash on power toggle/Local: no
     
-        Me.ReadAfterWriteGetter
-        DoEvents
+        Me.ReadAfterWriteEnabledGetter
+        For i = 1 To 10: DoEvents: Next
         Me.ReadAfterWriteEnabledSetter True
-        DoEvents
+        For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 2 Then
     
-        ' Identity query time:         70 ms
+        ' Identity query time:         40-50 ms
         ' Query Unterminated on write: YES
-        ' Crash on power toggle/Local: no
+        ' Crash on power toggle/Local: only if toggling when program already started.
         m_readAfterWriteEnabled = False
         Me.ReadAfterWriteEnabledSetter True
         DoEvents
+        For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 3 Then
         
         ' Identity query time:         74 ms
         ' Query Unterminated on write: no
         ' Crash on power toggle/Local: no
-        Me.ReadAfterWriteGetter
+        Me.ReadAfterWriteEnabledGetter
         DoEvents
         Me.ReadAfterWriteEnabledSetter False
         
         ' this takes it from 380 to 74! go figure!!!
+        ' Crash on power toggle/Local: no
         DoEvents
+        
+        ' this takes it to 24 ms! go figure!!!
+        ' Crash on power toggle/Local: YES
+        For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 4 Then
     
         ' Identity query time:         22 ms
         ' Query Unterminated on write: no
         ' Crash on power toggle:       YES
-        ' but reading fails on the second read after the
-        ' instrument power is toggled.
+        ' reading fails after the instrument power is toggled.
+        ' apparently, ++read works only if auto read is set first.
+        
         m_readAfterWriteEnabled = True
         Me.ReadAfterWriteEnabledSetter False
-        DoEvents
+        For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 5 Then
     
         ' Identity query time:         48 ms
         ' Query Unterminated on write: no
         ' Crash on power toggle/local: no
+        
         Me.ReadAfterWriteEnabledSetter True
-        DoEvents
+        For i = 1 To 10: DoEvents: Next
         Me.ReadAfterWriteEnabledSetter False
-        DoEvents
+        For i = 1 To 10: DoEvents: Next
         
         
     End If
-    
+
 End Sub
 
 ''' <summary>   Closes and releases the TCP Client. </summary>
@@ -123,7 +159,7 @@ End Sub
 ''' <returns>   The number of sent characters. </returns>
 Public Function SendToDevice(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    If appendTermination Then message = message & Me.WriteTermination
+    If appendTermination Then message = message & m_writeTermination
     
     ' if auto read after write, turn on listen to prevent Query Unterminated error on the 2700.
     If Me.ReadAfterWriteEnabled And Me.DisableReadAfterWriteOnWrite Then Me.ReadAfterWriteEnabledSetter False
@@ -148,7 +184,7 @@ Public Function ReceiveFromDevice(Optional ByVal maxLength As Long = &H7FFF, _
         ' but it seems that getting the controller to read from the instrumet is much faster.
         Me.ReadFromDeviceToController
     End If
-    ReceiveFromDevice = m_tcpClient.ReceiveRaw(maxLength, trimEnd, Me.ReadTermination)
+    ReceiveFromDevice = m_tcpClient.ReceiveRaw(maxLength, trimEnd, m_readTermination)
 
 End Function
     
@@ -184,14 +220,14 @@ End Property
 ''' <returns>   The number of sent characters. </returns>
 Public Function SendToController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    If appendTermination Then message = message & Me.WriteTermination
+    If appendTermination Then message = message & m_writeTermination
     SendToController = m_tcpClient.SendMessage(message)
 
 End Function
 
 ''' <summary>   Receives a message from the controller. </summary>
 Public Function ReceiveFromController() As String
-    ReceiveFromController = m_tcpClient.ReceiveRaw(termination:=Me.ReadTermination)
+    ReceiveFromController = m_tcpClient.ReceiveRaw(termination:=m_readTermination)
 End Function
 
 ''' <summary>   Sends a message to the controller and read back the reply. </summary>
@@ -277,8 +313,8 @@ Public Sub ReadAfterWriteEnabledSetter(ByVal enable As Boolean)
 
 End Sub
 
-''' <summary>   Query the Read-After-Write mode of the controller. </summary>
-Public Function ReadAfterWriteGetter() As Boolean
+''' <summary>   Query the Read-After-Write enabled mode of the controller. </summary>
+Public Function ReadAfterWriteEnabledGetter() As Boolean
     m_readAfterWriteEnabled = "1" = Me.QueryController("++auto")
 End Function
 

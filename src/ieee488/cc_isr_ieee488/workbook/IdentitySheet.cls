@@ -62,6 +62,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     Range(m_sentMessageCell).value = ""
     Range(m_receivedMessageLengthCell).value = ""
     Range(m_receivedMessageCell).value = ""
+    Range(m_averageElapsedTimeCell).value = ""
     Range(m_elapsedTimeCell).value = ""
     Range(m_errorMessageCell).value = ""
 

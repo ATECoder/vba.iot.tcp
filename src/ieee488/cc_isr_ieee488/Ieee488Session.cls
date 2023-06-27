@@ -11,7 +11,6 @@ Option Explicit
 
 Private m_viSession As ViSession
 Private m_identity As String
-Private m_readTimeout As Integer
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
@@ -113,7 +112,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     If Me.ViSession.UsingGpibLan Then
     
         ' read the status byte and check for errors.
-        Dim statusByte As Integer: statusByte = Me.SerialPoll()
+        Dim statusByte As Integer: statusByte = Me.ViSession.GpibLan.SerialPoll()
     
         ' check if we have an error.
         If ServiceRequests.ErrorAvailable = (statusByte And ServiceRequests.ErrorAvailable) Then
@@ -144,7 +143,7 @@ Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
         ' check if we have data to read.
     
         ' read the status byte and check for errors.
-        Dim statusByte As Integer: statusByte = Me.ReadStatusByte()
+        Dim statusByte As Integer: statusByte = Me.ViSession.GpibLan.SerialPoll()
     
         ' check if message available.
         If 0 = (statusByte And ServiceRequests.MessageAvailable) Then
@@ -233,7 +232,7 @@ End Function
 Public Function ReadStatusByte(Optional ByVal canQuery As Boolean = False) As Integer
     
     If Me.ViSession.UsingGpibLan Then
-        ReadStatusByte = Me.SerialPoll()
+        ReadStatusByte = Me.ViSession.GpibLan.SerialPoll()
     ElseIf canQuery Then
         ReadStatusByte = Me.QueryServiceRequestStatus()
     Else
@@ -251,7 +250,7 @@ End Function
 Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
     If Me.ViSession.UsingGpibLan Then
-        SRQ = Me.IsSRQ()
+        SRQ = Me.ViSession.GpibLan.IsSRQ()
     ElseIf canQuery Then
         SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus())
     Else

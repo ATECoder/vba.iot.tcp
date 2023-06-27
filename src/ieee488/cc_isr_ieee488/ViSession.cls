@@ -38,11 +38,15 @@ End Sub
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
 
-    m_gpibLan.Dispose
+    If Not m_gpibLan Is Nothing Then
+        m_gpibLan.Dispose
+    End If
     Set m_gpibLan = Nothing
+    
     If Me.Connected Then
         Me.CloseConnection
     End If
+    
     If Not m_tcpClient Is Nothing Then
         m_tcpClient.Dispose
     End If
