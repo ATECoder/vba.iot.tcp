@@ -112,15 +112,15 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     If Me.ViSession.UsingGpibLan Then
     
         ' read the status byte and check for errors.
-        Dim statusByte As Integer: statusByte = Me.ViSession.GpibLan.SerialPoll()
+        Dim StatusByte As Integer: StatusByte = Me.ViSession.GpibLan.SerialPoll()
     
         ' check if we have an error.
-        If ServiceRequests.ErrorAvailable = (statusByte And ServiceRequests.ErrorAvailable) Then
+        If ServiceRequests.ErrorAvailable = (StatusByte And ServiceRequests.ErrorAvailable) Then
         
             ' raise the write error adding some information
             Err.Raise UserDefinedErrors.SocketSendError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
                       UserDefinedErrors.SocketSendError.Description & _
-                      " SRQ=0x" & Hex(statusByte) & _
+                      " SRQ=0x" & Hex(StatusByte) & _
                       ". Error Available (0x" & Hex(ServiceRequests.ErrorAvailable) & _
                       ") after sending " & message & " to the instrument at " & _
                       Me.ViSession.SocketAddress & "."
@@ -143,15 +143,15 @@ Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
         ' check if we have data to read.
     
         ' read the status byte and check for errors.
-        Dim statusByte As Integer: statusByte = Me.ViSession.GpibLan.SerialPoll()
+        Dim StatusByte As Integer: StatusByte = Me.ViSession.GpibLan.SerialPoll()
     
         ' check if message available.
-        If 0 = (statusByte And ServiceRequests.MessageAvailable) Then
+        If 0 = (StatusByte And ServiceRequests.MessageAvailable) Then
         
             ' raise the write error adding some information
             Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
                       UserDefinedErrors.InvalidOperationError.Description & _
-                      " SRQ=0x" & Hex(statusByte) & _
+                      " SRQ=0x" & Hex(StatusByte) & _
                       ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
                       ") trying reading the instrument at " & Me.ViSession.SocketAddress & "."
         
