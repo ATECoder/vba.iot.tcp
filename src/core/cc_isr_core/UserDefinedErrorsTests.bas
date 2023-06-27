@@ -12,3 +12,38 @@ Public Function TestUserDefinedErrorShouldExist() As Assert
                                                         ude.ToString(" should exist"))
 End Function
 
+Public Function TestErrorMessageShouldBuild() As Assert
+
+    Const thisProcedureName = "TestErrorMessageShouldBuild"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    ' create an error
+    Dim zero As Double: zero = 0
+    Dim value As Double: value = 1 / zero
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, "UserDefinedErrorsTests"
+    
+    ' display the error message
+    Dim errorMessage As String: errorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(errorMessage) > 0, "error message should build")
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Function
+
+
+

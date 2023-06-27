@@ -1,7 +1,5 @@
 ### TODO
 
-ieee488: passed test with and without protecting from query unterminated.
-
 #### Updates
 * IEEE488 test sheet: ADD Go to local go to remote GPIB commands. Enable if Prologix.
 * test session: selective device clear and read status byte

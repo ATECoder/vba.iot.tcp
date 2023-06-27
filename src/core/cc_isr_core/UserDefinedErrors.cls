@@ -365,7 +365,7 @@ End Sub
 ''' </returns>
 Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = False) As String
 
-    Dim builder As StringBuilder: builder = New StringBuilder
+    Dim builder As StringBuilder: Set builder = New StringBuilder
   
     ' check if we have an error
     If Err.Number <> 0 Then
