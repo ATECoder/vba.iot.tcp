@@ -8,14 +8,28 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
-Private m_readTermination As String
-Private m_writeTermination As String
-Private m_receiveTimeout As Long
-Private m_tcpClient As TcpClient
+
+Private Const READ_AFTER_WRITE_DELAY_DEFAULT = 5
+
 Private m_gpibLan As GpibLanController
-Private m_usingGpibLan As Boolean
+
+Private m_readAfterWriteDelay As Integer
+
+Private m_readTermination As String
+
+Private m_receiveTimeout As Long
+
 Private m_readAfterWriteEnabled As Boolean
+
+Private m_stopper As StopWatch
+
+Private m_tcpClient As TcpClient
+
+Private m_usingGpibLan As Boolean
+
+Private m_writeTermination As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
@@ -23,11 +37,13 @@ Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChang
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Initialize()
+    Set m_stopper = cc_isr_Core.Constructor.CreateStopWatch
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
     Set m_gpibLan = New GpibLanController
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_receiveTimeout = 500
+    Me.ReadAfterWriteDelay = READ_AFTER_WRITE_DELAY_DEFAULT
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -51,6 +67,9 @@ Public Sub Dispose()
         m_tcpClient.Dispose
     End If
     Set m_tcpClient = Nothing
+    
+    Set m_stopper = Nothing
+
 End Sub
 
 ''' <summary>   Gets a reference to the GPIB Lan. </summary>
@@ -119,6 +138,17 @@ End Property
 ''' <param name="value">   The Write termination. </param>
 Public Property Let WriteTermination(value As String)
     m_writeTermination = value
+End Property
+
+''' <summary>   Gets the Read After Write Delay. </summary>
+''' <value>   An Integer. </value>
+Friend Property Get ReadAfterWriteDelay() As Integer
+    ReadAfterWriteDelay = m_readAfterWriteDelay
+End Property
+
+''' <summary>   Sets the Read After Write Delay. </summary>
+Friend Property Let ReadAfterWriteDelay(ByVal value As Integer)
+    m_readAfterWriteDelay = value
 End Property
 
 ''' <summary>   Gets the receive timeout in Milliseconds. </summary>
@@ -193,6 +223,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     Else
         If appendTermination Then message = message & Me.WriteTermination
         WriteLine = m_tcpClient.SendMessage(message)
+        m_stopper.Wait Me.ReadAfterWriteDelay
     End If
 
 End Function

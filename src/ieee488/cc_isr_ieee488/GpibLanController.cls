@@ -19,6 +19,10 @@ Private m_readTermination As String
 
 Private m_readTimeout As Integer
 
+Private m_readAfterWriteDelay As Integer
+
+Private m_stopper As StopWatch
+
 Private m_tcpClient As TcpClient
 
 Private m_writeTermination As String
@@ -26,6 +30,7 @@ Private m_writeTermination As String
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 ''' <remarks>   This GPIB Lan class uses the Prologix GPIB-Ethernet Controller. </remarks>
 Private Sub Class_Initialize()
+    Set m_stopper = cc_isr_Core.Constructor.CreateStopWatch
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
     m_readTermination = vbLf
     m_writeTermination = vbLf
@@ -44,25 +49,28 @@ End Sub
 '''                                           error by disabling read-after-write before write. </param>
 Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
-                      Optional ByVal preventQueryUnterminated As Boolean = True)
+                      Optional ByVal preventQueryUnterminated As Boolean = True, _
+                      Optional ByVal readAfterWriteDelayMs = 5)
     Set m_tcpClient = client
     m_readTermination = readTerm
     m_writeTermination = writeTerm
     Me.DisableReadAfterWriteOnWrite = preventQueryUnterminated
+    Me.ReadAfterWriteDelay = readAfterWriteDelayMs
     
     Dim i As Integer
     
     ' from experiments it seems this needs to be set first.
     Me.ReadAfterWriteEnabledGetter
-    For i = 1 To 10: DoEvents: Next
+    ' For i = 1 To 10: DoEvents: Next
+    
     Me.ReadAfterWriteEnabledSetter True
-    For i = 1 To 10: DoEvents: Next
+    ' For i = 1 To 10: DoEvents: Next
     
     If Not preventQueryUnterminated Then
         ' if not preventing query unterminated, the read after write must be
         ' disabled
         Me.ReadAfterWriteEnabledSetter False
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
     End If
     
 End Sub
@@ -79,9 +87,10 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/Local: no
     
         Me.ReadAfterWriteEnabledGetter
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
+        
         Me.ReadAfterWriteEnabledSetter True
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 2 Then
     
@@ -90,8 +99,7 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/Local: only if toggling when program already started.
         m_readAfterWriteEnabled = False
         Me.ReadAfterWriteEnabledSetter True
-        DoEvents
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 3 Then
         
@@ -99,7 +107,6 @@ Private Sub InitReadAfterWrite()
         ' Query Unterminated on write: no
         ' Crash on power toggle/Local: no
         Me.ReadAfterWriteEnabledGetter
-        DoEvents
         Me.ReadAfterWriteEnabledSetter False
         
         ' this takes it from 380 to 74! go figure!!!
@@ -108,7 +115,7 @@ Private Sub InitReadAfterWrite()
         
         ' this takes it to 24 ms! go figure!!!
         ' Crash on power toggle/Local: YES
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 4 Then
     
@@ -120,7 +127,7 @@ Private Sub InitReadAfterWrite()
         
         m_readAfterWriteEnabled = True
         Me.ReadAfterWriteEnabledSetter False
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 5 Then
     
@@ -129,10 +136,10 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/local: no
         
         Me.ReadAfterWriteEnabledSetter True
-        For i = 1 To 10: DoEvents: Next
-        Me.ReadAfterWriteEnabledSetter False
-        For i = 1 To 10: DoEvents: Next
+        ' For i = 1 To 10: DoEvents: Next
         
+        Me.ReadAfterWriteEnabledSetter False
+        ' For i = 1 To 10: DoEvents: Next
         
     End If
 
@@ -145,7 +152,21 @@ Public Sub Dispose()
         ' timeouts on the next read.
         ' Me.ReadAfterWriteEnabledSetter True
     End If
+
+    Set m_stopper = Nothing
+
 End Sub
+
+''' <summary>   Gets the Read After Write Delay. </summary>
+''' <value>   An Integer. </value>
+Friend Property Get ReadAfterWriteDelay() As Integer
+    ReadAfterWriteDelay = m_readAfterWriteDelay
+End Property
+
+''' <summary>   Sets the Read After Write Delay. </summary>
+Friend Property Let ReadAfterWriteDelay(ByVal value As Integer)
+    m_readAfterWriteDelay = value
+End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 ' DEVICE IO
@@ -166,6 +187,7 @@ Public Function SendToDevice(ByVal message As String, Optional ByVal appendTermi
     
     ' send the message to the device.
     SendToDevice = m_tcpClient.SendMessage(message)
+    m_stopper.Wait Me.ReadAfterWriteDelay
 
 End Function
 
@@ -222,6 +244,7 @@ Public Function SendToController(ByVal message As String, Optional ByVal appendT
     
     If appendTermination Then message = message & m_writeTermination
     SendToController = m_tcpClient.SendMessage(message)
+    m_stopper.Wait Me.ReadAfterWriteDelay
 
 End Function
 

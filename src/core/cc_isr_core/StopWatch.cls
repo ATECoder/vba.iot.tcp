@@ -78,13 +78,15 @@ Property Get ElapsedCounts() As Double
 End Property
 
 ''' <summary>   Returns the elapsed time in seconds. </summary>
+''' <value>   A Double elapsed time in seconds. </value>
 Property Get ElapsedSeconds() As Double
-    ElapsedSeconds = ElapsedCounts / m_frequency
+    ElapsedSeconds = Me.ElapsedCounts / m_frequency
 End Property
 
 ''' <summary>   Returns the elapsed time in milliseconds. </summary>
+''' <value>   A Double elapsed time in lilliseconds. </value>
 Property Get ElapsedMilliseconds() As Double
-    ElapsedMilliseconds = 1000# * ElapsedSeconds
+    ElapsedMilliseconds = 1000# * Me.ElapsedSeconds
 End Property
 
 ''' <summary>   Suspends the thread for the specified duration in milliseconds. </summary>
@@ -92,4 +94,15 @@ End Property
 Public Sub Sleep(ByVal duration As Long)
     SleepMilliseconds duration
 End Sub
+
+''' <summary>   Loop around <see cref="DoEvents"> for the specified duration. </summary>
+''' <param name="duration">   [Long] Wait time in milliseconds. </param>
+Public Function Wait(ByVal duration As Long) As Long
+    Me.Restart
+    While Me.ElapsedMilliseconds < duration
+        DoEvents
+    Wend
+    Wait = Me.ElapsedMilliseconds
+End Function
+
 
