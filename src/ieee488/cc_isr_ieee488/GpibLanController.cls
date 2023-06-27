@@ -45,8 +45,11 @@ End Sub
 ''' <param name="client">                     Reference to the <see cref="TcpClient"/>. </param>
 ''' <param name="readTerm">                   [Optiona, String, VbLf] the read termination. </param>
 ''' <param name="writeTerm">                  [Optiona, String, VbLf] the write termination. </param>
-''' <param name="preventQueryUnterminated">   [Optional, Boolea, True] prevent Query Unterminated
-'''                                           error by disabling read-after-write before write. </param>
+''' <param name="preventQueryUnterminated">   [Optional, Boolean, True] prevent Query Unterminated
+'''                                           error by disabling read-after-write before each write.
+'''                                           Otherwise, read-after-write is disabled and the lan controller
+'''                                           is used to pass readings from the device to the controller.
+'''                                           </param>
 Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
                       Optional ByVal preventQueryUnterminated As Boolean = True, _
@@ -61,16 +64,14 @@ Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As Stri
     
     ' from experiments it seems this needs to be set first.
     Me.ReadAfterWriteEnabledGetter
-    ' For i = 1 To 10: DoEvents: Next
     
     Me.ReadAfterWriteEnabledSetter True
-    ' For i = 1 To 10: DoEvents: Next
     
     If Not preventQueryUnterminated Then
-        ' if not preventing query unterminated, the read after write must be
-        ' disabled
+        ' If not preventing query unterminated, the read after write must be disabled.
+        ' The lan controller will then read from the instrument to the controller
+        ' on every read.
         Me.ReadAfterWriteEnabledSetter False
-        ' For i = 1 To 10: DoEvents: Next
     End If
     
 End Sub
@@ -87,10 +88,8 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/Local: no
     
         Me.ReadAfterWriteEnabledGetter
-        ' For i = 1 To 10: DoEvents: Next
         
         Me.ReadAfterWriteEnabledSetter True
-        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 2 Then
     
@@ -99,7 +98,6 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/Local: only if toggling when program already started.
         m_readAfterWriteEnabled = False
         Me.ReadAfterWriteEnabledSetter True
-        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 3 Then
         
@@ -115,7 +113,6 @@ Private Sub InitReadAfterWrite()
         
         ' this takes it to 24 ms! go figure!!!
         ' Crash on power toggle/Local: YES
-        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 4 Then
     
@@ -127,7 +124,6 @@ Private Sub InitReadAfterWrite()
         
         m_readAfterWriteEnabled = True
         Me.ReadAfterWriteEnabledSetter False
-        ' For i = 1 To 10: DoEvents: Next
     
     ElseIf opt = 5 Then
     
@@ -136,10 +132,8 @@ Private Sub InitReadAfterWrite()
         ' Crash on power toggle/local: no
         
         Me.ReadAfterWriteEnabledSetter True
-        ' For i = 1 To 10: DoEvents: Next
         
         Me.ReadAfterWriteEnabledSetter False
-        ' For i = 1 To 10: DoEvents: Next
         
     End If
 
