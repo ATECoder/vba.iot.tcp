@@ -110,7 +110,7 @@ Public Function WriteLine(ByVal message As String, Optional ByVal appendTerminat
     
     WriteLine = Me.ViSession.WriteLine(message, appendTermination)
     
-    If Me.ViSession.UsingPrologix Then
+    If Me.ViSession.UsingGpibLan Then
     
         ' read the status byte and check for errors.
         Dim statusByte As Integer: statusByte = Me.SerialPoll()
@@ -139,7 +139,7 @@ End Function
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
     
-    If Me.ViSession.UsingPrologix Then
+    If Me.ViSession.UsingGpibLan Then
         
         ' check if we have data to read.
     
@@ -228,11 +228,11 @@ End Function
 
 ''' <summary> Reads the status byte. </summary>
 ''' <param name="canQuery">   [Optional, False] True to send <c>*STB?</c>
-''' if not <see cref="UsingPrologix"/>. </param>
+''' if not <see cref="UsingGpibLan"/>. </param>
 ''' <returns>   The status byte. </returns>
 Public Function ReadStatusByte(Optional ByVal canQuery As Boolean = False) As Integer
     
-    If Me.ViSession.UsingPrologix Then
+    If Me.ViSession.UsingGpibLan Then
         ReadStatusByte = Me.SerialPoll()
     ElseIf canQuery Then
         ReadStatusByte = Me.QueryServiceRequestStatus()
@@ -246,11 +246,11 @@ End Function
 
 ''' <summary>   Checks if a service is requested. </summary>
 ''' <param name="canQuery">   [Optional, False] True to send <c>*STB?</c>
-''' if not <see cref="UsingPrologix"/>. </param>
+''' if not <see cref="UsingGpibLan"/>. </param>
 ''' <returns>   The status byte. </returns>
 Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
-    If Me.ViSession.UsingPrologix Then
+    If Me.ViSession.UsingGpibLan Then
         SRQ = Me.IsSRQ()
     ElseIf canQuery Then
         SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus())
@@ -337,172 +337,6 @@ Public Function ResetKnownState() As Integer
     ResetKnownState = Me.WriteLine(Ieee488Syntax.ResetKnownStateCommand)
     
 End Function
-
-' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' PROLOGIX GPIB METHODS
-
-''' <summary>   Configure the GPIB address. The meaning of the GPIB address depends on the
-''' operating mode of the controller.
-'''
-''' In CONTROLLER mode, it refers to the GPIB address of the instrument being controlled.
-''' In DEVICE mode, it is the address of the GPIB peripheral that Prologix GPIB-ETHERNET
-''' controller is emulating. </summary>
-''' <remarks>
-''' An optional secondary address may also be specified.
-'''
-''' Internally, the secondary address, which is offset by 96, must be separated from the primary
-''' address by a space character. Specifying secondary address has no effect in DEVICE mode.
-''' </remarks>
-''' <para name="primaryAddress">     [Integer] Specifies the primary GPIB address
-'''                                   between 0 and 30. </param>
-''' <para name="secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
-'''                                  between 0 and 30. </param>
-''' <returns>   The status byte. </returns>
-Public Sub SetGpibAddress(ByVal primaryAddress As Integer, _
-                          Optional ByVal secondaryAddress As Integer = -1)
-    
-    If Me.ViSession.UsingPrologix Then
-        If primaryAddress >= 0 And secondaryAddress < 0 Then
-            Me.ViSession.WriteLine ("++addr " & CStr(primaryAddress))
-        ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
-            Me.ViSession.QueryLine ("++spoll " & CStr(primaryAddress) & _
-                " " & CStr(secondaryAddress + 96))
-        End If
-    End If
-    
-End Sub
-
-''' <summary>   Query the GPIB address. </summary>
-''' <value>    An string including the primary and secondary address separated by a space. </value>
-Public Function GetGpibAddress() As String
-    
-    GetGpibAddress = "-1"
-    If Me.ViSession.UsingPrologix Then
-        GetGpibAddress = CInt(Me.ViSession.QueryLine("++addr"))
-        Dim addresses() As String: addresses = Split("", " ")
-        If 1 = UBound(addresses) - LBound(addresses) + 1 Then
-            GetGpibAddress = addresses(1)
-            If 1 < UBound(addresses) - LBound(addresses) + 1 Then
-                GetGpibAddress = GetGpibAddress & " " & addresses(2)
-            End If
-        End If
-        
-    End If
-    
-End Function
-
-
-''' <summary> Issues a local lockout (++llo). </summary>
-''' <remarks>   Valid if <see cref="UsingPrologix"/>. </remarks>
-Public Sub LocalLockout()
-    
-    If Me.ViSession.UsingPrologix Then
-        Me.ViSession.WriteLine "++llo"
-    End If
-    
-End Sub
-
-''' <summary> Issues a Go To Local (GTL) (++loc). </summary>
-''' <remarks>   Valid if <see cref="UsingPrologix"/>. </remarks>
-Public Sub GoToLocal()
-    
-    If Me.ViSession.UsingPrologix Then
-        Me.ViSession.WriteLine "++loc"
-    End If
-    
-End Sub
-
-''' <summary>   Gets the device read timeout in Milliseconds. </summary>
-''' <value>   An Integer. </value>
-Public Property Get ReadTimeout() As Integer
-    ReadTimeout = m_readTimeout
-End Property
-
-''' <summary>   Sets the device read timeout, in milliseconds, to be used in the
-'''  Prologix read and spoll commands. Timeout may be set to any value between 1 and 3000
-''' milliseconds.
-''' </summary>
-''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub SetReadTimeout(ByVal timeoutMs As Integer)
-    
-    If Me.ViSession.UsingPrologix Then
-        If Me.Connected Then
-            
-            If timeoutMs < 1 Then timeoutMs = 1
-            If timeoutMs > 3000 Then timeoutMs = 3000
-            
-            If timeoutMs <> m_readTimeout Then
-                Me.ViSession.WriteLine "++read_tmo_ms " & CStr(timeoutMs)
-            End If
-            m_readTimeout = timeoutMs
-        End If
-    End If
-    
-End Sub
-
-''' <summary>   Sets the device read timeout, in milliseconds, that is used in the
-'''  Prologix read and spoll commands.
-''' </summary>
-Public Function GetReadTimeout() As Integer
-    
-    If Me.ViSession.UsingPrologix Then
-        If Me.Connected Then
-            m_readTimeout = CInt(Me.ViSession.QueryLine("++read_tmo_ms"))
-        End If
-    Else
-        m_readTimeout = -1
-    End If
-    
-End Function
-
-''' <summary> Issues an SDC. </summary>
-''' <remarks>   Valid if <see cref="UsingPrologix"/>. </remarks>
-Public Sub SelectiveDeviceClear()
-    
-    If Me.ViSession.UsingPrologix Then
-        Me.ViSession.WriteLine "++clr"
-    End If
-    
-End Sub
-
-''' <summary> Performs a serial poll of the instrument at the current or the specified address.
-''' If no address is specified then this command serial polls the currently addressed instrument (as
-''' set by a previous ++addr command). This command uses the time-out value specified
-''' by the read_tmo_ms command.
-''' </summary>
-''' <para name="primaryAddress">     [Optional, Integer] Specifies the primary GPIB address
-'''                                   between 0 and 30. </param>
-''' <para name="secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
-'''                                  between 0 and 30. </param>
-''' <returns>   The status byte. </returns>
-Public Function SerialPoll(Optional ByVal primaryAddress As Integer = -1, _
-                           Optional ByVal secondaryAddress As Integer = -1) As Integer
-    
-    If Me.ViSession.UsingPrologix Then
-        If primaryAddress >= 0 And secondaryAddress < 0 Then
-            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress)))
-        ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
-            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll " & CStr(primaryAddress) & _
-                         " " & CStr(secondaryAddress + 96)))
-        Else
-            SerialPoll = CInt(Me.ViSession.QueryLine("++spoll"))
-        End If
-    Else
-        SerialPoll = 0
-    End If
-    
-End Function
-
-''' <summary>   Query Prologix service request status. </summary>
-''' <returns>   True if Server requested. </returns>
-Friend Function IsSRQ() As Boolean
-    
-    If Me.ViSession.UsingPrologix Then
-        IsSRQ = 1 = CInt(Me.ViSession.QueryLine("++srq"))
-    End If
-    
-End Function
-
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 ' Connection Changed

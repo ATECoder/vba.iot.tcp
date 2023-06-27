@@ -8,12 +8,13 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
-Private Const PROLOGIX_PORT_NO As Integer = 1234
+Private Const GPIB_LAN_PORT_NO As Integer = 1234
 Private m_readTermination As String
 Private m_writeTermination As String
 Private m_receiveTimeout As Long
 Private m_tcpClient As TcpClient
-Private m_usingPrologix As Boolean
+Private m_gpibLan As GpibLanController
+Private m_usingGpibLan As Boolean
 Private m_readAfterWriteEnabled As Boolean
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
@@ -23,6 +24,7 @@ Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChang
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Initialize()
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
+    Set m_gpibLan = New GpibLanController
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_receiveTimeout = 500
@@ -35,6 +37,9 @@ End Sub
 
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
+
+    m_gpibLan.Dispose
+    Set m_gpibLan = Nothing
     If Me.Connected Then
         Me.CloseConnection
     End If
@@ -43,6 +48,11 @@ Public Sub Dispose()
     End If
     Set m_tcpClient = Nothing
 End Sub
+
+''' <summary>   Gets a reference to the GPIB Lan. </summary>
+Public Property Get GpibLan() As GpibLanController
+    Set GpibLan = m_gpibLan
+End Property
 
 ''' <summary>   Returns the connection state of the client. </summary>
 ''' <returns>   True if the TCP Client socket is connected; otherwise, False. </returns>
@@ -132,17 +142,14 @@ End Sub
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
    
-    Me.UsingPrologix = port = PROLOGIX_PORT_NO
+    m_usingGpibLan = port = GPIB_LAN_PORT_NO
     
     m_tcpClient.ConnectTo host, port
     
     Me.SetReceiveTimeout timeoutMs
     
-    If Me.UsingPrologix Then
-        ' set prologix to auto read after write.
-        ' this forces the opposite value
-        m_readAfterWriteEnabled = False
-        Me.SetReadAfterWrite Not m_readAfterWriteEnabled
+    If Me.UsingGpibLan Then
+        m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination
     End If
     
     OnConnectionChanged Me.Connected
@@ -164,14 +171,8 @@ End Function
 ''' <summary>   Returns true if the TCP Connection uses the Prologix
 ''' GPIB-Lan interface device. </summary>
 ''' <value>   True if using the Prologix GPIB-Lan interface device. </value>
-Public Property Get UsingPrologix() As Boolean
-    UsingPrologix = m_usingPrologix
-End Property
-
-''' <summary>   Set true if the TCP Connection uses the Prologix
-''' GPIB-Lan interface device. </summary>
-Public Property Let UsingPrologix(ByVal value As Boolean)
-    m_usingPrologix = value
+Public Property Get UsingGpibLan() As Boolean
+    UsingGpibLan = m_usingGpibLan
 End Property
 
 ''' <summary>   Sends a message. </summary>
@@ -183,10 +184,12 @@ End Property
 ''' <returns>   The number of sent characters. </returns>
 Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
     
-    If appendTermination Then
-        message = message & Me.WriteTermination
+    If Me.UsingGpibLan Then
+        WriteLine = Me.GpibLan.SendToDevice(message, appendTermination)
+    Else
+        If appendTermination Then message = message & Me.WriteTermination
+        WriteLine = m_tcpClient.SendMessage(message)
     End If
-    WriteLine = m_tcpClient.SendMessage(message)
 
 End Function
 
@@ -200,18 +203,14 @@ End Function
 ''' <returns>   The received string. </returns>
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
-    
-    Read = m_tcpClient.ReceiveRaw(maxLength, trimEnd, Me.ReadTermination)
+    If Me.UsingGpibLan Then
+        Read = Me.GpibLan.ReceiveFromDevice(maxLength, trimEnd)
+    Else
+        Read = m_tcpClient.ReceiveRaw(maxLength, trimEnd, Me.ReadTermination)
+    End If
 
 End Function
     
-Public Function PrologixRead(Optional ByVal maxLength As Long = &H7FFF, _
-                     Optional ByVal trimEnd As Boolean = True) As String
-    m_tcpClient.SendMessage "++read eoi" & Me.WriteTermination
-    PrologixRead = m_tcpClient.ReceiveRaw(32767)
-End Function
-
-
 ''' <summary>   Sends a message and receives a reply. </summary>
 ''' <param name="message">   The message. </param>
 ''' <returns>   The received string. </returns>
@@ -225,59 +224,6 @@ Public Function QueryLine(ByVal message As String, Optional ByVal appendTerminat
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' PROLOGIX
-
-''' <summary>   Gets the read-after-write enabled status. </summary>
-''' <value>   True if wrte-after-write is enabled.  </value>
-Public Property Get ReadAfterWriteEnabled() As Boolean
-    ReadAfterWriteEnabled = m_readAfterWriteEnabled
-End Property
-
-''' <summary>   Configure the Read-After-Write mode of the Prologix controller. </summary>
-''' <remarks>
-''' Prologix GPIB-ETHERNET controller can be configured to automatically address
-''' instruments to talk after sending them a command in order to read their response. The
-''' feature called, Read-After-Write, saves the user from having to issue read commands
-''' repeatedly. This command enabled or disabled the Read-After-Write feature.
-'''
-''' In addition, auto command also addresses the instrument at the currently specified
-''' address to TALK or LISTEN. ++auto 0 addresses the instrument to LISTEN and
-''' ++auto 1 addresses the instrument to TALK.
-''' If the command is issued without any arguments it returns the current state of the
-''' readafter-write feature.
-'''
-''' NOTE:
-''' Some instruments generate “Query Unterminated” or “-420” error if they are addressed
-''' to talk after sending a command that does not generate a response (often called non
-''' query commands). In effect the instrument is saying, I have been asked to talk but I have
-''' nothing to say. The error is often benign and may be ignored. Otherwise, use the
-''' ++read command to read the instrument response. For example:
-''' <code>
-''' ++auto 0 — Turn off read-after-write and address instrument to listen
-''' SET VOLT 1.0 — Non-query command
-''' *idn? — Query command
-''' ++read eoi — Read until EOI asserted by instrument
-''' "HP54201A" — Response from instrument
-''' </code>
-''' <param name="enable">   True to enable read-after-write. </param>
-''' </remarks>
-Public Sub SetReadAfterWrite(ByVal enable As Boolean)
-    
-    If Me.UsingPrologix And m_readAfterWriteOn <> Me.ReadAfterWriteEnabled Then
-        Dim output As String: output = IIf(readAfterWriteOn, "1", "0")
-        m_tcpClient.SendMessage "++auto " & output & Me.WriteTermination
-        m_readAfterWriteEnabled = readAfterWriteOn
-    End If
-
-End Sub
-
-''' <summary>   Query the Read-After-Write mode of the Prologix controller. </summary>
-Public Function GetReadAfterWrite() As Boolean
-    m_readAfterWriteEnabled = "1" = Me.QueryLine("++auto")
-End Function
-
-
-' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 ' Connection Changed
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
@@ -286,7 +232,6 @@ Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
 End Sub
-
 
 
 

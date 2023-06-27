@@ -125,6 +125,27 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFF, _
   
 End Function
 
+
+''' <summary>   Sends a query message and reads back from the server until reaching the specified
+''' termination or reading the specified number of characters. </summary>
+''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
+''' <param name="termination">   [Optional, 10 ASCII] The character the signifies the end of the stream. </param>
+''' <returns>   The received string. </returns>
+Public Function QueryRaw(ByVal message As String, _
+                         Optional ByVal maxLength As Long = &H7FFF, _
+                         Optional ByVal trimEnd As Boolean = True, _
+                         Optional ByVal termination As String = vbLf) As String
+    
+    If Me.SendMessage(message) > 0 Then
+        QueryRaw = Me.TcpClientSocket.ReceiveRaw(maxLength, trimEnd, termination)
+    Else
+        QueryRaw = ""
+    End If
+  
+End Function
+
+
 ''' <summary>   Close the connection and releases the socket. </summary>
 Public Sub Dispose()
     If Me.Connected Then

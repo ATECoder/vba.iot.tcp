@@ -29,3 +29,13 @@ Public Function CreateViSession() As ViSession
     Set CreateViSession = New ViSession
 End Function
 
+''' <summary>   Creates a new instance of the <see cref="GpibLanController"/> class to
+''' share with external workbooks. </summary>
+''' <remarks>
+''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' </remarks>
+''' <returns>   A new instance of the <see cref="GpibLanController"/> class. </returns>
+Public Function CreateGpibLanController() As GpibLanController
+    Set CreateGpibLanController = New GpibLanController
+End Function
+

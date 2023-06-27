@@ -260,13 +260,19 @@ End Property
 ''' when an error first occurs in a procedure, the error
 ''' source string is the application title (App.Title).
 ''' </remarks>
-''' <param name="procedureName">   Specifies the name of the procedure which to append to the source string. </param>
-''' <param name="moduleName">      Specifies the module name to append to the source string. </param>
-Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As String)
+''' <param name="procedureName">   [String] Specifies the name of the procedure which to append to the source string. </param>
+''' <param name="moduleName">      [String] Specifies the module name to append to the source string. </param>
+''' <param name="projectName">     [Optiona, String] Specifies the project name; otherwise the project
+'''                                name of the active workbook is used. </param>
+Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As String, Optional projectName As String = "")
 
     Const appSeparator = ":"
     Const moduleSeparator = ";"
     Const procSeperator = "."
+    
+    If StringExtensions.IsNullOrEmpty(projectName) Then
+        projectName = ActiveWorkbook.VBProject.name
+    End If
     
     ' this procedure must not trap errors because it must
     ' not alter the error object.
@@ -278,7 +284,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
     Dim errorSource As String: errorSource = Err.source
     
     ' check if the error occurred in this procedure
-    If (errorSource = ActiveWorkbook.name) Or (Len(errorSource) = 0) Then
+    If (errorSource = projectName) Or (Len(errorSource) = 0) Then
     
         ' if the source string is the application title,
         ' the error occurred in the procedure.  Because
@@ -286,7 +292,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
         ' application and module to the source string
         errorSource = procedureName & _
                   moduleSeparator & moduleName & _
-                  appSeparator & ThisWorkbook.name
+                  appSeparator & projectName
   
     ' check if the error was raised from the same
     ' re-entrant procedure
@@ -324,7 +330,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
             moduleNamePos = InStr(1, errorSource, appSeparator) + 1
             
             ' check if this is the same as this application
-            If InStr(moduleNamePos, errorSource, ThisWorkbook.name) = moduleNamePos Then
+            If InStr(moduleNamePos, errorSource, projectName) = moduleNamePos Then
         
                 ' if the source is in this application than
                 ' just append the module and procedure
@@ -335,7 +341,7 @@ Public Sub AppendErrSource(ByVal procedureName As String, ByVal moduleName As St
                 ' append the procedure, module, and application
                 errorSource = procedureName & _
                          moduleSeparator & moduleName & _
-                         appSeparator & ThisWorkbook.name & _
+                         appSeparator & projectName & _
                          procSeperator & errorSource
             End If
         
