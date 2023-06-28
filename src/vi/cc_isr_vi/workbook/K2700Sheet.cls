@@ -12,29 +12,34 @@ Option Explicit
 Private Const m_receiveTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
-Private Const m_timerIntervalCell As String = "B4"
-Private Const m_connectedHostCell As String = "C2"
-Private Const m_connectedPortCell As String = "D2"
+Private Const m_socketAddressCell As String = "C2"
 Private Const m_connectedSocketIdCell As String = "E2"
 Private Const m_sentMessageCell As String = "G2"
 Private Const m_receivedMessageLengthCell As String = "H2"
 Private Const m_receivedMessageCell As String = "I2"
-Private Const m_statusByteCell As String = "G3"
 Private Const m_elapsedTimeCell As String = "J2"
 Private Const m_elapsedTimeFormat As String = "0.0"
 Private Const m_connectedCell As String = "F2"
 Private Const m_identityCell As String = "I2"
-Private Const m_errorMessageCell As String = "B5"
+Private Const m_errorMessageCell As String = "B4"
 
-Private Const m_card1Cell As String = "C15"
-Private Const m_card2Cell As String = "C16"
-Private Const m_card1ScanListCell As String = "C17"
-Private Const m_card2ScanListCell As String = "C18"
-Private Const m_inputsCell As String = "C20"
-Private Const m_resistanceNoCell As String = "C21"
-Private Const m_resistanceCell As String = "D21"
-Private Const m_resistanceCountCell As String = "D21"
-Private Const m_externalTriggerStatusCell As String = "C26"
+Private Const m_statusByteCell As String = "F16"
+Private Const m_serialPollCell As String = "E16"
+Private Const m_srqCell As String = "C13"
+Private Const m_listenTalkCell As String = "C15"
+Private Const m_gpibAddressCell As String = "C17"
+Private Const m_readTimeoutCell As String = "C21"
+
+Private Const m_timerIntervalCell As String = "C23"
+Private Const m_card1Cell As String = "C24"
+Private Const m_card2Cell As String = "C25"
+Private Const m_card1ScanListCell As String = "C26"
+Private Const m_card2ScanListCell As String = "C27"
+Private Const m_inputsCell As String = "C29"
+Private Const m_resistanceNoCell As String = "C30"
+Private Const m_resistanceCell As String = "C31"
+Private Const m_resistanceCountCell As String = "C32"
+Private Const m_externalTriggerStatusCell As String = "C33"
 
 Private Const m_resistanceNoTopRow As Integer = 2
 Private Const m_resistanceNoCol As String = "K"
@@ -47,10 +52,13 @@ Attribute m_eventTimer.VB_VarHelpID = -1
 Private m_pauseRequested As Boolean
 
 Private m_extTrigInitiated  As Boolean
+
 Private m_currentResistanceNo As Integer
+
 Private WithEvents m_k2700 As K2700
 Attribute m_k2700.VB_VarHelpID = -1
-Private m_stopWatch As cc_isr_Core.StopWatch
+
+Private m_stopWatch As StopWatch
 
 ''' <summary>   Gets the singleton instance of the 2700 virtual instrument. </summary>
 ''' <value>   The singleton instance of the 2700 virtual instrument. </value>
@@ -69,6 +77,15 @@ Public Property Get Session() As cc_isr_Ieee488.Ieee488Session
     Set Session = Me.K2700.Session
 End Property
 
+''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </summary>
+''' <value>   The singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </value>
+Public Property Get StopWatch() As cc_isr_Core.StopWatch
+    If m_stopWatch Is Nothing Then
+        Set m_stopWatch = cc_isr_Core.Constructor.CreateStopWatch
+    End If
+    Set StopWatch = m_stopWatch
+End Property
+
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
     Set m_stopWatch = Nothing
@@ -82,151 +99,30 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
 
     Dim affirmative As Boolean: affirmative = eventArgs.Connected
     
+    Me.ConnectToggleButton.value = affirmative
+    
     ' report the connection state
     Range(m_connectedCell).value = affirmative
         
-    Me.RSTButton.Enabled = affirmative
-    Me.SDCButton.Enabled = affirmative
-    Me.CLSButton.Enabled = affirmative
-    Me.ReadCardsButton.Enabled = affirmative
-    Me.QueryButton.Enabled = affirmative
-    Me.ReadButton.Enabled = affirmative
-    Me.ReadStatusByteButton.Enabled = affirmative
-    Me.WriteButton.Enabled = affirmative
-    Me.SetScansButton.Enabled = affirmative
-    Me.QueryInputsButton.Enabled = affirmative
-    Me.ReadResistanceButton.Enabled = affirmative
+    Me.RSTButton.enabled = affirmative
+    Me.CLSButton.enabled = affirmative
+    Me.QueryButton.enabled = affirmative
+    Me.ReadButton.enabled = affirmative
+    Me.ReadStatusByteButton.enabled = affirmative
+    Me.WriteButton.enabled = affirmative
     
-End Sub
-
-''' <summary>   Gets the singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </summary>
-''' <value>   The singleton instance of the <see cref="cc_isr_Core.StopWatch"/>. </value>
-Public Property Get StopWatch() As cc_isr_Core.StopWatch
-    If m_stopWatch Is Nothing Then
-        Set m_stopWatch = cc_isr_Core.Constructor.CreateStopWatch
+    Me.ReadCardsButton.enabled = affirmative
+    Me.SetScansButton.enabled = affirmative
+    Me.QueryInputsButton.enabled = affirmative
+    Me.ReadResistanceButton.enabled = affirmative
+    
+    If affirmative Then
+        EnableGpibLan Me.Session.VISession.UsingGpibLan
+    Else
+        EnableGpibLan False
     End If
-    Set StopWatch = m_stopWatch
-End Property
 
-''' <summary>   Write line handling an error messages. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Private Sub WriteLine(ByVal message As String)
-
-    Const thisProcedureName = "WriteLine"
-    
-    ' Trap errors to the error handler
-    On Error GoTo err_Handler
-    
-    Me.Session.WriteLine message
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-exit_Handler:
-
-    Exit Sub
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-err_Handler:
-  
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
-    
-    ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
-    
-    ' exit this procedure (not an active handler)
-    On Error Resume Next
-    GoTo exit_Handler
-    
 End Sub
-
-''' <summary>   Query a message from the instrument handling any errors. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Private Function QueryLine(ByVal message As String) As String
-
-    Const thisProcedureName = "QueryLine"
-    
-    ' Trap errors to the error handler
-    On Error GoTo err_Handler
-    
-    QueryLine = Me.Session.QueryLine(message)
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-exit_Handler:
-
-    Exit Function
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-err_Handler:
-  
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
-    
-    ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
-    
-    ' exit this procedure (not an active handler)
-    On Error Resume Next
-    GoTo exit_Handler
-    
-End Function
-
-''' <summary>   Read from the instrument handling any errors. </summary>
-Private Function Read() As String
-
-    Const thisProcedureName = "WriteLine"
-    
-    ' Trap errors to the error handler
-    On Error GoTo err_Handler
-    
-    Read = Me.Session.Read()
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-exit_Handler:
-
-    Exit Function
-
-' . . . . . . . . . . . . . . . . . . . . . . . . . . .
-err_Handler:
-  
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
-    
-    ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
-    
-    ' exit this procedure (not an active handler)
-    On Error Resume Next
-    GoTo exit_Handler
-    
-End Function
-
-''' <summary>   Handles the Toggle connection button click event. </summary>
-Private Sub ConnectToggleButton_Click()
-
-    Me.RestartStopWatch
-
-    Dim host As String
-    Dim port As Integer
-    Dim timeout As Integer
-    
-    timeout = Me.ReceiveTimeout
-    host = Me.host
-    port = Me.port
-    
-    If Not ConnectToggleButton.value And Me.K2700.Connected Then
-        
-        Me.K2700.CloseConnection
-        
-    ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
-    
-        Me.K2700.OpenConnection Me.host, Me.port, timeout
-    
-    End If
-    
-    Me.ReadStopWatch
-    
-End Sub
-
 
 ''' <summary>   Populates the Commands combo box. </summary>
 Friend Sub PopulateCommandsComboBox()
@@ -249,9 +145,14 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestEnableQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand
+   
     Me.CommandsComboBox.AddItem ":FUNC 'RES',(@101:120)"
     Me.CommandsComboBox.AddItem ":FUNC 'RES',(@201:220)"
-    Me.CommandsComboBox.AddItem "SYST:FRSW?"
+    Me.CommandsComboBox.AddItem ":SYST:BEEP"
+    Me.CommandsComboBox.AddItem ":SYST:CLE"
+    Me.CommandsComboBox.AddItem ":SYST:ERR?"
+    Me.CommandsComboBox.AddItem ":SYST:FRSW?"
+   
 End Sub
 
 ''' <summary>   Restarts the stop watch and clears the elapsed time cell. </summary>
@@ -265,34 +166,920 @@ Friend Sub ReadStopWatch()
     Range(m_elapsedTimeCell).value = Format(Me.StopWatch.ElapsedMilliseconds, m_elapsedTimeFormat)
 End Sub
 
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' IEEE 488 Control
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Write line handling an error messages. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Friend Sub WriteLine(ByVal message As String)
+
+    Const thisProcedureName = "WriteLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.WriteLine message
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Query a message from the instrument handling any errors. </summary>
+''' <param name="message">   [String] to send to the instrument. </param>
+Friend Function QueryLine(ByVal message As String) As String
+
+    Const thisProcedureName = "QueryLine"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    QueryLine = Me.Session.QueryLine(message)
+    
+    Me.ReadStopWatch
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+''' <summary>   Read from the instrument handling any errors. </summary>
+Friend Function Read() As String
+
+    Const thisProcedureName = "Read"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Read = Me.Session.Read()
+    
+    Me.ReadStopWatch
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+
+''' <summary>   Handles the Toggle connection button click event. </summary>
+Friend Sub ConnectToggleButton_Click()
+
+    Const thisProcedureName = "ConnectToggleButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+
+    Dim host As String
+    Dim port As Integer
+    Dim timeout As Integer
+    
+    timeout = Me.ReceiveTimeout
+    host = Me.host
+    port = Me.port
+    
+    If Not ConnectToggleButton.value And Me.K2700.Connected Then
+        
+        Me.K2700.CloseConnection
+        
+    ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
+    
+        Me.K2700.OpenConnection Me.host, Me.port, timeout
+    
+    End If
+    
+    Me.ReadStopWatch
+   
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
 ''' <summary>   Handles the Clear Know State button click event. </summary>
 Private Sub CLSButton_Click()
+    
+    Const thisProcedureName = "CLSButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
+    
     Me.Session.ClearExecutionState
+    
     Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+
+''' <summary>   Handles the Reset Known State button click event. </summary>
+Private Sub RSTButton_Click()
+    
+    Const thisProcedureName = "RSTButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.ResetKnownState
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Handles the Selective device clear button click event. </summary>
+Private Sub SDCButton_Click()
+    
+    Const thisProcedureName = "SDCButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.SelectiveDeviceClear
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+''' <summary>   Handles the Read Status Byte button click event. </summary>
+Friend Sub ReadStatusByteButton_Click()
+    
+    Const thisProcedureName = "ReadStatusByteButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    If Me.Session.VISession.UsingGpibLan Then
+    
+        Me.RestartStopWatch
+        
+        Range(m_serialPollCell).value = Me.Session.VISession.GpibLan.SerialPoll
+        
+        Me.ReadStopWatch
+        
+    End If
+    
+    Me.RestartStopWatch
+    
+    Me.StatusByte = Me.Session.QueryServiceRequestStatus
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Handles the Write button click event. </summary>
+Private Sub WriteButton_Click()
+
+    Const thisProcedureName = "WriteButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.SentMessage = ""
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
+    
+    Me.RestartStopWatch
+    
+    Me.WriteLine messageToSend
+    
+    Me.ReadStopWatch
+    
+    Me.SentMessage = messageToSend
+    If Me.Session.VISession.UsingGpibLan And Me.AutoStatusReadCheckBox.value Then
+        Range(m_serialPollCell).value = Me.Session.VISession.GpibLan.SerialPoll
+    End If
+    
+    Dim isQuery As Boolean: isQuery = cc_isr_Core.StringExtensions.EndsWith(messageToSend, "?")
+    If Not isQuery And Me.AutoStatusReadCheckBox.value Then
+        Me.StatusByte = Me.Session.QueryServiceRequestStatus
+    End If
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+''' <summary>   Handles the Read button click event. </summary>
+Private Sub ReadButton_Click()
+
+    Const thisProcedureName = "ReadButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.receivedMessage = ""
+    Dim messageReceived As String
+    
+    Me.RestartStopWatch
+    
+    messageReceived = Me.Read
+    
+    Me.ReadStopWatch
+    
+    Me.receivedMessage = messageReceived
+   
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+''' <summary>   Handles the Query button click event. </summary>
+Private Sub QueryButton_Click()
+    
+    Const thisProcedureName = "QueryButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.receivedMessage = ""
+    Me.SentMessage = ""
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
+    Dim messageReceived As String
+    
+    Me.RestartStopWatch
+    
+    messageReceived = Me.QueryLine(messageToSend)
+    
+    Me.ReadStopWatch
+    
+    Me.receivedMessage = messageReceived
+    Me.SentMessage = messageToSend
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' SETTINGS
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Gets the host dotted IP Address. </summary>
+Friend Property Get host() As String
+    host = Range(m_inputHostCell).value
+End Property
+
+''' <summary>   Gets the port number. </summary>
+Friend Property Get port() As Integer
+    port = CInt(Range(m_inputPortCell).value)
+End Property
+
+''' <summary>   Get the receive timeout. </summary>
+Friend Property Get ReceiveTimeout() As Integer
+    ReceiveTimeout = CInt(Range(m_receiveTimeoutCell).value)
+End Property
+
+''' <summary>   Gets the received message. </summary>
+Friend Property Get receivedMessage() As String
+    receivedMessage = Range(m_receivedMessageCell).value
+End Property
+
+''' <summary>   Sets the received message. </summary>
+Friend Property Let receivedMessage(ByVal value As String)
+    Range(m_receivedMessageCell).value = value
+    Range(m_receivedMessageLengthCell).value = Len(value)
+End Property
+
+''' <summary>   Gets the sent message. </summary>
+Friend Property Get SentMessage() As String
+    SentMessage = Range(m_sentMessageCell).value
+End Property
+
+''' <summary>   Sets the sent message. </summary>
+Friend Property Let SentMessage(ByVal value As String)
+    Range(m_sentMessageCell).value = value
+End Property
+
+''' <summary>   Gets the status byte. </summary>
+Friend Property Get StatusByte() As Integer
+    StatusByte = Range(m_statusByteCell).value
+End Property
+
+''' <summary>   Sets the status byte. </summary>
+Friend Property Let StatusByte(ByVal value As Integer)
+    Range(m_statusByteCell).value = value
+End Property
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' GPIB LAN
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+
+Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
+    Me.SDCButton.enabled = usingGpibLanController
+    Me.GoToLocalButton.enabled = usingGpibLanController
+    Me.ListenTalkButton.enabled = usingGpibLanController
+    Me.LocalLockoutButton.enabled = usingGpibLanController
+    Me.SerialPollButton.enabled = usingGpibLanController
+    Me.SRQButton.enabled = usingGpibLanController
+    Me.GpibAddressButton.enabled = usingGpibLanController
+    Me.ReadTimeoutGetButton.enabled = usingGpibLanController
+    Me.ReadTimeoutSetButton.enabled = usingGpibLanController
+End Sub
+
+Private Sub GoToLocalButton_Click()
+
+    Const thisProcedureName = "GoToLocalButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.GoToLocal
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub LocalLockoutButton_Click()
+
+    Const thisProcedureName = "LocalLockoutButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.LocalLockout
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub ListenTalkButton_Click()
+
+    Const thisProcedureName = "ListenTalkButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.ReadAfterWriteEnabledSetter Not Me.Session.VISession.GpibLan.ReadAfterWriteEnabled
+    
+    Me.ReadStopWatch
+    
+    Range(m_listenTalkCell).value = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub SerialPollButton_Click()
+
+    Const thisProcedureName = "SerialPollButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Range(m_serialPollCell).value = Me.Session.VISession.GpibLan.SerialPoll
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub SRQButton_Click()
+
+    Const thisProcedureName = "SRQButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Range(m_srqCell).value = Me.Session.VISession.GpibLan.IsSRQ
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub GpibAddressButton_Click()
+
+    Const thisProcedureName = "GpibAddressButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Range(m_gpibAddressCell).value = Me.Session.VISession.GpibLan.GpibAddressGetter
+
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub ReadTimeoutGetButton_Click()
+
+    Const thisProcedureName = "ReadTimeoutGetButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Range(m_readTimeoutCell).value = Me.Session.VISession.GpibLan.ReadTimeoutGetter
+
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub ReadTimeoutSetButton_Click()
+
+    Const thisProcedureName = "ReadTimeoutSetButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.ReadTimeoutSetter (CInt(Range(m_readTimeoutCell).value))
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' 2700 Measurments Control
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary> Get the timer interval. </summary>
+Friend Property Get TimerInerval() As Integer
+    TimerInerval = CInt(Range(m_timerIntervalCell).value)
+End Property
+
+''' <summary> Get the resistance count. </summary>
+Friend Property Get ResistanceCount() As Integer
+    ResistanceCount = CInt(Range(m_resistanceCountCell).value)
+End Property
+
+''' <summary>   Indicates that front inputs are required for this mode. </summary>
+Friend Property Get FrontReadRequired() As Boolean
+    FrontReadRequired = Me.FrontRearToggleButton.value
+End Property
+
+''' <summary>   Gets the external trigger status. </summary>
+Friend Property Get ExternalTrigEnabled() As Boolean
+    ExternalTrigEnabled = Me.ExtTrigToggleButton.value
+End Property
+
+''' <summary>   Enables or disables external triggering. </summary>
+Friend Property Let ExternalTrigEnabled(ByVal value As Boolean)
+    Me.ExtTrigToggleButton.value = value
+End Property
+
+''' <summary>   Gets the auto increment resistance number status. </summary>
+Friend Property Get AutoIncrementResistanceNoEnabled() As Boolean
+    AutoIncrementResistanceNoEnabled = Me.AutoIncrementToggleButton.value
+End Property
+
+''' <summary>   Gets the single read enabled. </summary>
+Friend Property Get SingeReadEnabled() As Boolean
+    SingeReadEnabled = Me.SingleAllToggleButton.value
+End Property
+
+''' <summary>   Gets the resistance number. </summary>
+Friend Property Get SelectedResistanceNumber() As Integer
+    SelectedResistanceNumber = CInt(Range(m_resistanceNoCell).value)
+End Property
+
+''' <summary>   Sets the resistance display. </summary>
+''' <param name="resistanceNo">      [single] the resistance number. </param>
+''' <param name="resistanceValue">   [double] the resistance. </param>
+Private Sub SetResistance(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
+
+    Range(m_resistanceNoCell).value = resistanceNo
+    Range(m_resistanceCell).value = resistanceValue
+    
+    Dim row As Integer: row = m_resistanceNoTopRow + resistanceNo - 1
+    Range(m_resistanceNoCol & CStr(row)).value = "R" & CStr(resistanceNo)
+    Range(m_resistanceCol & CStr(row)).value = Format(resistanceValue, m_resistanceFormat)
+    
+End Sub
+
+Private Sub FrontRearToggleButton_Click()
+    FrontRearToggleButton.Caption = IIf(FrontRearToggleButton.value, "Front", "Rear")
+End Sub
+
+Private Sub AutoIncrementToggleButton_Click()
+    AutoIncrementToggleButton.Caption = IIf(AutoIncrementToggleButton.value, "Auto", "Manual")
+End Sub
+
+Private Sub SingleAllToggleButton_Click()
+    SingleAllToggleButton.Caption = IIf(SingleAllToggleButton.value, "Single", "All")
 End Sub
 
 ''' <summary> Queries the Inputs status. </summary>
 Private Sub QueryInputsButton_Click()
+
+    Const thisProcedureName = "QueryInputsButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
+    
     Range(m_inputsCell).value = IIf(Me.K2700.IsFrontInputs, "Front", "Rear")
+    
     Me.ReadStopWatch
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary> </summary>
 Private Sub ReadCardsButton_Click()
+    
+    Const thisProcedureName = "ReadCardsButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
+    
     Me.K2700.ReadCards
+    
     Me.ReadStopWatch
+    
     Range(m_card1Cell).value = Me.K2700.Card1
     Range(m_card2Cell).value = Me.K2700.Card2
-End Sub
 
-''' <summary>   Handles the Reset Known State button click event. </summary>
-Private Sub RSTButton_Click()
-    Me.RestartStopWatch
-    Me.Session.ResetKnownState
-    Me.ReadStopWatch
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Read a single or all resistances from the front or read panel. </summary>
@@ -303,8 +1090,8 @@ Private Sub ReadResistanceButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReadResistanceButton.Enabled = False
-    Me.ExtTrigToggleButton.Enabled = False
+    Me.ReadResistanceButton.enabled = False
+    Me.ExtTrigToggleButton.enabled = False
     
     ' reinitialize if device not defined
     If Not Me.K2700.Connected Then
@@ -363,8 +1150,8 @@ Private Sub ReadResistanceButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    Me.ReadResistanceButton.Enabled = True
-    Me.ExtTrigToggleButton.Enabled = True
+    Me.ReadResistanceButton.enabled = True
+    Me.ExtTrigToggleButton.enabled = True
     
     Exit Sub
 
@@ -383,63 +1170,41 @@ err_Handler:
     
 End Sub
 
-''' <summary>  Handles the Selective device clear button click event. </summary>
-Private Sub SDCButton_Click()
-    Me.RestartStopWatch
-    Me.Session.SelectiveDeviceClear
-    Me.ReadStopWatch
-End Sub
-
-''' <summary> </summary>
+''' <summary>   Sets and displays the scan list for the cards. </summary>
 Private Sub SetScansButton_Click()
+
+    Const thisProcedureName = "SetScansButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
+    
     Me.K2700.DefineResistanceScanLists
+    
     Me.ReadStopWatch
+    
     Range(m_card1ScanListCell).value = Me.K2700.Card1ScanList
     Range(m_card2ScanListCell).value = Me.K2700.Card2ScanList
-End Sub
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
-''' <summary>   Handles the Write button click event. </summary>
-Private Sub WriteButton_Click()
-    Me.SentMessage = ""
-    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
-    Me.RestartStopWatch
-    Me.Session.WriteLine messageToSend
-    Me.ReadStopWatch
-    Me.SentMessage = messageToSend
-    If Me.AutoStatusReadCheckBox.value Then
-        Me.ReadStatusByteButton_Click
-    End If
-End Sub
+    Exit Sub
 
-''' <summary>   Handles the Read button click event. </summary>
-Private Sub ReadButton_Click()
-    Me.ReceivedMessage = ""
-    Dim messageReceived As String
-    Me.RestartStopWatch
-    messageReceived = Me.Session.Read
-    Me.ReadStopWatch
-    Me.ReceivedMessage = messageReceived
-End Sub
-
-''' <summary>   Handles the Read Status Byte button click event. </summary>
-Friend Sub ReadStatusByteButton_Click()
-    Me.RestartStopWatch
-    Me.StatusByte = Me.Session.ReadStatusByte
-    Me.ReadStopWatch
-End Sub
-
-''' <summary>   Handles the Query button click event. </summary>
-Private Sub QueryButton_Click()
-    Me.ReceivedMessage = ""
-    Me.SentMessage = ""
-    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
-    Dim messageReceived As String
-    Me.RestartStopWatch
-    messageReceived = Me.Session.QueryLine(messageToSend)
-    Me.ReadStopWatch
-    Me.ReceivedMessage = messageReceived
-    Me.SentMessage = messageToSend
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   clears the data acquisition readings. </summary>
@@ -547,8 +1312,8 @@ Private Sub ExtTrigToggleButton_Click()
     
     If Me.ExternalTrigEnabled Then
     
-        Me.ExtTrigToggleButton.Enabled = False
-        Me.ReadResistanceButton.Enabled = False
+        Me.ExtTrigToggleButton.enabled = False
+        Me.ReadResistanceButton.enabled = False
         
         If Me.AutoIncrementResistanceNoEnabled Then
             
@@ -591,6 +1356,12 @@ err_Handler:
     GoTo exit_Handler
 
 End Sub
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' TIMER CONTROL
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the external trigger monitoring timer event using the
 ''' device to handle the timing events. </summary>
@@ -640,8 +1411,8 @@ Private Sub HandleTimerEvent()
         ' EnableButtons
         Range(m_externalTriggerStatusCell) = "External Trigger off"
         
-        Me.ExtTrigToggleButton.Enabled = True
-        Me.ReadResistanceButton.Enabled = True
+        Me.ExtTrigToggleButton.enabled = True
+        Me.ReadResistanceButton.enabled = True
         
     End If
     
@@ -657,8 +1428,8 @@ err_Handler:
     Me.PauseTimer
     
     ' enable all buttons
-    Me.ExtTrigToggleButton.Enabled = True
-    Me.ReadResistanceButton.Enabled = True
+    Me.ExtTrigToggleButton.enabled = True
+    Me.ReadResistanceButton.enabled = True
     
     ' append the error source
     UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
@@ -671,107 +1442,6 @@ err_Handler:
     GoTo exit_Handler
 
 End Sub
-
-''' <summary>   Gets the host dotted IP Address. </summary>
-Friend Property Get host() As String
-    host = Range(m_inputHostCell).value
-End Property
-
-''' <summary>   Gets the port number. </summary>
-Friend Property Get port() As Integer
-    port = CInt(Range(m_inputPortCell).value)
-End Property
-
-''' <summary> Get the receive timeout. </summary>
-Friend Property Get ReceiveTimeout() As Integer
-    ReceiveTimeout = CInt(Range(m_receiveTimeoutCell).value)
-End Property
-
-''' <summary> Get the timer interval. </summary>
-Friend Property Get TimerInerval() As Integer
-    TimerInerval = CInt(Range(m_timerIntervalCell).value)
-End Property
-
-''' <summary> Get the resistance count. </summary>
-Friend Property Get ResistanceCount() As Integer
-    ResistanceCount = CInt(Range(m_resistanceCountCell).value)
-End Property
-
-''' <summary>   Gets the received message. </summary>
-Friend Property Get ReceivedMessage() As String
-    ReceivedMessage = Range(m_receivedMessageCell).value
-End Property
-
-''' <summary>   Sets the received message. </summary>
-Friend Property Let ReceivedMessage(ByVal value As String)
-    Range(m_receivedMessageCell).value = value
-    Range(m_receivedMessageLengthCell).value = Len(value)
-End Property
-
-''' <summary>   Gets the sent message. </summary>
-Friend Property Get SentMessage() As String
-    SentMessage = Range(m_sentMessageCell).value
-End Property
-
-''' <summary>   Sets the sent message. </summary>
-Friend Property Let SentMessage(ByVal value As String)
-    Range(m_sentMessageCell).value = value
-End Property
-
-''' <summary>   Gets the status byte. </summary>
-Friend Property Get StatusByte() As Integer
-    StatusByte = Range(m_statusByteCell).value
-End Property
-
-''' <summary>   Sets the status byte. </summary>
-Friend Property Let StatusByte(ByVal value As Integer)
-    Range(m_statusByteCell).value = value
-End Property
-
-''' <summary>   Indicates that front inputs are required for this mode. </summary>
-Friend Property Get FrontReadRequired() As Boolean
-    FrontReadRequired = Me.FrontCheckBox.value
-End Property
-
-''' <summary>   Gets the external trigger status. </summary>
-Friend Property Get ExternalTrigEnabled() As Boolean
-    ExternalTrigEnabled = Me.ExtTrigToggleButton.value
-End Property
-
-''' <summary>   Enables or disables external triggering. </summary>
-Friend Property Let ExternalTrigEnabled(ByVal value As Boolean)
-    Me.ExtTrigToggleButton.value = value
-End Property
-
-''' <summary>   Gets the auto increment resistance number status. </summary>
-Friend Property Get AutoIncrementResistanceNoEnabled() As Boolean
-    AutoIncrementResistanceNoEnabled = Me.AutoIncrCheckBox.value
-End Property
-
-''' <summary>   Gets the single read enabled. </summary>
-Friend Property Get SingeReadEnabled() As Boolean
-    SingeReadEnabled = Me.SingleReadCheckBox.value
-End Property
-
-''' <summary>   Gets the resistance number. </summary>
-Friend Property Get SelectedResistanceNumber() As Integer
-    SelectedResistanceNumber = CInt(Range(m_resistanceNoCell).value)
-End Property
-
-''' <summary>   Sets the resistance display. </summary>
-''' <param name="resistanceNo">      [single] the resistance number. </param>
-''' <param name="resistanceValue">   [double] the resistance. </param>
-Private Sub SetResistance(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
-
-    Range(m_resistanceNoCell).value = resistanceNo
-    Range(m_resistanceCell).value = resistanceValue
-    
-    Dim row As Integer: row = m_resistanceNoTopRow + resistanceNo - 1
-    Range(m_resistanceNoCol & CStr(row)).value = "R" & CStr(resistanceNo)
-    Range(m_resistanceCol & CStr(row)).value = Format(resistanceValue, m_resistanceFormat)
-    
-End Sub
-
 
 ''' <summary>   Starts the event timer. </summary>
 ''' <param name="timerInterval">   Specifies the timer interval in milliseconds. </param>
@@ -806,6 +1476,12 @@ Private Sub m_eventTimer_Tick()
     End If
 End Sub
 
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' K2700 Events
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ResistanceNumberMeasured"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_VI.ResistanceNumberEventArgs"/> event arguments. </param>
 Private Sub m_k2700_ResistanceNumberMeasured(ByRef eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
@@ -834,18 +1510,15 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
     If eventArgs.Connected Then
     
         ' report the socket number
-        Range(m_connectedHostCell).value = Me.host
-        Range(m_connectedPortCell).value = Me.port
-        Range(m_connectedSocketIdCell).value = Me.Session.VISession.SocketId
+        Range(m_socketAddressCell).value = Me.Session.VISession.socketAddress
+        Range(m_connectedSocketIdCell).value = Me.Session.SocketId
     
     Else
     
-        Range(m_connectedHostCell).value = ""
-        Range(m_connectedPortCell).value = ""
+        Range(m_socketAddressCell).value = ""
         Range(m_connectedSocketIdCell).value = ""
         
     End If
 
 End Sub
-
 

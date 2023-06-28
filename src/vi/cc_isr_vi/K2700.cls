@@ -16,6 +16,9 @@ Private Const Mux20Cards As String = "7700,7710"
 ' reference to the IEEE488 session
 Private m_session As Ieee488Session
 
+' reference to the SCPI System subsystem class
+Private m_scpiSystem As ScpiSystem
+
 Private m_options As String
 Private m_hasMux40A As Boolean
 Private m_hasMux40B As Boolean
@@ -64,10 +67,16 @@ Public Property Get Connected() As Boolean
 
 End Property
 
-''' <summary>   Returns a reference to the IEEE488 Session. </summary>
-''' <value>   An IEEE488Session. </returns>
+''' <summary>   Returns a reference to the <see cref="Ieee488Session"/>. </summary>
+''' <value>   An <see cref="Ieee488Session"/>. </returns>
 Public Property Get Session() As Ieee488Session
     Set Session = m_session
+End Property
+
+''' <summary>   Returns a reference to the <see cref="ScpiSystem"/> subsystem. </summary>
+''' <value>   An <see cref="ScpiSystem"/>. </returns>
+Public Property Get ScpiSystem() As ScpiSystem
+    Set ScpiSystem = m_scpiSystem
 End Property
 
 ''' <summary>   Opens a TCP Client connection to the specified host at the specified port
@@ -120,8 +129,8 @@ Public Function Initialize(ByVal host As String, ByVal port As Long, _
 
     Me.OpenConnection host, port, timeoutMs
 
-    ' this only works with the Prologix device
-    Me.Session.SelectiveDeviceClear
+    ' reset clear the device.
+    If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
     Me.Session.ResetKnownState
     Me.Session.ClearExecutionState
     
@@ -474,11 +483,11 @@ Public Sub SetExternalTriggerResistanceMode()
     End If
     
     ' Clear the device
-    Me.Session.SelectiveDeviceClear
+    If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
     Me.Session.ClearExecutionState
     
     ' set external triggering
-    Me.Session.WriteLine ":INIT:CONT Off"
+    Me.Session.WriteLine ":INIT:CONT OFF"
     Me.Session.WriteLine ":FUNC 'FRES'"
     Me.Session.WriteLine ":FRES:RANG:AUTO ON"
     Me.Session.WriteLine ":FRES:NPLC 1"
@@ -513,8 +522,7 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
           
         ' abort triggering
         
-        ' this only works with the Prologix device
-        Me.Session.SelectiveDeviceClear
+        If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
         
         ' should we do system:preset here?
         Me.Session.ClearExecutionState
@@ -522,7 +530,7 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
         ' set the device to measure 4 wire resistance
         Me.Session.WriteLine ":INIT:CONT OFF"
         Me.Session.WriteLine ":FUNC 'FRES'"
-        Me.Session.WriteLine "TRIG:SOUR IMM"
+        Me.Session.WriteLine ":TRIG:SOUR IMM"
     
         ' restore continuous reading
         Me.Session.WriteLine ":INIT:CONT ON"
@@ -563,7 +571,7 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
             
             ' clear the trigger register
             Me.Session.WriteLine ":TRIG:SOUR IMM"
-            Me.Session.WriteLine "::TRIG:SOUR EXT"
+            Me.Session.WriteLine ":TRIG:SOUR EXT"
             
             ' clear the screen
             Me.Session.WriteLine ":FRES:NPLC 1"
@@ -600,6 +608,18 @@ End Sub
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+
+    If isConnected Then
+    
+        Set m_scpiSystem = New ScpiSystem
+        m_scpiSystem.Initialize Me.Session
+        
+    Else
+    
+        Set m_scpiSystem = Nothing
+    
+    End If
+
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
 End Sub
