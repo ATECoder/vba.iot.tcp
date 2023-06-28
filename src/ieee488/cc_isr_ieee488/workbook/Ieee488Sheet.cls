@@ -617,6 +617,12 @@ Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connec
         Range(m_connectedSocketIdCell).value = ""
         
     End If
+    
+    If Me.Session.ViSession.UsingGpibLan Then
+    
+        Me.ListenTalkToggleButton.value = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
+    
+    End If
 
 End Sub
 

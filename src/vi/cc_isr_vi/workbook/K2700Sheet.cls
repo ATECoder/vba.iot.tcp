@@ -23,23 +23,23 @@ Private Const m_connectedCell As String = "F2"
 Private Const m_identityCell As String = "I2"
 Private Const m_errorMessageCell As String = "B4"
 
-Private Const m_statusByteCell As String = "F16"
-Private Const m_serialPollCell As String = "E16"
-Private Const m_srqCell As String = "C13"
-Private Const m_listenTalkCell As String = "C15"
-Private Const m_gpibAddressCell As String = "C17"
-Private Const m_readTimeoutCell As String = "C21"
+Private Const m_statusByteCell As String = "F11"
+Private Const m_serialPollCell As String = "E11"
 
-Private Const m_timerIntervalCell As String = "C23"
-Private Const m_card1Cell As String = "C24"
-Private Const m_card2Cell As String = "C25"
-Private Const m_card1ScanListCell As String = "C26"
-Private Const m_card2ScanListCell As String = "C27"
-Private Const m_inputsCell As String = "C29"
-Private Const m_resistanceNoCell As String = "C30"
-Private Const m_resistanceCell As String = "C31"
-Private Const m_resistanceCountCell As String = "C32"
-Private Const m_externalTriggerStatusCell As String = "C33"
+Private Const m_srqCell As String = "C10"
+Private Const m_gpibAddressCell As String = "C12"
+Private Const m_readTimeoutCell As String = "C15"
+
+Private Const m_timerIntervalCell As String = "C19"
+Private Const m_card1Cell As String = "C20"
+Private Const m_card2Cell As String = "C21"
+Private Const m_card1ScanListCell As String = "C22"
+Private Const m_card2ScanListCell As String = "C23"
+Private Const m_inputsCell As String = "C24"
+Private Const m_resistanceNoCell As String = "C25"
+Private Const m_resistanceCell As String = "C26"
+Private Const m_resistanceCountCell As String = "C27"
+Private Const m_externalTriggerStatusCell As String = "C28"
 
 Private Const m_resistanceNoTopRow As Integer = 2
 Private Const m_resistanceNoCol As String = "K"
@@ -111,17 +111,17 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
     ' report the connection state
     Range(m_connectedCell).value = affirmative
         
-    Me.RSTButton.enabled = affirmative
-    Me.CLSButton.enabled = affirmative
-    Me.QueryButton.enabled = affirmative
-    Me.ReadButton.enabled = affirmative
-    Me.ReadStatusByteButton.enabled = affirmative
-    Me.WriteButton.enabled = affirmative
+    Me.RSTButton.Enabled = affirmative
+    Me.CLSButton.Enabled = affirmative
+    Me.QueryButton.Enabled = affirmative
+    Me.ReadButton.Enabled = affirmative
+    Me.ReadStatusByteButton.Enabled = affirmative
+    Me.WriteButton.Enabled = affirmative
     
-    Me.ReadCardsButton.enabled = affirmative
-    Me.SetScansButton.enabled = affirmative
-    Me.QueryInputsButton.enabled = affirmative
-    Me.ReadResistanceButton.enabled = affirmative
+    Me.ReadCardsButton.Enabled = affirmative
+    Me.SetScansButton.Enabled = affirmative
+    Me.QueryInputsButton.Enabled = affirmative
+    Me.ReadResistanceButton.Enabled = affirmative
     
     If affirmative Then
         EnableGpibLan Me.Session.VISession.UsingGpibLan
@@ -309,7 +309,7 @@ Friend Sub ConnectToggleButton_Click()
     ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
     
         Me.K2700.OpenConnection Me.host, Me.port, timeout
-    
+        
     End If
     
     Me.ReadStopWatch
@@ -669,15 +669,16 @@ End Property
 
 
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
-    Me.SDCButton.enabled = usingGpibLanController
-    Me.GoToLocalButton.enabled = usingGpibLanController
-    Me.ListenTalkButton.enabled = usingGpibLanController
-    Me.LocalLockoutButton.enabled = usingGpibLanController
-    Me.SerialPollButton.enabled = usingGpibLanController
-    Me.SRQButton.enabled = usingGpibLanController
-    Me.GpibAddressButton.enabled = usingGpibLanController
-    Me.ReadTimeoutGetButton.enabled = usingGpibLanController
-    Me.ReadTimeoutSetButton.enabled = usingGpibLanController
+    Me.SDCButton.Enabled = usingGpibLanController
+    Me.GoToLocalButton.Enabled = usingGpibLanController
+    Me.ListenTalkToggleButton.Enabled = usingGpibLanController
+    Me.LocalLockoutButton.Enabled = usingGpibLanController
+    Me.SerialPollButton.Enabled = usingGpibLanController
+    Me.SRQButton.Enabled = usingGpibLanController
+    Me.GetGpibAddressButton.Enabled = usingGpibLanController
+    Me.SetGpibAddressButton.Enabled = usingGpibLanController
+    Me.ReadTimeoutGetButton.Enabled = usingGpibLanController
+    Me.ReadTimeoutSetButton.Enabled = usingGpibLanController
 End Sub
 
 Private Sub GoToLocalButton_Click()
@@ -746,9 +747,9 @@ err_Handler:
 
 End Sub
 
-Private Sub ListenTalkButton_Click()
+Private Sub ListenTalkToggleButton_Click()
 
-    Const thisProcedureName = "ListenTalkButton_Click"
+    Const thisProcedureName = "ListenTalkToggleButton"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -759,7 +760,7 @@ Private Sub ListenTalkButton_Click()
     
     Me.ReadStopWatch
     
-    Range(m_listenTalkCell).value = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+    Me.ListenTalkToggleButton.Caption = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -847,9 +848,9 @@ err_Handler:
 
 End Sub
 
-Private Sub GpibAddressButton_Click()
+Private Sub GetGpibAddressButton_Click()
 
-    Const thisProcedureName = "GpibAddressButton_Click"
+    Const thisProcedureName = "GetGpibAddressButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -879,6 +880,40 @@ err_Handler:
     GoTo exit_Handler
 
 End Sub
+
+Private Sub SetGpibAddressButton_Click()
+
+    Const thisProcedureName = "SetGpibAddressButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.VISession.GpibLan.GpibAddresssetter CInt(Range(m_gpibAddressCell).value)
+
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
 
 Private Sub ReadTimeoutGetButton_Click()
 
@@ -1097,8 +1132,8 @@ Private Sub ReadResistanceButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReadResistanceButton.enabled = False
-    Me.ExtTrigToggleButton.enabled = False
+    Me.ReadResistanceButton.Enabled = False
+    Me.ExtTrigToggleButton.Enabled = False
     
     ' reinitialize if device not defined
     If Not Me.K2700.Connected Then
@@ -1157,8 +1192,8 @@ Private Sub ReadResistanceButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    Me.ReadResistanceButton.enabled = True
-    Me.ExtTrigToggleButton.enabled = True
+    Me.ReadResistanceButton.Enabled = True
+    Me.ExtTrigToggleButton.Enabled = True
     
     Exit Sub
 
@@ -1319,8 +1354,8 @@ Private Sub ExtTrigToggleButton_Click()
     
     If Me.ExternalTrigEnabled Then
     
-        Me.ExtTrigToggleButton.enabled = False
-        Me.ReadResistanceButton.enabled = False
+        Me.ExtTrigToggleButton.Enabled = False
+        Me.ReadResistanceButton.Enabled = False
         
         If Me.AutoIncrementResistanceNoEnabled Then
             
@@ -1421,8 +1456,8 @@ Private Sub HandleTimerEvent()
         ' EnableButtons
         Range(m_externalTriggerStatusCell) = "External Trigger off"
         
-        Me.ExtTrigToggleButton.enabled = True
-        Me.ReadResistanceButton.enabled = True
+        Me.ExtTrigToggleButton.Enabled = True
+        Me.ReadResistanceButton.Enabled = True
         
     End If
     
@@ -1441,8 +1476,8 @@ err_Handler:
     Me.PauseTimer
     
     ' enable all buttons
-    Me.ExtTrigToggleButton.enabled = True
-    Me.ReadResistanceButton.enabled = True
+    Me.ExtTrigToggleButton.Enabled = True
+    Me.ReadResistanceButton.Enabled = True
     
     ' append the error source
     UserDefinedErrors.SetErrSource thisProcedureName, Me.name
@@ -1526,6 +1561,12 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
         ' report the socket number
         Range(m_socketAddressCell).value = Me.Session.VISession.socketAddress
         Range(m_connectedSocketIdCell).value = Me.Session.SocketId
+        
+        Me.Session.VISession.GpibLan.SelectiveDeviceClear
+        Me.Session.ResetKnownState
+        Me.Session.ClearExecutionState
+        
+        Me.ListenTalkToggleButton.Caption = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
     
     Else
     

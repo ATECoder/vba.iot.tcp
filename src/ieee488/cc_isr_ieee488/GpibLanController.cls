@@ -49,14 +49,15 @@ End Sub
 ''' <param name="client">                     Reference to the <see cref="TcpClient"/>. </param>
 ''' <param name="readTerm">                   [Optiona, String, VbLf] the read termination. </param>
 ''' <param name="writeTerm">                  [Optiona, String, VbLf] the write termination. </param>
-''' <param name="preventQueryUnterminated">   [Optional, Boolean, True] prevent Query Unterminated
-'''                                           error by disabling read-after-write before each write.
-'''                                           Otherwise, read-after-write is disabled and the lan controller
-'''                                           is used to pass readings from the device to the controller.
+''' <param name="preventQueryUnterminated">   [Optional, Boolean, False] If true, read of write is turned on
+'''                                           which might cause the instrument to start with a
+'''                                           query unterminated error. If false, read after write is turned
+'''                                           of and the controller is set to read the response from the
+'''                                           instrument using the <c>++read</c> command.
 '''                                           </param>
 Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
-                      Optional ByVal preventQueryUnterminated As Boolean = True, _
+                      Optional ByVal preventQueryUnterminated As Boolean = False, _
                       Optional ByVal readAfterWriteDelayMs = 5)
     Set m_tcpClient = client
     m_readTermination = readTerm
@@ -67,7 +68,7 @@ Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As Stri
     Dim i As Integer
     
     ' from experiments it seems this needs to be set first.
-    Me.ReadAfterWriteEnabledGetter
+    Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
     
     Me.ReadAfterWriteEnabledSetter True
     
