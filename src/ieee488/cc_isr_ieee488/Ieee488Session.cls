@@ -247,14 +247,14 @@ End Function
 ''' <param name="canQuery">   [Optional, False] True to send <c>*STB?</c>
 ''' if not <see cref="UsingGpibLan"/>. </param>
 ''' <returns>   The status byte. </returns>
-Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
+Public Function ServiceRequested(Optional ByVal canQuery As Boolean = False) As Boolean
     
     If Me.ViSession.UsingGpibLan Then
-        SRQ = Me.ViSession.GpibLan.IsSRQ()
+        ServiceRequested = Me.ViSession.GpibLan.ServiceRequested()
     ElseIf canQuery Then
-        SRQ = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus())
+        ServiceRequested = ServiceRequests.RequestingService = (ServiceRequests.RequestingService And Me.QueryServiceRequestStatus())
     Else
-        SRQ = 0
+        ServiceRequested = False
     End If
     
 End Function

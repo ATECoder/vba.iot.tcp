@@ -1,6 +1,8 @@
 Attribute VB_Name = "UserDefinedErrorsTests"
 Option Explicit
 
+Private Const m_moduleName As String = "UserDefinedErrorsTests"
+
 ''' <summary>   Unit test. Asserts the existing of a user defined error. </summary>
 ''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestUserDefinedErrorShouldExist() As Assert
@@ -31,10 +33,16 @@ exit_Handler:
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
-    ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, "UserDefinedErrorsTests"
+    ' build the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, m_moduleName
     
-    ' display the error message
+    Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(Err.source) > 0, "Err.Source should not be empty")
+    
+    Dim expectedErrorSource As String
+    expectedErrorSource = ThisWorkbook.VBProject.name & "." & m_moduleName & "." & thisProcedureName
+    
+    Set TestErrorMessageShouldBuild = Assert.AreEqual(expectedErrorSource, Err.source, "Err.Source should equal the expected value")
+    
     Dim errorMessage As String: errorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(errorMessage) > 0, "error message should build")

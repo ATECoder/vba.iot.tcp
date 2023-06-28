@@ -25,10 +25,9 @@ Private Const m_errorMessageCell As String = "B4"
 
 Private Const m_statusByteCell As String = "F16"
 Private Const m_serialPollCell As String = "E16"
-Private Const m_srqCell As String = "C13"
-Private Const m_listenTalkCell As String = "C15"
-Private Const m_gpibAddressCell As String = "C17"
-Private Const m_readTimeoutCell As String = "C21"
+Private Const m_srqCell As String = "C10"
+Private Const m_gpibAddressCell As String = "C12"
+Private Const m_readTimeoutCell As String = "C15"
 
 Private WithEvents m_session As cc_isr_Ieee488.Ieee488Session
 Attribute m_session.VB_VarHelpID = -1
@@ -148,7 +147,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -183,7 +182,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -217,7 +216,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -268,7 +267,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -302,7 +301,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -337,7 +336,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -371,7 +370,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -415,7 +414,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -462,7 +461,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -501,7 +500,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -543,7 +542,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -622,16 +621,20 @@ Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connec
 End Sub
 
 ' + + + + + +
+'
 ' GPIB LAN
+'
+' + + + + + +
 
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
     Me.SDCButton.enabled = usingGpibLanController
     Me.GoToLocalButton.enabled = usingGpibLanController
-    Me.ListenTalkButton.enabled = usingGpibLanController
+    Me.ListenTalkToggleButton.enabled = usingGpibLanController
     Me.LocalLockoutButton.enabled = usingGpibLanController
     Me.SerialPollButton.enabled = usingGpibLanController
     Me.SRQButton.enabled = usingGpibLanController
-    Me.GpibAddressButton.enabled = usingGpibLanController
+    Me.GetGpibAddressButton.enabled = usingGpibLanController
+    Me.SetGpibAddressButton.enabled = usingGpibLanController
     Me.ReadTimeoutGetButton.enabled = usingGpibLanController
     Me.ReadTimeoutSetButton.enabled = usingGpibLanController
 End Sub
@@ -658,7 +661,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -691,7 +694,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -702,9 +705,9 @@ err_Handler:
 
 End Sub
 
-Private Sub ListenTalkButton_Click()
+Private Sub ListenTalkToggleButton_Click()
 
-    Const thisProcedureName = "ListenTalkButton_Click"
+    Const thisProcedureName = "ListenTalkToggleButton"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -715,7 +718,7 @@ Private Sub ListenTalkButton_Click()
     
     Me.ReadStopWatch
     
-    Range(m_listenTalkCell).value = IIf(Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+    ListenTalkToggleButton.Caption = IIf(Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -726,7 +729,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -738,7 +741,8 @@ err_Handler:
 End Sub
 
 Private Sub SerialPollButton_Click()
-    Const thisProcedureName = "ReadStatusByteButton_Click"
+
+    Const thisProcedureName = "SerialPollButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -758,7 +762,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -778,7 +782,7 @@ Private Sub SRQButton_Click()
     
     Me.RestartStopWatch
     
-    Range(m_srqCell).value = Me.Session.ViSession.GpibLan.IsSRQ
+    Range(m_srqCell).value = Me.Session.ViSession.GpibLan.ServiceRequested
     
     Me.ReadStopWatch
     
@@ -791,7 +795,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -802,9 +806,42 @@ err_Handler:
 
 End Sub
 
-Private Sub GpibAddressButton_Click()
+Private Sub SetGibAddressButton_Click()
 
-    Const thisProcedureName = "GpibAddressButton_Click"
+    Const thisProcedureName = "SetGpibAddressButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.Session.ViSession.GpibLan.GpibAddressSetter CInt(Range(m_gpibAddressCell).value)
+
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub GetGpibAddressButton_Click()
+
+    Const thisProcedureName = "GetGpibAddressButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -824,7 +861,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -857,7 +894,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -890,7 +927,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()

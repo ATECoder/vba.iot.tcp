@@ -21,6 +21,10 @@ Private m_readTimeout As Integer
 
 Private m_readAfterWriteDelay As Integer
 
+Private m_statusByte As Integer
+
+Private m_controllerMode As Boolean
+
 Private m_stopper As StopWatch
 
 Private m_tcpClient As TcpClient
@@ -33,6 +37,7 @@ Private Sub Class_Initialize()
     Set m_stopper = cc_isr_Core.Constructor.CreateStopWatch
     m_readTermination = vbLf
     m_writeTermination = vbLf
+    m_controllerMode = True
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -153,12 +158,12 @@ End Sub
 
 ''' <summary>   Gets the Read After Write Delay. </summary>
 ''' <value>   An Integer. </value>
-Friend Property Get ReadAfterWriteDelay() As Integer
+Public Property Get ReadAfterWriteDelay() As Integer
     ReadAfterWriteDelay = m_readAfterWriteDelay
 End Property
 
 ''' <summary>   Sets the Read After Write Delay. </summary>
-Friend Property Let ReadAfterWriteDelay(ByVal value As Integer)
+Public Property Let ReadAfterWriteDelay(ByVal value As Integer)
     m_readAfterWriteDelay = value
 End Property
 
@@ -339,7 +344,16 @@ Public Function ReadAfterWriteEnabledGetter() As Boolean
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
 ' GPIB METHODS
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Gets the controller mode status. </summary>
+''' <value>   True if the GPIB-Lan is set as a controller. </value>
+Public Property Get ControllerMode() As Boolean
+    ControllerMode = m_controllerMode
+End Property
 
 ''' <summary>   Issues a Go To Local (GTL) (++loc). </summary>
 ''' <remarks>   Valid if <see cref="UsingGpibLan"/>. </remarks>
@@ -416,8 +430,7 @@ End Property
 ''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
 Public Sub ReadTimeoutSetter(ByVal timeoutMs As Integer)
     
-    If timeoutMs < 1 Then timeoutMs = 1
-    If timeoutMs > 3000 Then timeoutMs = 3000
+    timeoutMs = Me.DelimitInteger(timeoutMs, 1, 3000)
     
     If timeoutMs <> m_readTimeout Then
         Me.SendToController "++read_tmo_ms " & CStr(timeoutMs)
@@ -426,7 +439,7 @@ Public Sub ReadTimeoutSetter(ByVal timeoutMs As Integer)
     
 End Sub
 
-''' <summary>   Sets the device read timeout, in milliseconds, that is used in the
+''' <summary>   Gets the device read timeout, in milliseconds, that is used in the
 '''  controller read and spoll commands.
 ''' </summary>
 Public Function ReadTimeoutGetter() As Integer
@@ -483,13 +496,69 @@ Public Function SerialPoll(Optional ByVal primaryAddress As Integer = -1, _
     
 End Function
 
-''' <summary>   Query controller service request status. </summary>
+''' <summary>   Queries the GPIB SRQ signal status. </summary>
+''' <remarks>   This command returns the current state of the GPIB SRQ signal. The controler returns
+''' <c>1</c> if the SRQ signal is asserted (low) and <c>0</c> if the signal is not asserted (high). </remarks>
 ''' <returns>   True if Server requested. </returns>
-Friend Function IsSRQ() As Boolean
+Public Function ServiceRequested() As Boolean
     
-    IsSRQ = 1 = CInt(Me.QueryController("++srq"))
+    ServiceRequested = 1 = CInt(Me.QueryController("++srq"))
     
 End Function
 
+''' <summary>   Gets the device Status Byte. </summary>
+''' <value>   An Integer. </value>
+Public Property Get StatusByte() As Integer
+    StatusByte = m_statusByte
+End Property
 
+''' <summary>   Sets the device Status Byte to be returned on a serial poll. </summary>
+''' <remarks>
+''' This command works only if the controller is set as a device using the ++mode command.
+''' The status command is used to specify the device status byte to be returned when serial
+''' polled by a GPIB controller. If the RQS bit (bit #6) of this status byte is set then the
+''' SRQ signal is asserted (low). After a serial poll, SRQ line is de-asserted and status byte is
+''' set to 0. Status byte is initialized to 0 on power up.
+''' SRQ is also de-asserted and status byte is cleared if DEVICE CLEAR (DCL) message,
+''' or SELECTED DEVICE CLEAR (SDC) message, is received from the GPIB controller.
+''' If the command is issued without any arguments it returns the currently specified status
+''' byte.
+''' SYNTAX: ++status [0-255]
+''' Example:
+''' ++status 72 Specify serial poll status byte as 72. Since bit #6 is set, this
+'''             command will assert SRQ.
+''' ++status Query current serial poll status byte.
+''' </remarks>
+''' <param name="value">   The status byte mask. </param>
+Public Sub StatusByteSetter(ByVal value As Integer)
+    
+    If Not Me.ControllerMode Then
+        value = Me.DelimitInteger(value, 0, 255)
+        
+        If value <> m_statusByte Then
+            Me.SendToController "++status " & CStr(value)
+        End If
+    End If
+    m_statusByte = value
+    
+End Sub
 
+''' <summary>   Gets the device Status Byte. </summary>
+Public Function StatusByteGetter() As Integer
+    If Me.ControllerMode Then
+        m_statusByte = 0
+    Else
+        m_statusByte = CInt(Me.QueryController("++status"))
+    End If
+    StatusByteGetter = m_statusByte
+End Function
+
+''' <summary>   Returns the delimited integer value. </summary>
+''' <param name="value">   [Integer] the value to delimit.</param>
+''' <param name="minValue">   [Integer] the minimum. </param>
+''' <param name="maxValue">   [Integer] the maximum. </param>
+Public Function DelimitInteger(ByVal value As Integer, ByVal minValue As Integer, ByVal maxValue As Integer) As Integer
+    If value < minValue Then value = minValue
+    If value > maxValue Then value = maxValue
+    DelimitInteger = value
+End Function

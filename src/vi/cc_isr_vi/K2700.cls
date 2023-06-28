@@ -109,7 +109,7 @@ Public Function CloseConnection() As Boolean
     ' set session to nothing which tells us that the session
     ' is no longer connected
     
-    m_session = Nothing
+    Set m_session = Nothing
     
     ' raise the connection changed event.
     
@@ -525,20 +525,23 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
         If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
         
         ' should we do system:preset here?
+        
         Me.Session.ClearExecutionState
         
         ' set the device to measure 4 wire resistance
+        
         Me.Session.WriteLine ":INIT:CONT OFF"
         Me.Session.WriteLine ":FUNC 'FRES'"
         Me.Session.WriteLine ":TRIG:SOUR IMM"
     
         ' restore continuous reading
+        
         Me.Session.WriteLine ":INIT:CONT ON"
             
     Else
     
-        ' if not done, check we need to prime the external
-        ' trigger mode.
+        ' if not done, check we need to prime the external trigger mode.
+        
         If m_extTrigInitiated Then
         
             ' if awaiting the external trigger (external trigger mode
@@ -570,19 +573,23 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
             ' we need to initiate the next wait for an external trigger.
             
             ' clear the trigger register
+            
             Me.Session.WriteLine ":TRIG:SOUR IMM"
             Me.Session.WriteLine ":TRIG:SOUR EXT"
             
             ' clear the screen
+            
             Me.Session.WriteLine ":FRES:NPLC 1"
               
             ' clear the serial poll register
+            
             Me.Session.QueryServiceRequestStatus
             
             ' initiate awaiting for the external trigger
+            
             Me.Session.WriteLine ":INIT; *CLS"
             
-            ' and say so
+            ' and indicate that external triggering was initiated
             m_extTrigInitiated = True
         
         End If

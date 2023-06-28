@@ -31,7 +31,6 @@ Private Sub Workbook_Activate()
     
     ' activate the sheets to initialize values.
     K2700Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
-    Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
     IdentitySheet.Initialize
     TestSheet.Initialize
     
@@ -71,7 +70,6 @@ End Sub
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
     ' disposes of sheet objects.
     K2700Sheet.Dispose
-    Ieee488Sheet.Dispose
 End Sub
 
 

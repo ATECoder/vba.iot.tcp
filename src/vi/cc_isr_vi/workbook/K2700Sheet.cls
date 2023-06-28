@@ -49,7 +49,14 @@ Private Const m_resistanceFormat As String = "0.00"
 ' defines the standard event timer.
 Private WithEvents m_eventTimer As cc_isr_Core.stdTimer
 Attribute m_eventTimer.VB_VarHelpID = -1
+
+' true if a pause is requested so that the timer event is not handled
+' and the timer is paused on the next event.
 Private m_pauseRequested As Boolean
+
+' true when handling the timer event to prevent timer
+' event handler overrun.
+Private m_handlingTimerEvent As Boolean
 
 Private m_extTrigInitiated  As Boolean
 
@@ -196,7 +203,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -231,7 +238,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -265,7 +272,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -316,7 +323,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -350,7 +357,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -385,7 +392,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -419,7 +426,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -463,7 +470,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -510,7 +517,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -549,7 +556,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -591,7 +598,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -695,7 +702,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -728,7 +735,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -763,7 +770,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -796,7 +803,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -816,7 +823,7 @@ Private Sub SRQButton_Click()
     
     Me.RestartStopWatch
     
-    Range(m_srqCell).value = Me.Session.VISession.GpibLan.IsSRQ
+    Range(m_srqCell).value = Me.Session.VISession.GpibLan.ServiceRequested
     
     Me.ReadStopWatch
     
@@ -829,7 +836,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -862,7 +869,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -895,7 +902,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -928,7 +935,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1034,7 +1041,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1071,7 +1078,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1159,7 +1166,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1196,7 +1203,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1291,7 +1298,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1346,7 +1353,7 @@ err_Handler:
     Me.PauseTimer
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1377,11 +1384,13 @@ Private Sub HandleTimerEvent()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    If m_pauseRequested Then Exit Sub
+    If m_pauseRequested Or m_handlingTimerEvent Then Exit Sub
    
-    Dim sData As String
+    ' prevent reenty
+    m_handlingTimerEvent = True
+    
     Dim resistanceNo As Integer
-      
+    
     ' check if scan or single
     If AutoIncrementResistanceNoEnabled Then
       
@@ -1408,6 +1417,7 @@ Private Sub HandleTimerEvent()
     
     ' if we ended manual mode, enable the rest of the buttons
     If isDone Then
+    
         ' EnableButtons
         Range(m_externalTriggerStatusCell) = "External Trigger off"
         
@@ -1418,6 +1428,9 @@ Private Sub HandleTimerEvent()
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
+
+    ' release reenty prevention
+    m_handlingTimerEvent = False
 
     Exit Sub
 
@@ -1432,7 +1445,7 @@ err_Handler:
     Me.ReadResistanceButton.enabled = True
     
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -1446,6 +1459,7 @@ End Sub
 ''' <summary>   Starts the event timer. </summary>
 ''' <param name="timerInterval">   Specifies the timer interval in milliseconds. </param>
 Friend Sub StartTimer(Optional ByVal timerInterval As Long = 100)
+    m_handlingTimerEvent = False
     m_pauseRequested = False
     If m_eventTimer Is Nothing Then
         Set m_eventTimer = cc_isr_Core.Constructor.CreateStdTimer(timerInterval)

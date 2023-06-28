@@ -128,7 +128,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -159,7 +159,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -173,7 +173,7 @@ End Function
 ''' <summary>   Read from the instrument handling any errors. </summary>
 Private Function Read() As String
 
-    Const thisProcedureName = "WriteLine"
+    Const thisProcedureName = "Read"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -189,7 +189,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -200,9 +200,14 @@ err_Handler:
     
 End Function
 
-''' <summary>   Handles the Toggle connection button click event. </summary>
-Private Sub ConnectToggleButton_Click()
+''' <summary>   Toggles the connection. </summary>
+Friend Function ToggleConnaction() As String
 
+    Const thisProcedureName = "ToggleConnaction"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     Me.RestartStopWatch
 
     Dim host As String
@@ -213,17 +218,43 @@ Private Sub ConnectToggleButton_Click()
     host = Me.host
     port = Me.port
     
-    If Not ConnectToggleButton.value And Me.K2700.Connected Then
+    If Not Me.ConnectToggleButton.value And Me.K2700.Connected Then
         
         Me.K2700.CloseConnection
         
-    ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
+    ElseIf Me.ConnectToggleButton.value And Not Me.K2700.Connected Then
     
         Me.K2700.OpenConnection Me.host, Me.port, timeout
     
     End If
     
     Me.ReadStopWatch
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Function
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Function
+
+
+''' <summary>   Handles the Toggle connection button click event. </summary>
+Private Sub ConnectToggleButton_Click()
+    
+    Me.ToggleConnaction
     
 End Sub
 
@@ -372,7 +403,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -526,7 +557,7 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -581,7 +612,7 @@ err_Handler:
     Me.PauseTimer
   
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
@@ -661,7 +692,7 @@ err_Handler:
     Me.ReadResistanceButton.enabled = True
     
     ' append the error source
-    UserDefinedErrors.AppendErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
     
     ' display the error message
     Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
