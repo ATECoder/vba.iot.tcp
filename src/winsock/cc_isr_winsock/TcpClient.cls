@@ -17,7 +17,6 @@ Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChang
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClientSocket"/>. </summary>
 Private Sub Class_Initialize()
-    Set m_tcpClientSocket = New IPv4StreamSocket
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClientSocket"/>. </summary>
@@ -38,6 +37,10 @@ End Property
 Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
     
     If host = "localhost" Then host = "127.0.0.1"
+    
+    ' a new socket must be created on each connection because closing a socket
+    ' releases the socket, which can then be used by the system as soon as it is released.
+    Set m_tcpClientSocket = New IPv4StreamSocket
 
     Me.TcpClientSocket.OpenConnection host, port
     
@@ -60,6 +63,10 @@ End Property
 Public Function Disconnect() As Boolean
 
     Me.TcpClientSocket.CloseConnection
+    
+    ' the socket must be disposed here becuase it cannot be used after
+    ' the connection is closed.
+    Set m_tcpClientSocket = Nothing
     
     OnConnectionChanged Me.Connected
         

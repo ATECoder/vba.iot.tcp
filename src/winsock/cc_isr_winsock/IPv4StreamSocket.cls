@@ -45,6 +45,13 @@ Private Declare PtrSafe Function bind_ Lib "wsock32.dll" Alias "bind" ( _
         ByVal s As Long, ByRef address As wsock32.ws32_SocketAddress_in, ByVal addressLength As Integer) As Long
 
 ''' <summary>   Closes an existing socket. </summary>
+''' <remarks>
+''' The closesocket function closes a socket. Use it to release the socket descriptor passed in the
+''' s parameter. Note that the socket descriptor passed in the s parameter may immediately be reused
+''' by the system as soon as closesocket function is issued. As a result, it is not reliable to expect
+''' further references to the socket descriptor passed in the s parameter to fail with the error WSAENOTSOCK.
+''' A Winsock client must never issue closesocket on s concurrently with another Winsock function call.
+''' </remarks>
 ''' <param name="s">   [in] A descriptor identifying the socket to close. </param>
 ''' <returns>   If no error occurs, closesocket returns zero. Otherwise, a value of ws32_SOCKET_ERROR is returned.
 ''' A specific error code can be retrieved by calling WSAGetLastError. <returns>

@@ -31,7 +31,6 @@ Private m_writeTermination As String
 ''' <remarks>   This GPIB Lan class uses the Prologix GPIB-Ethernet Controller. </remarks>
 Private Sub Class_Initialize()
     Set m_stopper = cc_isr_Core.Constructor.CreateStopWatch
-    Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
     m_readTermination = vbLf
     m_writeTermination = vbLf
 End Sub
@@ -141,6 +140,7 @@ End Sub
 
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
+    
     If m_tcpClient.Connected Then
         ' leave the instrument in it's default condition to prevent
         ' timeouts on the next read.
@@ -244,7 +244,9 @@ End Function
 
 ''' <summary>   Receives a message from the controller. </summary>
 Public Function ReceiveFromController() As String
-    ReceiveFromController = m_tcpClient.ReceiveRaw(termination:=m_readTermination)
+    Dim receivedMessage As String: receivedMessage = m_tcpClient.ReceiveRaw(termination:=m_readTermination)
+    ' the controller termination is CR + LF
+    ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(receivedMessage, vbCr)
 End Function
 
 ''' <summary>   Sends a message to the controller and read back the reply. </summary>
@@ -333,12 +335,13 @@ End Sub
 ''' <summary>   Query the Read-After-Write enabled mode of the controller. </summary>
 Public Function ReadAfterWriteEnabledGetter() As Boolean
     m_readAfterWriteEnabled = "1" = Me.QueryController("++auto")
+    ReadAfterWriteEnabledGetter = m_readAfterWriteEnabled
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 ' GPIB METHODS
 
-''' <summary> Issues a Go To Local (GTL) (++loc). </summary>
+''' <summary>   Issues a Go To Local (GTL) (++loc). </summary>
 ''' <remarks>   Valid if <see cref="UsingGpibLan"/>. </remarks>
 Public Sub GoToLocal()
     
@@ -351,8 +354,11 @@ End Sub
 Public Function GpibAddressGetter() As String
     
     GpibAddressGetter = "-1"
-    Dim addresses() As String: addresses = Split(Me.QueryController("++addr"), " ")
-    If 1 = UBound(addresses) - LBound(addresses) + 1 Then
+    Dim receivedMessage As String: receivedMessage = Me.QueryController("++addr")
+    Dim addresses() As String: addresses = Split(receivedMessage, " ")
+    If 0 = UBound(addresses) Then
+        GpibAddressGetter = receivedMessage
+    ElseIf 1 = UBound(addresses) - LBound(addresses) + 1 Then
         GpibAddressGetter = addresses(1)
         If 1 < UBound(addresses) - LBound(addresses) + 1 Then
             GpibAddressGetter = GpibAddressGetter & " " & addresses(2)
@@ -389,7 +395,7 @@ Public Sub GpibAddressSetter(ByVal primaryAddress As Integer, _
     
 End Sub
 
-''' <summary> Issues a local lockout (++llo). </summary>
+''' <summary>   Issues a local lockout (++llo). </summary>
 ''' <remarks>   Valid if <see cref="UsingGpibLan"/>. </remarks>
 Public Sub LocalLockout()
     
@@ -426,10 +432,11 @@ End Sub
 Public Function ReadTimeoutGetter() As Integer
     
     m_readTimeout = CInt(Me.QueryController("++read_tmo_ms"))
+    ReadTimeoutGetter = m_readTimeout
     
 End Function
 
-''' <summary> Issues an SDC. </summary>
+''' <summary>   Issues an SDC. </summary>
 ''' <remarks>   Valid if <see cref="UsingGpibLan"/>. </remarks>
 Public Sub SelectiveDeviceClear()
     
@@ -437,11 +444,26 @@ Public Sub SelectiveDeviceClear()
     
 End Sub
 
-''' <summary> Performs a serial poll of the instrument at the current or the specified address.
+''' <summary>   Performs a serial poll of the instrument at the current or the specified address.
 ''' If no address is specified then this command serial polls the currently addressed instrument (as
 ''' set by a previous ++addr command). This command uses the time-out value specified
 ''' by the read_tmo_ms command.
 ''' </summary>
+''' <remarks>
+''' Serial polling obtains specific information from a device. When you serial poll, the Controller
+''' sends a special command message—Serial Poll Enable (SPE)—to the device, directing it to return
+''' its serial poll status byte. The SPE message sets the IEEE 488.1 serial poll mode in the device,
+''' so when the device is addressed to talk, it returns a single 8-bit status byte. This serial poll
+''' status byte is different for each type of instrument; except for one bit, you must refer to the
+''' instrument user manual for information on the other bits. Bit 6 (hex 40) of any serial poll status
+''' byte indicates whether a device requested service by asserting the SRQ line. The device uses the
+''' other seven bits of the status byte to specify why it needs attention.
+'''
+''' After the Controller reads the status byte, it sends another command message, Serial Poll Disable (SPD),
+''' to the device. The SPD message terminates the serial poll mode, thus returning the device to its normal
+''' Talker/Listener state. Once a device requesting service is serial polled, it usually unasserts the SRQ
+''' line.
+''' </remarks>
 ''' <para name="primaryAddress">     [Optional, Integer] Specifies the primary GPIB address
 '''                                   between 0 and 30. </param>
 ''' <para name="secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address

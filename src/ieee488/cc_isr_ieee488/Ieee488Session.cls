@@ -183,7 +183,7 @@ Public Property Get ViSession() As ViSession
     Set ViSession = m_viSession
 End Property
 
-''' <summary> Clears Status (CLS) command. </summary>
+''' <summary>   Clears Status (CLS) command. </summary>
 ''' <returns> the number of characters that were sent. </returns>
 Public Function ClearExecutionState() As Integer
     ClearExecutionState = Me.WriteLine(Ieee488Syntax.ClearExecutionStateCommand)
@@ -205,7 +205,7 @@ Public Function QueryIdentity() As String
     QueryIdentity = m_identity
 End Function
 
-''' <summary> Operation Complete (*OPC) command. </summary>
+''' <summary>   Operation Complete (*OPC) command. </summary>
 ''' <returns> The number of characters that were sent. </returns>
 Public Function OperationComplete() As Integer
     OperationComplete = Me.WriteLine(Ieee488Syntax.OperationCompleteCommand)
@@ -225,7 +225,7 @@ Public Function QueryOptions() As String
     
 End Function
 
-''' <summary> Reads the status byte. </summary>
+''' <summary>   Reads the status byte. </summary>
 ''' <param name="canQuery">   [Optional, False] True to send <c>*STB?</c>
 ''' if not <see cref="UsingGpibLan"/>. </param>
 ''' <returns>   The status byte. </returns>
@@ -259,7 +259,7 @@ Public Function SRQ(Optional ByVal canQuery As Boolean = False) As Boolean
     
 End Function
 
-''' <summary> Issues a wait (*WAI) command. </summary>
+''' <summary>   Issues a wait (*WAI) command. </summary>
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function Wait() As Integer
     
@@ -267,7 +267,7 @@ Public Function Wait() As Integer
     
 End Function
 
-''' <summary> Enables standard events using the (*ESE {0}) command. </summary>
+''' <summary>   Enables standard events using the (*ESE {0}) command. </summary>
 ''' <param name="standardEvents">   The standard event bits to enable. <param>
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Integer
@@ -329,7 +329,7 @@ Public Function QueryServiceRequestStatus() As Integer
     
 End Function
 
-''' <summary> Reset to known state (*RST) command. </summary>
+''' <summary>   Reset to known state (*RST) command. </summary>
 ''' <returns>   The number of characters that were sent. </returns>
 Public Function ResetKnownState() As Integer
     

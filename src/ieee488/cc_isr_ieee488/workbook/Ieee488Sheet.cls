@@ -69,6 +69,8 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
 
     Dim affirmative As Boolean: affirmative = eventArgs.Connected
     
+    Me.ConnectToggleButton.value = affirmative
+    
     ' report the connection state
     Range(m_connectedCell).value = affirmative
         
@@ -78,6 +80,12 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
     Me.ReadButton.enabled = affirmative
     Me.ReadStatusByteButton.enabled = affirmative
     Me.WriteButton.enabled = affirmative
+    
+    If affirmative Then
+        EnableGpibLan Me.Session.ViSession.UsingGpibLan
+    Else
+        EnableGpibLan False
+    End If
 
 End Sub
 
@@ -340,7 +348,7 @@ err_Handler:
     
 End Sub
 
-''' <summary>  Handles the Selective device clear button click event. </summary>
+''' <summary>   Handles the Selective device clear button click event. </summary>
 Private Sub SDCButton_Click()
     
     Const thisProcedureName = "SDCButton_Click"
@@ -473,7 +481,7 @@ Private Sub ReadButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReceivedMessage = ""
+    Me.receivedMessage = ""
     Dim messageReceived As String
     
     Me.RestartStopWatch
@@ -482,7 +490,7 @@ Private Sub ReadButton_Click()
     
     Me.ReadStopWatch
     
-    Me.ReceivedMessage = messageReceived
+    Me.receivedMessage = messageReceived
    
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -512,7 +520,7 @@ Private Sub QueryButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReceivedMessage = ""
+    Me.receivedMessage = ""
     Me.SentMessage = ""
     Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
     Dim messageReceived As String
@@ -523,7 +531,7 @@ Private Sub QueryButton_Click()
     
     Me.ReadStopWatch
     
-    Me.ReceivedMessage = messageReceived
+    Me.receivedMessage = messageReceived
     Me.SentMessage = messageToSend
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -556,18 +564,18 @@ Friend Property Get port() As Integer
     port = CInt(Range(m_inputPortCell).value)
 End Property
 
-''' <summary> Get the receive timeout. </summary>
+''' <summary>   Get the receive timeout. </summary>
 Friend Property Get ReceiveTimeout() As Integer
     ReceiveTimeout = CInt(Range(m_receiveTimeoutCell).value)
 End Property
 
 ''' <summary>   Gets the received message. </summary>
-Friend Property Get ReceivedMessage() As String
-    ReceivedMessage = Range(m_receivedMessageCell).value
+Friend Property Get receivedMessage() As String
+    receivedMessage = Range(m_receivedMessageCell).value
 End Property
 
 ''' <summary>   Sets the received message. </summary>
-Friend Property Let ReceivedMessage(ByVal value As String)
+Friend Property Let receivedMessage(ByVal value As String)
     Range(m_receivedMessageCell).value = value
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
@@ -610,11 +618,8 @@ Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connec
         Range(m_connectedSocketIdCell).value = ""
         
     End If
-    
-    Me.EnableGpibLan Me.Session.ViSession.UsingGpibLan
 
 End Sub
-
 
 ' + + + + + +
 ' GPIB LAN
@@ -623,7 +628,7 @@ Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
     Me.SDCButton.enabled = usingGpibLanController
     Me.GoToLocalButton.enabled = usingGpibLanController
     Me.ListenTalkButton.enabled = usingGpibLanController
-    Me.LocalLockoutButton.Eabled = usingGpibLanController
+    Me.LocalLockoutButton.enabled = usingGpibLanController
     Me.SerialPollButton.enabled = usingGpibLanController
     Me.SRQButton.enabled = usingGpibLanController
     Me.GpibAddressButton.enabled = usingGpibLanController
