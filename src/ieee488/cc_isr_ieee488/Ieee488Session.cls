@@ -16,6 +16,10 @@ Private m_identity As String
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
 Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
+''' <summary>   The event that is raised before change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
+Public Event ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="ViSession"/>. </summary>
 Private Sub Class_Initialize()
     
@@ -86,9 +90,19 @@ End Property
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
-    OpenConnection = Me.ViSession.OpenConnection(host, port, timeoutMs)
+    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    OnConnectionChanging eventArgs
+    
+    If Not eventArgs.cancel Then
+    
+        OpenConnection = Me.ViSession.OpenConnection(host, port, timeoutMs)
+        
+        OnConnectionChanged Me.Connected
+     
+    End If
    
-    OnConnectionChanged Me.Connected
+    OpenConnection = Me.Connected
    
 End Function
 
@@ -96,31 +110,49 @@ End Function
 ''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
-    CloseConnection = Me.ViSession.CloseConnection
+    Dim p_args As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_args = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    OnConnectionChanging p_args
     
-    OnConnectionChanged Me.Connected
+    If Not p_args.cancel Then
+    
+        CloseConnection = Me.ViSession.CloseConnection
+        
+        OnConnectionChanged Me.Connected
+     
+    End If
+
+    CloseConnection = Not Me.Connected
 
 End Function
 
 ''' <summary>   Sends a message. </summary>
-''' <param name="message">   The message. </param>
-''' <returns>   The number of sent characters. </returns>
-Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+''' <param name="message">                 [String] The message to send to the instrument. </param>
+''' <param name="queryStatusAfterWrite">   [Option, Boolean, True] True to read the status byte and
+'''                                        check for errors after sending the message, which
+'''                                        requires <see cref="UsingGpibLan"/> or VXI support. </param>
+''' <param name="appendTermination">       [Option, Boolean, True] True to append termination to
+'''                                        the message. </param>
+''' <returns>   [Long] The number of sent characters. </returns>
+Public Function WriteLine(ByVal message As String, _
+        Optional ByVal queryStatusAfterWrite As Boolean = True, _
+        Optional ByVal appendTermination As Boolean = True) As Long
     
     WriteLine = Me.ViSession.WriteLine(message, appendTermination)
     
-    If Me.ViSession.UsingGpibLan Then
+    If Me.ViSession.UsingGpibLan And queryStatusAfterWrite Then
     
         ' read the status byte and check for errors.
-        Dim StatusByte As Integer: StatusByte = Me.ViSession.GpibLan.SerialPoll()
+        Dim p_status As Integer: p_status = Me.ViSession.GpibLan.SerialPoll()
+        
     
         ' check if we have an error.
-        If ServiceRequests.ErrorAvailable = (StatusByte And ServiceRequests.ErrorAvailable) Then
+        If ServiceRequests.ErrorAvailable = (p_status And ServiceRequests.ErrorAvailable) Then
         
             ' raise the write error adding some information
             Err.Raise UserDefinedErrors.SocketSendError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
                       UserDefinedErrors.SocketSendError.Description & _
-                      " SRQ=0x" & Hex(StatusByte) & _
+                      " SRQ=0x" & Hex(p_status) & _
                       ". Error Available (0x" & Hex(ServiceRequests.ErrorAvailable) & _
                       ") after sending " & message & " to the instrument at " & _
                       Me.ViSession.SocketAddress & "."
@@ -132,13 +164,18 @@ End Function
 
 ''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
-''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
-''' <returns>   The received string. </returns>
-Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
-                     Optional ByVal trimEnd As Boolean = True) As String
+''' <param name="queryStatusBeforeRead">   [Option, Boolean, True] True to read the status byte and
+'''                                        check for errors before reading, which
+'''                                        requires <see cref="UsingGpibLan"/> or VXI support. </param>
+''' <param name="maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">                 [Optional, Boolean True] True to return the string without
+'''                                         the termination. </param>
+''' <returns>   [String] The received message. </returns>
+Public Function Read(Optional ByVal queryStatusBeforeRead As Boolean = True, _
+        Optional ByVal maxLength As Long = &H7FFF, _
+        Optional ByVal trimEnd As Boolean = True) As String
     
-    If Me.ViSession.UsingGpibLan Then
+    If Me.ViSession.UsingGpibLan And queryStatusBeforeRead Then
         
         ' check if we have data to read.
     
@@ -164,13 +201,29 @@ Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
 End Function
     
 ''' <summary>   Sends a message and receives a reply. </summary>
-''' <param name="message">   The message. </param>
-''' <returns>   The received string. </returns>
-Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+''' <param name="message">                 [String] The message to send to the instrument. </param>
+''' <param name="queryStatusAfterWrite">   [Option, Boolean, True] True to read the status byte and
+'''                                        check for errors after sending the message, which
+'''                                        requires <see cref="UsingGpibLan"/> or VXI support. </param>
+''' <param name="queryStatusBeforeRead">   [Option, Boolean, True] True to read the status byte and
+'''                                        check for errors before reading, which
+'''                                        requires <see cref="UsingGpibLan"/> or VXI support. </param>
+''' <param name="appendTermination">       [Option, Boolean, True] True to append termination to
+'''                                        the message. </param>
+''' <param name="maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">                 [Optional, Boolean True] True to return the string without
+'''                                         the termination. </param>
+''' <returns>   [String] The received message. </returns>
+Public Function QueryLine(ByVal message As String, _
+        Optional ByVal queryStatusAfterWrite As Boolean = True, _
+        Optional ByVal queryStatusBeforeRead As Boolean = True, _
+        Optional ByVal appendTermination As Boolean = True, _
+        Optional ByVal maxLength As Long = &H7FFF, _
+        Optional ByVal trimEnd As Boolean = True) As String
     
-    If Me.WriteLine(message, appendTermination) > 0 Then
+    If Me.WriteLine(message, queryStatusAfterWrite, appendTermination) > 0 Then
         DoEvents
-        QueryLine = Me.Read()
+        QueryLine = Me.Read(queryStatusBeforeRead, maxLength, trimEnd)
     Else
         QueryLine = ""
     End If
@@ -178,36 +231,36 @@ Public Function QueryLine(ByVal message As String, Optional ByVal appendTerminat
 End Function
 
 ''' <summary>   Returns a reference to the VI Session. </summary>
-''' <value>   A ViSession. </returns>
+''' <value>   [<see cref="ViSession"/>. </returns>
 Public Property Get ViSession() As ViSession
     Set ViSession = m_viSession
 End Property
 
 ''' <summary>   Clears Status (CLS) command. </summary>
-''' <returns> the number of characters that were sent. </returns>
-Public Function ClearExecutionState() As Integer
-    ClearExecutionState = Me.WriteLine(Ieee488Syntax.ClearExecutionStateCommand)
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function ClearExecutionState() As Long
+    ClearExecutionState = Me.WriteLine(Ieee488Syntax.ClearExecutionStateCommand, False)
 End Function
 
 ''' <summary>   Returns the identity. </summary>
-''' <value>   A string. </returns>
-Public Property Get identity() As String
+''' <value>   [String]. </value>
+Public Property Get Identity() As String
     If StringExtensions.IsNullOrEmpty(m_identity) And Me.ViSession.Connected Then
         m_identity = Me.QueryIdentity
     End If
-    identity = m_identity
+    Identity = m_identity
 End Property
 
 ''' <summary>   Returns the instrument identity using the *IDN? query command. </summary>
-''' <returns>   A string. </returns>
+''' <returns>   [String]. </returns>
 Public Function QueryIdentity() As String
     m_identity = Me.QueryLine(Ieee488Syntax.IdentityQueryCommand)
     QueryIdentity = m_identity
 End Function
 
 ''' <summary>   Operation Complete (*OPC) command. </summary>
-''' <returns> The number of characters that were sent. </returns>
-Public Function OperationComplete() As Integer
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function OperationComplete() As Long
     OperationComplete = Me.WriteLine(Ieee488Syntax.OperationCompleteCommand)
 End Function
 
@@ -218,7 +271,7 @@ Public Function QueryOperationCompleted() As String
 End Function
 
 ''' <summary>   Returns option (instrument specific). </summary>
-''' <returns>   A string. </returns>
+''' <returns>   [String]. </returns>
 Public Function QueryOptions() As String
     
     QueryOptions = Me.QueryLine(Ieee488Syntax.OptionsQueryCommand)
@@ -260,8 +313,8 @@ Public Function ServiceRequested(Optional ByVal canQuery As Boolean = False) As 
 End Function
 
 ''' <summary>   Issues a wait (*WAI) command. </summary>
-''' <returns>   The number of characters that were sent. </returns>
-Public Function Wait() As Integer
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function Wait() As Long
     
     Wait = Me.WriteLine(Ieee488Syntax.WaitCommand)
     
@@ -269,8 +322,8 @@ End Function
 
 ''' <summary>   Enables standard events using the (*ESE {0}) command. </summary>
 ''' <param name="standardEvents">   The standard event bits to enable. <param>
-''' <returns>   The number of characters that were sent. </returns>
-Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Integer
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Long
     
     Dim command As String
     command = StringExtensions.StringFormat(StandardEventEnableCommandFormat, StandardEvents)
@@ -300,8 +353,8 @@ End Function
 
 ''' <summary>   Enables Service Request using the (*SRE {0}) command. </summary>
 ''' <param name="ServiceRequest">   The standard event bits to enable. <param>
-''' <returns>   The number of characters that were sent. </returns>
-Public Function EnableServiceRequest(ByVal serviceRequest As Integer) As Integer
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function EnableServiceRequest(ByVal serviceRequest As Integer) As Long
     
     Dim command As String
     command = StringExtensions.StringFormat(ServiceRequestEnableCommandFormat, serviceRequest)
@@ -330,21 +383,30 @@ Public Function QueryServiceRequestStatus() As Integer
 End Function
 
 ''' <summary>   Reset to known state (*RST) command. </summary>
-''' <returns>   The number of characters that were sent. </returns>
-Public Function ResetKnownState() As Integer
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function ResetKnownState() As Long
     
-    ResetKnownState = Me.WriteLine(Ieee488Syntax.ResetKnownStateCommand)
+    ResetKnownState = Me.WriteLine(Ieee488Syntax.ResetKnownStateCommand, False)
     
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' Connection Changed
+'
+' Connection Events
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
+''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
+Private Sub OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+    RaiseEvent ConnectionChanging(eventArgs)
 End Sub
 
 

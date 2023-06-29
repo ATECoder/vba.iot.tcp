@@ -13,18 +13,18 @@ Private Const m_receiveTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
 Private Const m_socketAddressCell As String = "C2"
-Private Const m_connectedSocketIdCell As String = "E2"
-Private Const m_sentMessageCell As String = "G2"
-Private Const m_receivedMessageLengthCell As String = "H2"
-Private Const m_receivedMessageCell As String = "I2"
-Private Const m_elapsedTimeCell As String = "J2"
-Private Const m_elapsedTimeFormat As String = "0.0"
+Private Const m_socketIdCell As String = "E2"
 Private Const m_connectedCell As String = "F2"
-Private Const m_identityCell As String = "I2"
+Private Const m_sentMessageCell As String = "G2"
+Private Const m_receivedMessageLengthCell As String = "K2"
+Private Const m_receivedMessageCell As String = "L2"
+Private Const m_elapsedTimeCell As String = "M2"
+Private Const m_elapsedTimeFormat As String = "0.0"
 Private Const m_errorMessageCell As String = "B4"
 
-Private Const m_statusByteCell As String = "F16"
-Private Const m_serialPollCell As String = "E16"
+Private Const m_serialPollCell As String = "F12"
+Private Const m_statusByteCell As String = "G12"
+Private Const m_StandardByteCell As String = "I12"
 Private Const m_srqCell As String = "C10"
 Private Const m_gpibAddressCell As String = "C12"
 Private Const m_readTimeoutCell As String = "C15"
@@ -242,7 +242,6 @@ err_Handler:
     
 End Function
 
-
 ''' <summary>   Handles the Toggle connection button click event. </summary>
 Friend Sub ConnectToggleButton_Click()
 
@@ -327,7 +326,6 @@ err_Handler:
     
 End Sub
 
-
 ''' <summary>   Handles the Reset Known State button click event. </summary>
 Private Sub RSTButton_Click()
     
@@ -397,22 +395,47 @@ err_Handler:
 End Sub
 
 ''' <summary>   Handles the Read Status Byte button click event. </summary>
+Private Sub ReadStandardEventStatusButton_Click()
+
+    Const thisProcedureName = "ReadStatusByteButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.StandardByte = Me.Session.QueryStandardEventsStatus
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+
+''' <summary>   Handles the Read Status Byte button click event. </summary>
 Friend Sub ReadStatusByteButton_Click()
     
     Const thisProcedureName = "ReadStatusByteButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
-    
-    If Me.Session.ViSession.UsingGpibLan Then
-    
-        Me.RestartStopWatch
-        
-        Range(m_serialPollCell).value = Me.Session.ViSession.GpibLan.SerialPoll
-        
-        Me.ReadStopWatch
-        
-    End If
     
     Me.RestartStopWatch
     
@@ -465,6 +488,7 @@ Private Sub WriteButton_Click()
     Dim isQuery As Boolean: isQuery = cc_isr_Core.StringExtensions.EndsWith(messageToSend, "?")
     If Not isQuery And Me.AutoStatusReadCheckBox.value Then
         Me.StatusByte = Me.Session.QueryServiceRequestStatus
+        Me.StandardByte = Me.Session.QueryStandardEventsStatus
     End If
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -614,38 +638,21 @@ Friend Property Let StatusByte(ByVal value As Integer)
     Range(m_statusByteCell).value = value
 End Property
 
-''' <summary>   Handles the <see cref="cc_isr_Ieee488.ViSession.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <summary>   Gets the Standard byte. </summary>
+Friend Property Get StandardByte() As Integer
+    StandardByte = Range(m_StandardByteCell).value
+End Property
 
-    Me.Initialize eventArgs
+''' <summary>   Sets the Standard byte. </summary>
+Friend Property Let StandardByte(ByVal value As Integer)
+    Range(m_StandardByteCell).value = value
+End Property
 
-    If eventArgs.Connected Then
-    
-        ' report the socket number
-        Range(m_socketAddressCell).value = Me.Session.ViSession.SocketAddress
-        Range(m_connectedSocketIdCell).value = Me.Session.SocketId
-    
-    Else
-    
-        Range(m_socketAddressCell).value = ""
-        Range(m_connectedSocketIdCell).value = ""
-        
-    End If
-    
-    If Me.Session.ViSession.UsingGpibLan Then
-    
-        Me.ListenTalkToggleButton.value = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
-    
-    End If
-
-End Sub
-
-' + + + + + +
+' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 '
 ' GPIB LAN
 '
-' + + + + + +
+' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = usingGpibLanController
@@ -958,5 +965,47 @@ err_Handler:
     GoTo exit_Handler
 
 End Sub
+
+
+' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+'
+' IEEE 488 Session Events
+'
+' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
+
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanged"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+    Me.Initialize eventArgs
+
+    If eventArgs.Connected Then
+    
+        ' report the socket number
+        Range(m_socketAddressCell).value = Me.Session.ViSession.SocketAddress
+        Range(m_socketIdCell).value = Me.Session.SocketId
+    
+    Else
+    
+        Range(m_socketAddressCell).value = ""
+        Range(m_socketIdCell).value = ""
+        
+    End If
+    
+    If Me.Session.ViSession.UsingGpibLan Then
+    
+        Me.ListenTalkToggleButton.value = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
+    
+    End If
+
+End Sub
+
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanging"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_session_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
+End Sub
+
+
 
 

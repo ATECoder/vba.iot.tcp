@@ -49,7 +49,8 @@ Private Sub Class_Initialize()
     Me.ReadAfterWriteDelay = READ_AFTER_WRITE_DELAY_DEFAULT
     
     Set m_gpibLan = New GpibLanController
-    m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination
+    m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
+    
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -60,14 +61,16 @@ End Sub
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
 
+    If Me.Connected Then
+        Me.CloseConnection
+    End If
+    
+    ' dispose the GPIB-Lan controller only after closing the connection.
+    
     If Not m_gpibLan Is Nothing Then
         m_gpibLan.Dispose
     End If
     Set m_gpibLan = Nothing
-    
-    If Me.Connected Then
-        Me.CloseConnection
-    End If
     
     If Not m_tcpClient Is Nothing Then
         m_tcpClient.Dispose
@@ -176,21 +179,32 @@ Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
 End Sub
 
 ''' <summary>   Opens a TCP Client connection. </summary>
-''' <param name="host">        An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        [Long] The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
    
     m_usingGpibLan = port = GPIB_LAN_PORT_NO
     
-    m_tcpClient.ConnectTo host, port
+    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    OnConnectionChanging eventArgs
     
-    Me.SetReceiveTimeout timeoutMs
+    If Not eventArgs.cancel Then
     
-    m_gpibLan.Enabled = Me.UsingGpibLan
-    
-    OnConnectionChanged Me.Connected
+        ' enable/disable the GPIB-Lan controller; this ensure that the controller correctly handles the
+        ' Tcp Client connection events.
+        
+        m_gpibLan.Enabled = Me.UsingGpibLan
+        
+        m_tcpClient.ConnectTo host, port
+        
+        Me.SetReceiveTimeout timeoutMs
+        
+        OnConnectionChanged Me.Connected
+        
+    End If
 
     OpenConnection = Me.Connected
    
@@ -200,9 +214,19 @@ End Function
 ''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
-    CloseConnection = m_tcpClient.Disconnect
+    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    OnConnectionChanging eventArgs
     
-    OnConnectionChanged Me.Connected
+    If Not eventArgs.cancel Then
+    
+        CloseConnection = m_tcpClient.Disconnect
+    
+        OnConnectionChanged Me.Connected
+    
+    End If
+    
+    CloseConnection = Not Me.Connected
     
 End Function
 
@@ -218,9 +242,12 @@ End Property
 ''' method first sets the Prologix to auto off (++auto 0) to prevent it from
 ''' setting the device to talk prematurely which might cause the device
 ''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
-''' <param name="message">   The message. </param>
-''' <returns>   The number of sent characters. </returns>
-Public Function WriteLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+''' <param name="message">             [String] The message to send to the instrument. </param>
+''' <param name="appendTermination">   [Option, Boolean, True] True to append termination to
+'''                                    the message. </param>
+''' <returns>   [Long] The number of sent characters. </returns>
+Public Function WriteLine(ByVal message As String, _
+        Optional ByVal appendTermination As Boolean = True) As Long
     
     If Me.UsingGpibLan Then
         WriteLine = Me.GpibLan.SendToDevice(message, appendTermination)
@@ -239,7 +266,7 @@ End Function
 ''' the previous read on <see cref="WriteLine"/>. </remarks>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
-''' <returns>   The received string. </returns>
+''' <returns>   [String] The received string. </returns>
 Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
                      Optional ByVal trimEnd As Boolean = True) As String
     If Me.UsingGpibLan Then
@@ -251,12 +278,19 @@ Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
 End Function
     
 ''' <summary>   Sends a message and receives a reply. </summary>
-''' <param name="message">   The message. </param>
-''' <returns>   The received string. </returns>
-Public Function QueryLine(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+''' <param name="message">             [String] The message to send to the instrument. </param>
+''' <param name="appendTermination">   [Option, Boolean, True] True to append termination to
+'''                                    the message. </param>
+''' <param name="maxLength">           [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">             [Optional, True] True to return the string without the termination. </param>
+''' <returns>   [String] The received string. </returns>
+Public Function QueryLine(ByVal message As String, _
+        Optional ByVal appendTermination As Boolean = True, _
+        Optional ByVal maxLength As Long = &H7FFF, _
+        Optional ByVal trimEnd As Boolean = True) As String
     If Me.WriteLine(message, appendTermination) > 0 Then
         DoEvents
-        QueryLine = Me.Read()
+        QueryLine = Me.Read(maxLength, trimEnd)
     Else
         QueryLine = ""
     End If

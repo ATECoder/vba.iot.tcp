@@ -239,7 +239,7 @@ End Sub
 ''' <summary>   Opens a socket connection and sets and returns the socket id. </summary>
 ''' <param name="host">   An IPv4 dotted-decimal host address. </param>
 ''' <param name="port">   The port that the server is listening on. </param>
-''' <returns>   True if the socket is connected. </returns>
+''' <returns>   [Boolean] True if the socket is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Boolean
    
     m_connected = False
@@ -287,7 +287,7 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
 End Function
 
 ''' <summary>   Closes the socket connection and zeros the socket id. </summary>
-''' <returns>   True if socket disconnection succeeded; otherwise, false. </returns>
+''' <returns>   [Boolean] True if socket disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
     Dim result As Long
@@ -311,7 +311,7 @@ End Function
 ''' <summary>   Associates a local address with a socket. </summary>
 ''' <param name="address">   The INet address to bind to. </param>
 ''' <param name="port">   The port that the server is listening on. </param>
-''' <returns>   True if the socket is bound. </returns>
+''' <returns>   [Boolean] True if the socket is bound. </returns>
 Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
 
     Dim endpoint As wsock32.ws32_SocketAddress_in
@@ -334,7 +334,7 @@ Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
 End Function
 
 ''' <summary>   Returns the listening state of the socket. </summary>
-''' <value>   True if the socket is Listening; otherwise, False. </value>
+''' <value>   [Boolean] True if the socket is Listening; otherwise, False. </value>
 Public Property Get Listening() As Boolean
     Listening = m_listening
 End Property
@@ -342,7 +342,7 @@ End Property
 
 ''' <summary>   Places a socket in a state in which it is listening for an incoming connection. </summary>
 ''' <param name="backlog">   [Optional, 10] [in] The maximum length of the queue of pending connections. </para>
-''' <returns>   True if the socket is Listening; otherwise, False. </returns>
+''' <returns>   [Boolean] True if the socket is Listening; otherwise, False. </returns>
 Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolean
 
     Dim listenResult As Long
@@ -359,8 +359,8 @@ Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolea
 End Function
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
-''' <param name="serverSocket">   [in] Reference to the server socket. </param>
-''' <param name="timeoutMs">      [Optional, 500] The maximum milliseconds time for select to wait. </param>
+''' <param name="serverSocket">   [<see cref="IPv4StreamSocket"/>] The server socket. </param>
+''' <param name="timeoutMs">      [Optional, Long, 500] The maximum milliseconds time for select to wait. </param>
 ''' <returns>   the connected socket. </returns>
 Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
         Optional ByVal timeoutMs As Long = 500) As IPv4StreamSocket
@@ -400,9 +400,9 @@ Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
 End Function
 
 ''' <summary>   Sends a terminated message to the server. </summary>
-''' <param name="message">   The terminated message. </param>
-''' <returns>   The number of bytes that were sent to the server. </returns>
-Public Function SendMessage(ByVal message As String) As Integer
+''' <param name="message">   [String] The terminated message. </param>
+''' <returns>   [Long} The number of bytes that were sent to the server. </returns>
+Public Function SendMessage(ByVal message As String) As Long
 
     If StringExtensions.IsNullOrEmpty(message) Then
         SendMessage = 0

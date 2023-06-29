@@ -57,6 +57,7 @@ Public Sub Initialize(ByVal client As TcpClient, _
                       Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
                       Optional ByVal readAfterWriteDelayMs As Integer = 5)
+    
     Set m_tcpClient = client
     m_readTermination = readTerm
     m_writeTermination = writeTerm
@@ -79,17 +80,24 @@ Public Sub Dispose()
 End Sub
 
 ''' <summary>   Gets the enabled status. </summary>
+''' <remarks>
+''' The GPIB-Lan controller is enabled only if the Tcp client is
+''' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
+''' </remarks>
 ''' <value>   [Boolean] True if enabled.  </value>
 Public Property Get Enabled() As Boolean
     Enabled = m_enabled
 End Property
 
 ''' <summary>   Sets the enabled status. </summary>
+''' <remarks>
+''' The GPIB-Lan controller is enabled only if the Tcp client is
+''' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
+''' </remarks>
 ''' <param name=""value>   [Boolean] True if enabled.  </value>
 Public Property Let Enabled(ByVal value As Boolean)
     m_enabled = value
 End Property
-
 
 ''' <summary>   Gets the Read After Write Delay. </summary>
 ''' <value>   An Integer. </value>
@@ -103,61 +111,10 @@ Public Property Let ReadAfterWriteDelay(ByVal value As Integer)
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' DEVICE IO
-
-''' <summary>   Sends a message to the device. </summary>
-''' <remarks>   If using the controller at port 1234 and auto read-after-write is on,
-''' this method first sets the controller to auto off (++auto 0) to prevent it from
-''' setting the device to talk prematurely which might cause the device
-''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
-''' <param name="message">   The message. </param>
-''' <returns>   The number of sent characters. </returns>
-Public Function SendToDevice(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    
-    If appendTermination Then message = message & m_writeTermination
-    
-    ' if auto read after write, turn on listen to prevent Query Unterminated error on the 2700.
-    If Me.ReadAfterWriteEnabled And Me.DisableReadAfterWriteOnWrite Then Me.ReadAfterWriteEnabledSetter False
-    
-    ' send the message to the device.
-    SendToDevice = m_tcpClient.SendMessage(message)
-    m_stopper.Wait Me.ReadAfterWriteDelay
-
-End Function
-
-''' <summary>   Receives a message from the server until reaching the specified termination
-''' or reading the specified number of characters. </summary>
-''' <remarks>   If <see cref="ReadAfterWriteEnabled"/> is not enabled then
-''' this method uses the <c>++read</c> command to first read the data
-''' from the device to the controller. </remarks>
-''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
-''' <returns>   The received string. </returns>
-Public Function ReceiveFromDevice(Optional ByVal maxLength As Long = &H7FFF, _
-                                  Optional ByVal trimEnd As Boolean = True) As String
-    If Not Me.ReadAfterWriteEnabled Then
-        ' if auto read after write is disabled, we can either turn on ' read after write,
-        ' but it seems that getting the controller to read from the instrumet is much faster.
-        Me.ReadFromDeviceToController
-    End If
-    ReceiveFromDevice = m_tcpClient.ReceiveRaw(maxLength, trimEnd, m_readTermination)
-
-End Function
-    
-''' <summary>   Sends a message to the device and receives a reply. </summary>
-''' <param name="message">   The message. </param>
-''' <returns>   The received string. </returns>
-Public Function QueryDevice(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    If Me.SendToDevice(message, appendTermination) > 0 Then
-        DoEvents
-        QueryDevice = Me.ReceiveFromDevice()
-    Else
-        QueryDevice = ""
-    End If
-End Function
-
+'
+' Controller mode Device IO
+'
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' CONTROLLER I/O
 
 ''' <summary>   Gets the Disable Read After Write On Write. </summary>
 ''' <remarks>   Read-After-Write should be disabled on non-query commands
@@ -172,70 +129,6 @@ End Property
 ''' <param name="value">   True to Disable Read After Write On Write. </param>
 Public Property Let DisableReadAfterWriteOnWrite(value As Boolean)
     m_disableReadAfterWriteOnWrite = value
-End Property
-
-''' <summary>   Sends a message to the controller. </summary>
-''' <remarks>   This method does not alter the auto Read-After-Write condition. </remarks>
-''' <param name="message">   The message. </param>
-''' <returns>   The number of sent characters. </returns>
-Public Function SendToController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    
-    If appendTermination Then message = message & m_writeTermination
-    SendToController = m_tcpClient.SendMessage(message)
-    m_stopper.Wait Me.ReadAfterWriteDelay
-
-End Function
-
-''' <summary>   Receives a message from the controller. </summary>
-Public Function ReceiveFromController() As String
-    Dim receivedMessage As String: receivedMessage = m_tcpClient.ReceiveRaw(termination:=m_readTermination)
-    ' the controller termination is CR + LF
-    ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(receivedMessage, vbCr)
-End Function
-
-''' <summary>   Sends a message to the controller and read back the reply. </summary>
-''' <param name="message">   The message. </param>
-''' <returns>   The received message. </returns>
-Public Function QueryController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    If Me.SendToController(message, appendTermination) > 0 Then
-        DoEvents
-        QueryController = Me.ReceiveFromController()
-    Else
-        QueryController = ""
-    End If
-End Function
-
-''' <summary>   Sends the '++read eoi' copmmand to have the controller set the instrument to talk
-''' and get the data from the instrument into the controller until EOI character is recevied.
-''' </summary>
-''' <remarks>
-''' This command can be used to read data from an instrument until:
-''' <code>
-''' EOI is detected or timeout expires, or
-''' A specified character is read, or
-''' timeout expires,
-''' </code>
-''' Timeout is set using the read_tmo_ms command and applies to inter-character delay, i.e.,
-''' the delay since the last character was read. Timeout is not be confused with the total
-''' time for which data is read.
-''' SYNTAX: ++read [eoi|<char>] where <char> is a decimal value less than 256
-''' Examples:
-''' <code>
-'''  ++read     - Read until timeout
-'''  ++read eoi - Read until EOI detected or timeout
-'''  ++read 10  - Read until LF (ASCII 10) is received or timeout
-''' </code>
-''' </remarks>
-''' <param name="message">   The message. </param>
-''' <returns>   The number of characters that were sent. </returns>
-Public Function ReadFromDeviceToController() As Integer
-    ReadFromDeviceToController = Me.SendToController("++read eoi")
-End Function
-
-''' <summary>   Gets the read-after-write enabled status. </summary>
-''' <value>   [Boolean] True if read-after-write is enabled.  </value>
-Public Property Get ReadAfterWriteEnabled() As Boolean
-    ReadAfterWriteEnabled = m_readAfterWriteEnabled
 End Property
 
 ''' <summary>   Configure the Read-After-Write mode of the controller. </summary>
@@ -282,17 +175,155 @@ Public Function ReadAfterWriteEnabledGetter() As Boolean
     ReadAfterWriteEnabledGetter = m_readAfterWriteEnabled
 End Function
 
+''' <summary>   Sends a message to the device. </summary>
+''' <remarks>   If using the controller at port 1234 and auto read-after-write is on,
+''' this method first sets the controller to auto off (++auto 0) to prevent it from
+''' setting the device to talk prematurely which might cause the device
+''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
+''' <param name="message">   The message. </param>
+''' <returns>   [Long] The number of sent characters. </returns>
+Public Function SendToDevice(ByVal message As String, _
+        Optional ByVal appendTermination As Boolean = True) As Long
+    
+    If appendTermination Then message = message & m_writeTermination
+    
+    ' if auto read after write and write control of read after write is enabled,
+    ' turn on listen to prevent Query Unterminated error on the 2700.
+    
+    If Me.ReadAfterWriteEnabled And Me.DisableReadAfterWriteOnWrite Then Me.ReadAfterWriteEnabledSetter False
+    
+    ' send the message to the device.
+    
+    SendToDevice = m_tcpClient.SendMessage(message)
+    
+    ' a read after write delay is necessary for propert operations.
+    
+    m_stopper.Wait Me.ReadAfterWriteDelay
+
+End Function
+
+''' <summary>   Receives a message from the server until reaching the specified termination
+''' or reading the specified number of characters. </summary>
+''' <remarks>   If <see cref="ReadAfterWriteEnabled"/> is not enabled then
+''' this method uses the <c>++read</c> command to first read the data
+''' from the device to the controller. </remarks>
+''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
+''' <returns>   [String] The received message. </returns>
+Public Function ReceiveFromDevice(Optional ByVal maxLength As Long = &H7FFF, _
+                                  Optional ByVal trimEnd As Boolean = True) As String
+    
+    If Not Me.ReadAfterWriteEnabled Then
+        ' if auto read after write is disabled, we can either turn on ' read after write,
+        ' but it seems that getting the controller to read from the instrumet is much faster.
+        
+        Me.ReadFromDeviceToController
+    
+    End If
+    
+    ReceiveFromDevice = m_tcpClient.ReceiveRaw(maxLength, trimEnd, m_readTermination)
+
+End Function
+    
+''' <summary>   Sends a message to the device and receives a reply. </summary>
+''' <param name="message">   The message. </param>
+''' <returns>   [String] The received message. </returns>
+Public Function QueryDevice(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+    If Me.SendToDevice(message, appendTermination) > 0 Then
+        DoEvents
+        QueryDevice = Me.ReceiveFromDevice()
+    Else
+        QueryDevice = ""
+    End If
+End Function
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+' CONTROLLER I/O
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Sends a message to the controller. </summary>
+''' <remarks>   This method does not alter the auto Read-After-Write condition. </remarks>
+''' <param name="message">             [String] The message. </param>
+''' <param name="appendTermination">   [Optional, Boolean, True] True to append the
+'''                                    <see cref="WriteTermination"/> to the message. </param>
+''' <returns>   [Long] The number of sent characters. </returns>
+Public Function SendToController(ByVal message As String, _
+        Optional ByVal appendTermination As Boolean = True) As Long
+    
+    If appendTermination Then message = message & m_writeTermination
+    SendToController = m_tcpClient.SendMessage(message)
+    m_stopper.Wait Me.ReadAfterWriteDelay
+
+End Function
+
+''' <summary>   Receives a message from the controller. </summary>
+''' <param name="trimEnd">   [Optional, Boolean, True] True to trim the end termination. </param>
+''' <returns>   [String] The received message. </returns>
+Public Function ReceiveFromController(Optional trimEnd As Boolean = True) As String
+
+    Dim receivedMessage As String: receivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
+                                                                            termination:=m_readTermination)
+    
+    ' messages that come from the controller have a CR + LF termination. The Receive Raw method
+    ' may stop at the LF termination, in which case the CR termination needs to be trimmed.
+    If trimEnd Then
+        ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(receivedMessage, vbCr)
+    End If
+    
+End Function
+
+''' <summary>   Sends a message to the controller and read back the reply. </summary>
+''' <param name="message">   The message. </param>
+''' <returns>   The received message. </returns>
+Public Function QueryController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
+    If Me.SendToController(message, appendTermination) > 0 Then
+        DoEvents
+        QueryController = Me.ReceiveFromController()
+    Else
+        QueryController = ""
+    End If
+End Function
+
+''' <summary>   Sends the '++read eoi' copmmand to have the controller set the instrument to talk
+''' and get the data from the instrument into the controller until EOI character is recevied.
+''' </summary>
+''' <remarks>
+''' This command can be used to read data from an instrument until:
+''' <code>
+''' EOI is detected or timeout expires, or
+''' A specified character is read, or
+''' timeout expires,
+''' </code>
+''' Timeout is set using the read_tmo_ms command and applies to inter-character delay, i.e.,
+''' the delay since the last character was read. Timeout is not be confused with the total
+''' time for which data is read.
+''' SYNTAX: ++read [eoi|<char>] where <char> is a decimal value less than 256
+''' Examples:
+''' <code>
+'''  ++read     - Read until timeout
+'''  ++read eoi - Read until EOI detected or timeout
+'''  ++read 10  - Read until LF (ASCII 10) is received or timeout
+''' </code>
+''' </remarks>
+''' <param name="message">   The message. </param>
+''' <returns>   [Long] The number of characters that were sent. </returns>
+Public Function ReadFromDeviceToController() As Integer
+    ReadFromDeviceToController = Me.SendToController("++read eoi")
+End Function
+
+''' <summary>   Gets the read-after-write enabled status. </summary>
+''' <value>   [Boolean] True if read-after-write is enabled.  </value>
+Public Property Get ReadAfterWriteEnabled() As Boolean
+    ReadAfterWriteEnabled = m_readAfterWriteEnabled
+End Property
+
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
 ' GPIB METHODS
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-
-''' <summary>   Gets the controller mode status. </summary>
-''' <value>   [Boolean] True if the GPIB-Lan is set as a controller. </value>
-Public Property Get ControllerMode() As Boolean
-    ControllerMode = m_controllerMode
-End Property
 
 ''' <summary>   Issues a Go To Local (GTL) (++loc). </summary>
 ''' <remarks>   Valid if <see cref="UsingGpibLan"/>. </remarks>
@@ -337,11 +368,17 @@ End Function
 '''                                  between 0 and 30. </param>
 ''' <returns>   The status byte. </returns>
 Public Sub GpibAddressSetter(ByVal primaryAddress As Integer, _
-                          Optional ByVal secondaryAddress As Integer = -1)
+                             Optional ByVal secondaryAddress As Integer = -1)
     
     If primaryAddress >= 0 And secondaryAddress < 0 Then
+    
+        primaryAddress = Me.DelimitInteger(primaryAddress, 0, 30)
         Me.SendToController "++addr " & CStr(primaryAddress)
+        
     ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
+        
+        primaryAddress = Me.DelimitInteger(primaryAddress, 0, 30)
+        secondaryAddress = Me.DelimitInteger(secondaryAddress, 0, 30)
         Me.SendToController "++addr " & CStr(primaryAddress) & _
             " " & CStr(secondaryAddress + 96)
     End If
@@ -445,6 +482,19 @@ Public Function ServiceRequested() As Boolean
     
 End Function
 
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+'  Device Mode Functions
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Gets the controller mode status. </summary>
+''' <value>   [Boolean] True if the GPIB-Lan is set as a controller. </value>
+Public Property Get ControllerMode() As Boolean
+    ControllerMode = m_controllerMode
+End Property
+
 ''' <summary>   Gets the device Status Byte. </summary>
 ''' <value>   An Integer. </value>
 Public Property Get StatusByte() As Integer
@@ -502,7 +552,6 @@ Public Function DelimitInteger(ByVal value As Integer, ByVal minValue As Integer
     DelimitInteger = value
 End Function
 
-
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
 '  TCP Client Event Handlers
@@ -516,6 +565,10 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
     Const thisProcedureName As String = "m_tcpClient_ConnectionChanging"
 
     On Error Resume Next
+    
+    ' the GPIB-Lan controller is enabled only if the Tcp client is
+    ' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
+    If Not Me.Enabled Then Return
 
     ' when connected, the read after write is turned off by default.
     ' this is done to prevent Query Unterminated errors on instruments such as the Keithley 2700.
@@ -536,6 +589,7 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
     End If
     
     If Err.Number <> 0 Then
+        ' report any error when debugging this code.
         UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
         Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
     End If
@@ -550,6 +604,10 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
     
     On Error Resume Next
     
+    ' the GPIB-Lan controller is enabled only if the Tcp client is
+    ' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
+    If Not Me.Enabled Then Return
+    
     If eventArgs.Connected Then
     
         ' leave the instrument with auto read-after-write off to prevent
@@ -560,6 +618,7 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
     End If
 
     If Err.Number <> 0 Then
+        ' report any error when debugging this code.
         UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
         Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
     End If
@@ -567,11 +626,10 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
 End Sub
 
 ''' <summary>   Experiments with options for setting read-after-write. </summary>
-Private Sub InitReadAfterWrite()
+''' <remarks>   good options: 1, 2 ?, 5; bad options: 4, 3. </remarks>
+''' <para name="opt">   [Integer] selects an configuration option. </param>
+Private Sub InitReadAfterWrite(ByVal opt As Integer)
 
-    Dim i As Integer
-    Dim opt As Integer: opt = 5 ' good options: 1, 2 ?, 5; bad options: 4, 3
-    
     If opt = 1 Then
     
         ' Identity query time:         40-50 ms

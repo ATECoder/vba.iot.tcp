@@ -94,18 +94,18 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
             loopCount = loopCount + 1
             sw.Restart
             
-            Dim identity As String
+            Dim Identity As String
             
             If Me.UsingViSessionIOCheckBox Then
-                identity = Session.ViSession.QueryLine(command)
+                Identity = Session.ViSession.QueryLine(command)
             Else
-                identity = Session.QueryLine(command)
+                Identity = Session.QueryLine(command)
             End If
             
             totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value = Len(identity)
-            Range(m_receivedMessageCell).value = identity
+            Range(m_receivedMessageLengthCell).value = Len(Identity)
+            Range(m_receivedMessageCell).value = Identity
     
         Loop
   

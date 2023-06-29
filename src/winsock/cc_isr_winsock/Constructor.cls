@@ -51,7 +51,7 @@ End Function
 
 ''' <summary>   Gets an instance of the <see cref="ConnectionChangedEventArgs"/> class. </summary>
 ''' <para name="isConnected">   [Optional, Boolean, False] True if connected. </param>
-''' <value>   An instance of the <see cref="ConnectionChangedEventArgs"/> class. </returns>
+''' <value>   [<see cref="ConnectionChangedEventArgs"/>]. </returns>
 Public Property Get CreateConnectionChangedEventArgs(Optional ByVal isConnected As Boolean = False) As ConnectionChangedEventArgs
     Set CreateConnectionChangedEventArgs = New ConnectionChangedEventArgs
     CreateConnectionChangedEventArgs.Initialize isConnected
@@ -59,7 +59,7 @@ End Property
 
 ''' <summary>   Gets an instance of the <see cref="ConnectionChangingEventArgs"/> class. </summary>
 ''' <para name="isConnected">   [Optional, Boolean, False] True if connected. </param>
-''' <value>   An instance of the <see cref="ConnectionChangingEventArgs"/> class. </returns>
+''' <value>   [<see cref="ConnectionChangingEventArgs"/>]. </returns>
 Public Property Get CreateConnectionChangingEventArgs(Optional ByVal isConnected As Boolean = False) As ConnectionChangingEventArgs
     Set CreateConnectionChangingEventArgs = New ConnectionChangingEventArgs
     CreateConnectionChangingEventArgs.Initialize isConnected

@@ -43,7 +43,7 @@ End Sub
 
 
 ''' <summary>   Gets the Tcp Client socket. </summary>
-''' <value>   [<see cref="IPv4StreamSocket"/>. </value>
+''' <value>   [<see cref="IPv4StreamSocket"/>]. </value>
 Public Property Get TcpClientSocket() As IPv4StreamSocket
     Set TcpClientSocket = m_tcpClientSocket
 End Property
@@ -51,7 +51,7 @@ End Property
 ''' <summary>   Opens a socket connection and sets and returns the socket id. </summary>
 ''' <param name="host">   An IPv4 dotted-decimal host address. </param>
 ''' <param name="port">   The port that the server is listening on. </param>
-''' <returns>   True if the socket is connected. </returns>
+''' <returns>   [Boolean] True if the socket is connected. </returns>
 Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
     
     If host = "localhost" Then host = "127.0.0.1"
@@ -77,7 +77,7 @@ Public Function ConnectTo(ByVal host As String, ByVal port As Long) As Boolean
 End Function
 
 ''' <summary>   Returns the connection state of the client. </summary>
-''' <returns>   True if the socket is connected; otherwise, False. </returns>
+''' <returns>   [Boolean] True if the socket is connected; otherwise, False. </returns>
 Public Property Get Connected() As Boolean
     If m_tcpClientSocket Is Nothing Then
         Connected = False
@@ -87,7 +87,7 @@ Public Property Get Connected() As Boolean
 End Property
 
 ''' <summary>   Closes the connection. </summary>
-''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
+''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
 Public Function Disconnect() As Boolean
 
     Dim eventArgs As New cc_isr_Winsock.ConnectionChangingEventArgs
@@ -112,7 +112,7 @@ End Function
 
 ''' <summary>   Initializes this TCP Client using the provided connected socket. </summary>
 ''' <remarks>   Raises an invalid operation exception is a socket is already connected. </remarks>
-''' <param name="connectedSocket ">   A connected INET stream socket. </param>
+''' <param name="connectedSocket ">   [IPv4StreamSocket] A connected INET stream socket. </param>
 Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
     
     If Me.Connected Then
@@ -129,15 +129,15 @@ Public Sub Initialize(ByVal connectedSocket As IPv4StreamSocket)
 End Sub
 
 ''' <summary>   Sends a terminated message to the server. </summary>
-''' <param name="command">   The message. </param>
-''' <returns>   The number of bytes that were sent to the server. </returns>
-Public Function SendMessage(ByVal message As String) As Integer
+''' <param name="command">   [String] The message. </param>
+''' <returns>   [Long] The number of bytes that were sent to the server. </returns>
+Public Function SendMessage(ByVal message As String) As Long
     SendMessage = Me.TcpClientSocket.SendMessage(message)
 End Function
 
 ''' <summary>   Receives a message from the server. </summary>
 ''' <param name="maxLength">   The maximum number of characters to read. </param>
-''' <returns>   The received characters. </returns>
+''' <returns>   [String] The received characters. </returns>
 Public Function ReceiveBytes(ByVal maxLength As Long) As String
     
     ReceiveBytes = Me.TcpClientSocket.ReceiveBytes(maxLength)

@@ -26,7 +26,7 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Gets the Tcp Server socket. </summary>
-''' <value>   [<see cref="IPv4StreamSocket"/>. </value>
+''' <value>   [<see cref="IPv4StreamSocket"/>]. </value>
 Public Property Get TcpServerSocket() As IPv4StreamSocket
     Set TcpServerSocket = m_tcpServerSocket
 End Property
@@ -34,7 +34,7 @@ End Property
 ''' <summary>   Associates any local address with a socket and start listening. </summary>
 ''' <param name="port">   The port that the server is listening on. </param>
 ''' <param name="backlog">   [Optional, 10] The maximum length of the queue of pending connections. </para>
-''' <returns>   True if the socket is bound. </returns>
+''' <returns>   [Boolean] True if the socket is bound. </returns>
 Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10) As Boolean
 
     On Error GoTo ErrHandler
@@ -66,7 +66,7 @@ ErrHandler:
 End Function
 
 ''' <summary>   Returns the connection state of the client. </summary>
-''' <returns>   True if the socket is connected; otherwise, False. </returns>
+''' <returns>   [Boolean] True if the socket is connected; otherwise, False. </returns>
 Public Property Get Connected() As Boolean
     If m_tcpServerSocket Is Nothing Then
         Connected = False
