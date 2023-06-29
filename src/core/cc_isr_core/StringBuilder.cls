@@ -41,7 +41,7 @@ Public Sub Append(ByVal text As String)
 End Sub
 
 ''' <summary>   Returns the current length. </summary>
-''' <value>   A Long. </value>
+''' <value>   [Long]. </value>
 Public Property Get Length() As Long
     Length = m_currentIndex
 End Property

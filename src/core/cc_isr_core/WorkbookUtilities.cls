@@ -24,7 +24,7 @@ End Sub
 '''                                are to be stored. </param>
 ''' <para name="mustExist">        [Optional, Boolean, True] true if the folder must exists in order to prevent
 '''                                unintended storage into the default folder. </param>
-Public Sub ExportProjectCodeFiles(ByRef project As VBProject, _
+Public Sub ExportProjectCodeFiles(ByVal project As VBProject, _
         Optional ByVal useProjectName As Boolean = True, _
         Optional ByVal subFolder As String = "code", _
         Optional ByVal mustExist As Boolean = True)
@@ -176,7 +176,7 @@ End Function
 ''' <summary>   Checks if the Lists all macros in the specified module. <summary>
 ''' <param name="component">   The component to check for macro methods. </param>
 ''' <param name="prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
-Function HasMacros(ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
+Function HasMacros(ByVal component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
 
     Dim currentName As String, newName As String
     HasMacros = False
@@ -218,7 +218,7 @@ End Function
 ''' <param name="project">      The project. </param>
 ''' <param name="moduleName">   The component (e.g., module) name. </param>
 ''' <returns>   A reference to the component of found code module or nothing. </returns>
-Public Function FindCodeModuleByName(ByRef project As VBProject, ByVal moduleName As String) As VBComponent
+Public Function FindCodeModuleByName(ByVal project As VBProject, ByVal moduleName As String) As VBComponent
     If Not project Is Nothing Then
         Dim component As VBComponent
         For Each component In project.VBComponents
@@ -239,7 +239,7 @@ End Function
 ''' <param name="module">   The module info of the module containing the macros. </param>
 ''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
 ''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateMacros(ByRef module As ModuleInfo, Optional ByVal prefix As String = "Test") As VBA.Collection
+Public Function EnumerateMacros(ByVal module As ModuleInfo, Optional ByVal prefix As String = "Test") As VBA.Collection
 
     Dim macros As Collection: Set macros = New Collection
     If Not module Is Nothing Then
@@ -270,8 +270,8 @@ End Function
 ''' <param name="module">   The module info of the module containing the macros. </param>
 ''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
 ''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateComponentMacros(ByRef module As ModuleInfo, _
-        ByRef component As VBComponent, Optional ByVal prefix As String = "Test") As VBA.Collection
+Public Function EnumerateComponentMacros(ByVal module As ModuleInfo, _
+        ByVal component As VBComponent, Optional ByVal prefix As String = "Test") As VBA.Collection
 
     Dim macros As VBA.Collection: Set macros = New VBA.Collection
     Dim currentName As String: currentName = ""
@@ -296,7 +296,7 @@ End Function
 ''' <param name="project">         A reference to the VBProject. </param>
 ''' <param name="referenceName">   The nae of the reference. </param>
 ''' <returns>   True if the reference was removed. </returns>
-Public Function RemoveReference(ByRef project As VBProject, ByVal referenceName As String) As Boolean
+Public Function RemoveReference(ByVal project As VBProject, ByVal referenceName As String) As Boolean
     RemoveReference = False
     Dim ref As Reference
     For Each ref In project.References

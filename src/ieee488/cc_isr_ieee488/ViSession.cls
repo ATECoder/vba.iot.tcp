@@ -25,7 +25,7 @@ Private m_readAfterWriteEnabled As Boolean
 
 Private m_stopper As StopWatch
 
-Private m_tcpClient As TcpClient
+Private WithEvents m_tcpClient As TcpClient
 
 Private m_usingGpibLan As Boolean
 
@@ -33,17 +33,23 @@ Private m_writeTermination As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+''' <summary>   The event that is raised before change of connection. </summary>
+''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
+Public Event ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Initialize()
     Set m_stopper = cc_isr_Core.Constructor.CreateStopWatch
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
-    Set m_gpibLan = New GpibLanController
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_receiveTimeout = 500
     Me.ReadAfterWriteDelay = READ_AFTER_WRITE_DELAY_DEFAULT
+    
+    Set m_gpibLan = New GpibLanController
+    m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -182,9 +188,7 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optiona
     
     Me.SetReceiveTimeout timeoutMs
     
-    If Me.UsingGpibLan Then
-        m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination
-    End If
+    m_gpibLan.Enabled = Me.UsingGpibLan
     
     OnConnectionChanged Me.Connected
 
@@ -204,7 +208,7 @@ End Function
 
 ''' <summary>   Returns true if the TCP Connection uses the Prologix
 ''' GPIB-Lan interface device. </summary>
-''' <value>   True if using the Prologix GPIB-Lan interface device. </value>
+''' <value>   [Boolean] True if using the Prologix GPIB-Lan interface device. </value>
 Public Property Get UsingGpibLan() As Boolean
     UsingGpibLan = m_usingGpibLan
 End Property
@@ -259,7 +263,10 @@ Public Function QueryLine(ByVal message As String, Optional ByVal appendTerminat
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
-' Connection Changed
+'
+'  Vi Session Events
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
@@ -268,6 +275,27 @@ Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
 End Sub
 
+''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
+''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
+Private Sub OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+    RaiseEvent ConnectionChanging(eventArgs)
+End Sub
 
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+'  TCP Client Event Handlers
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
+''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanged"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+End Sub
+
+''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanging"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
+End Sub
 

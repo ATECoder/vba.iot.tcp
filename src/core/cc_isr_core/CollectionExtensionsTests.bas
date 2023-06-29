@@ -25,10 +25,10 @@ End Function
 ''' <summary>   Unit test. Asserts that the collection contains an expected value. </summary>
 ''' <returns>   An <see cref="Assert"/>   instance of <see cref="Assert.AssertSuccessful"/>   True if the test passed. </returns>
 Public Function TestCollectionShouldContainItself() As Assert
-    Dim col As Collection
-    Set col = New Collection
+    Dim col As New Collection
     col.Add "a"
     col.Add "b"
-    Set TestCollectionShouldContainItself = Assert.IsTrue(CollectionExtensions.ContainsAll(col, col), "The collection should contain itself")
+    Set TestCollectionShouldContainItself = Assert.IsTrue(CollectionExtensions.ContainsAll(col, col), _
+                                    "The collection should contain itself")
 End Function
 

@@ -12,7 +12,7 @@ Attribute VB_Exposed = True
 ''' <param name="collection">   The subject collection. </param>
 ''' <param name="key">          The key to check for in the collection. </param>
 ''' <returns>   True if the key is contained in the collection. </returns>
-Public Function ContainsKey(ByRef col As VBA.Collection, ByRef key As Variant) As Boolean
+Public Function ContainsKey(ByVal col As VBA.Collection, ByVal key As Variant) As Boolean
     Dim found As Boolean
     found = False
     Dim colItem As Variant
@@ -42,9 +42,9 @@ End Function
 ''' <param name="contained">   The collection which to check for being contained in the
 '''                            subject collection. </param>
 ''' <returns>   True if the contained collection is fully contained in the collection. </returns>
-Public Function ContainsAll(ByRef col As VBA.Collection, ByRef contained As VBA.Collection) As Boolean
+Public Function ContainsAll(ByVal col As VBA.Collection, ByVal contained As VBA.Collection) As Boolean
     
-    Dim result As Boolean: result = False
+    Dim result As Boolean: result = True
     Dim key As Variant
     For Each key In contained
         DoEvents
@@ -62,7 +62,7 @@ End Function
 ''' <param name="col">         The subject collection. </param>
 ''' <param name="contained">   The collection which to check for being contained in the
 '''                            subject collection. </param>
-Public Function FindMissingItem(ByRef col As VBA.Collection, ByRef contained As VBA.Collection) As Variant
+Public Function FindMissingItem(ByVal col As VBA.Collection, ByVal contained As VBA.Collection) As Variant
     
     Dim result As Variant: Set result = Nothing
     Dim key As Variant

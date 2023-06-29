@@ -78,13 +78,13 @@ Property Get ElapsedCounts() As Double
 End Property
 
 ''' <summary>   Returns the elapsed time in seconds. </summary>
-''' <value>   A Double elapsed time in seconds. </value>
+''' <value>   [Double] Elapsed time in seconds. </value>
 Property Get ElapsedSeconds() As Double
     ElapsedSeconds = Me.ElapsedCounts / m_frequency
 End Property
 
 ''' <summary>   Returns the elapsed time in milliseconds. </summary>
-''' <value>   A Double elapsed time in lilliseconds. </value>
+''' <value>   [Double] Elapsed time in lilliseconds. </value>
 Property Get ElapsedMilliseconds() As Double
     ElapsedMilliseconds = 1000# * Me.ElapsedSeconds
 End Property

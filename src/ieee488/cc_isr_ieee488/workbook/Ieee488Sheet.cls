@@ -57,14 +57,29 @@ End Property
 
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
+
+    Dim disconnected As Boolean
+    
+    If m_session Is Nothing Then
+        disconnected = True
+    Else
+        disconnected = Not m_session.Connected
+    End If
+    
+    If Not disconnected Then disconnected = m_session.CloseConnection
+    
+    If disconnected And Not m_session Is Nothing Then
+        m_session.Dispose
+        Set m_session = Nothing
+    End If
+
     Set m_stopWatch = Nothing
-    If Not m_session Is Nothing Then m_session.Dispose
-    Set m_session = Nothing
+
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Dim affirmative As Boolean: affirmative = eventArgs.Connected
     
@@ -73,15 +88,15 @@ Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
     ' report the connection state
     Range(m_connectedCell).value = affirmative
         
-    Me.RSTButton.enabled = affirmative
-    Me.CLSButton.enabled = affirmative
-    Me.QueryButton.enabled = affirmative
-    Me.ReadButton.enabled = affirmative
-    Me.ReadStatusByteButton.enabled = affirmative
-    Me.WriteButton.enabled = affirmative
+    Me.RSTButton.Enabled = affirmative
+    Me.CLSButton.Enabled = affirmative
+    Me.QueryButton.Enabled = affirmative
+    Me.ReadButton.Enabled = affirmative
+    Me.ReadStatusByteButton.Enabled = affirmative
+    Me.WriteButton.Enabled = affirmative
     
     If affirmative Then
-        EnableGpibLan Me.Session.ViSession.UsingGpibLan
+        EnableGpibLan m_session.ViSession.UsingGpibLan
     Else
         EnableGpibLan False
     End If
@@ -599,9 +614,9 @@ Friend Property Let StatusByte(ByVal value As Integer)
     Range(m_statusByteCell).value = value
 End Property
 
-''' <summary>   Handles the session <see cref="cc_isr_VI.ConnectionChanged"/> event. </summary>
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.ViSession.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_session_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Me.Initialize eventArgs
 
@@ -633,16 +648,16 @@ End Sub
 ' + + + + + +
 
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
-    Me.SDCButton.enabled = usingGpibLanController
-    Me.GoToLocalButton.enabled = usingGpibLanController
-    Me.ListenTalkToggleButton.enabled = usingGpibLanController
-    Me.LocalLockoutButton.enabled = usingGpibLanController
-    Me.SerialPollButton.enabled = usingGpibLanController
-    Me.SRQButton.enabled = usingGpibLanController
-    Me.GetGpibAddressButton.enabled = usingGpibLanController
-    Me.SetGpibAddressButton.enabled = usingGpibLanController
-    Me.ReadTimeoutGetButton.enabled = usingGpibLanController
-    Me.ReadTimeoutSetButton.enabled = usingGpibLanController
+    Me.SDCButton.Enabled = usingGpibLanController
+    Me.GoToLocalButton.Enabled = usingGpibLanController
+    Me.ListenTalkToggleButton.Enabled = usingGpibLanController
+    Me.LocalLockoutButton.Enabled = usingGpibLanController
+    Me.SerialPollButton.Enabled = usingGpibLanController
+    Me.SRQButton.Enabled = usingGpibLanController
+    Me.GetGpibAddressButton.Enabled = usingGpibLanController
+    Me.SetGpibAddressButton.Enabled = usingGpibLanController
+    Me.ReadTimeoutGetButton.Enabled = usingGpibLanController
+    Me.ReadTimeoutSetButton.Enabled = usingGpibLanController
 End Sub
 
 Private Sub GoToLocalButton_Click()

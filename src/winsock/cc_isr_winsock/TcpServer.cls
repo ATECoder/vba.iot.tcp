@@ -26,7 +26,7 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Gets the Tcp Server socket. </summary>
-''' <value>   A IPv4StreamSocket. </value>
+''' <value>   [<see cref="IPv4StreamSocket"/>. </value>
 Public Property Get TcpServerSocket() As IPv4StreamSocket
     Set TcpServerSocket = m_tcpServerSocket
 End Property

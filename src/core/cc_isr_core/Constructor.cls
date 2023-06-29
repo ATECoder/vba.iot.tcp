@@ -9,6 +9,14 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+''' <summary>   A public creatable singleton class for creating instances of this workbook
+''' classes to share with external workbooks. </summary>
+''' <remarks>
+''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' </remarks>
+Private Sub Class_Initialize()
+End Sub
+
 ''' <summary>   Creates a new instance of the <see cref="MacroInfo"/> class to share
 ''' with external workbooks. </summary>
 ''' <remarks>
@@ -58,5 +66,13 @@ End Function
 Public Function CreateStringBuilder() As StringBuilder
     Set CreateStringBuilder = New StringBuilder
 End Function
+
+''' <summary>   Creates a new instance of the <see cref="CancelEventArgs"/> class to share
+''' with external workbooks. </summary>
+''' <returns>   A new instance of the <see cref="CancelEventArgs"/> class. </returns>
+Public Function CreateCancelEventArgs() As CancelEventArgs
+    Set CreateCancelEventArgs = New CancelEventArgs
+End Function
+
 
 

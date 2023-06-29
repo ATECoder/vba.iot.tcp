@@ -9,12 +9,12 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-Private m_viSession As ViSession
+Private WithEvents m_viSession As ViSession
 Private m_identity As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="ViSession"/>. </summary>
 Private Sub Class_Initialize()
@@ -54,7 +54,7 @@ End Property
 
 
 ''' <summary>   Returns the connection state of the <see cref="ViSession"/>. </summary>
-''' <value>   True if the <see cref="ViSession"/> is connected via the TCP Client socket;
+''' <value>   [Boolean] True if the <see cref="ViSession"/> is connected via the TCP Client socket;
 ''' otherwise, False. </value>
 Public Property Get Connected() As Boolean
     
@@ -67,7 +67,7 @@ Public Property Get Connected() As Boolean
 End Property
 
 ''' <summary>   Returns true if a connection can be made. </summary>
-''' <value>   True if a connection can be made. </value>
+''' <value>   [Boolean] True if a connection can be made. </value>
 Public Property Get CanConnect() As Boolean
     
     If Me.ViSession Is Nothing Then
@@ -345,5 +345,24 @@ End Function
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+End Sub
+
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+'  VI Session Event Handlers
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.m_viSession.ConnectionChanged"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_viSession_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+End Sub
+
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.ViSession.ConnectionChanging"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_viSession_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
 End Sub
 

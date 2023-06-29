@@ -26,21 +26,21 @@ Public Function CreateTestFile() As TestFileHandle
 End Function
 
 ''' <summary>   Deletes the given test file. </summary>
-''' <param name="fileHandle">   The <see cref="TestFileHandle"/>   to delete. </param>
-Public Sub DeleteTestFile(ByRef fileHandle As TestFileHandle)
+Public Sub DeleteTestFile()
     Dim fso As FileSystemObject: Set fso = New FileSystemObject
     fso.DeleteFile Me.FileName
 End Sub
 
-''' <summary> </summary>
-Public Sub Delete(ByRef fileHandle As TestFileHandle)
+''' <summary>   Deletes the file handle test file. </summary>
+''' <param name="fileHandle">   The <see cref="TestFileHandle"/>   to delete. </param>
+Public Sub Delete(ByVal fileHandle As TestFileHandle)
     Dim fso
     Set fso = CreateObject("Scripting.FileSystemObject")
     fso.DeleteFile fileHandle.FileName
 End Sub
 
 ''' <summary> </summary>
-''' <value> </value>
+''' <value>   [String]. </value>
 Public Property Get FileName() As String
     FileName = m_fileName
 End Property
@@ -51,13 +51,13 @@ Public Property Let FileName(ByVal value As String)
 End Property
 
 ''' <summary> </summary>
-''' <value> </value>
+''' <value>   [TextStream]. </value>
 Public Property Get FileStream() As TextStream
     Set FileStream = m_fileStream
 End Property
 
-''' <summary> </summary>
-''' <value> </value>
+''' <summary>   Sets the file stream. </summary>
+''' <param name="value">   [TextStream]. </param>
 Public Property Set FileStream(ByVal value As TextStream)
     Set m_fileStream = value
 End Property

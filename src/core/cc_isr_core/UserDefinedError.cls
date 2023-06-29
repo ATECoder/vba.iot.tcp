@@ -24,7 +24,7 @@ Public Sub InitiateProperties(ByVal errorCode As Long, ByVal errorName As String
 End Sub
 
 ''' <summary>   Gets the error code. </summary>
-''' <value>   An error code of Long type. </value>
+''' <value>   [Long] error code. </value>
 Public Property Get Code() As Long
     Code = m_code
 End Property

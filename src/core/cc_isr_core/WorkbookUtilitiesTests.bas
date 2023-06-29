@@ -1,14 +1,14 @@
 Attribute VB_Name = "WorkbookUtilitiesTests"
 Option Explicit
 
-Private Sub AddModule(ByRef col As VBA.Collection, ByVal moduleFullName As String)
+Private Sub AddModule(ByVal col As VBA.Collection, ByVal moduleFullName As String)
     Dim module As ModuleInfo
     Set module = Constructor.CreateModuleInfo
     module.FromModuleFullName moduleFullName
     col.Add module
 End Sub
 
-Public Function ContainsModule(ByRef col As VBA.Collection, ByRef findModule As ModuleInfo) As Boolean
+Public Function ContainsModule(ByVal col As VBA.Collection, ByVal findModule As ModuleInfo) As Boolean
     Dim found As Boolean
     found = False
     Dim colItem As ModuleInfo
@@ -22,7 +22,7 @@ Public Function ContainsModule(ByRef col As VBA.Collection, ByRef findModule As 
     ContainsModule = found
 End Function
 
-Private Function ContainsAllModules(ByRef leftCol As VBA.Collection, ByRef rightCol As VBA.Collection)
+Private Function ContainsAllModules(ByVal leftCol As VBA.Collection, ByVal rightCol As VBA.Collection)
 
     Dim result As Boolean: result = False
     Dim rightModule As ModuleInfo
@@ -39,7 +39,7 @@ End Function
 
 
 ''' <summary>   Adds the test modules. </summary>
-Private Sub AddTestModules(ByRef knownTestModules As VBA.Collection)
+Private Sub AddTestModules(ByVal knownTestModules As VBA.Collection)
     Dim projectName As String: projectName = Application.ActiveWorkbook.VBProject.name
     AddModule knownTestModules, projectName & ".CollectionExtensionsTests"
     AddModule knownTestModules, projectName & ".MarshalTests"

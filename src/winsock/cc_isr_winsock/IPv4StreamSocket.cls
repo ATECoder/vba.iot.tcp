@@ -16,7 +16,7 @@ Private Const DEFAULT_TIMEOUT_MS = 500
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
 ''' <param name="s">                     [in] A descriptor that identifies a socket that has been placed in a listening state with the listen function.

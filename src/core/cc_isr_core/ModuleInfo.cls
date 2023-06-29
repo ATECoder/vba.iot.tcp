@@ -62,7 +62,7 @@ End Property
 ''' <summary>   Checks if the two modules are equal referring to the same
 ''  component in the project. </summary>
 ''' <param name="module">   The module to check for equality. </param>
-Public Function Equals(ByRef module As ModuleInfo) As Boolean
+Public Function Equals(ByVal module As ModuleInfo) As Boolean
     If IsObject(module) Then
         Equals = (0 = StrComp(Me.projectName, module.projectName)) And _
                  (0 = StrComp(Me.moduleName, module.moduleName))

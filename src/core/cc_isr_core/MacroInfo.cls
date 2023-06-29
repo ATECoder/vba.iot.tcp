@@ -26,7 +26,7 @@ End Sub
 ''' <summary>   Initializes this class. </summary>
 ''' <param name="project">     A reference to the module info. </param>
 ''' <param name="macroName">   The name of the macro. </param>
-Public Sub InitializeModuelMacro(ByRef module As ModuleInfo, ByVal macroName As String)
+Public Sub InitializeModuelMacro(ByVal module As ModuleInfo, ByVal macroName As String)
     m_projectName = module.projectName
     m_moduleName = module.moduleName
     m_macroName = macroName
@@ -72,7 +72,7 @@ End Property
 ''' <summary>   Checks if the two macros are equal referring to the same
 ''  macro in the project. </summary>
 ''' <param name="macro">   The macro to check for equality. </param>
-Public Function Equals(ByRef macro As MacroInfo) As Boolean
+Public Function Equals(ByVal macro As MacroInfo) As Boolean
     If IsObject(macro) Then
         Equals = (0 = StrComp(Me.projectName, macro.projectName)) And _
                  (0 = StrComp(Me.moduleName, macro.moduleName)) And _

@@ -13,7 +13,7 @@ Option Explicit
 ''' <para name="testDataSheet">         Specifies the work sheet were test data are set and logged. </param>
 ''' <para name="usingRemoteWorkbook">   True if using a remote workbook where workbook file needs to be added
 ''' to the application run call. </param>
-Public Sub Execute(ByRef testDataSheet As Worksheet, Optional usingRemoteWorkbook As Boolean = False)
+Public Sub Execute(ByVal testDataSheet As Worksheet, Optional usingRemoteWorkbook As Boolean = False)
     
     On Error GoTo Finally
     

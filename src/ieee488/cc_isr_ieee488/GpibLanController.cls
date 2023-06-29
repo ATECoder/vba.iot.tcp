@@ -9,9 +9,14 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const MODULE_NAME As String = "GpibLanController"
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
 
+Private m_controllerMode As Boolean
+
 Private m_disableReadAfterWriteOnWrite As Boolean
+
+Private m_enabled As Boolean
 
 Private m_readAfterWriteEnabled As Boolean
 
@@ -23,11 +28,9 @@ Private m_readAfterWriteDelay As Integer
 
 Private m_statusByte As Integer
 
-Private m_controllerMode As Boolean
-
 Private m_stopper As StopWatch
 
-Private m_tcpClient As TcpClient
+Private WithEvents m_tcpClient As TcpClient
 
 Private m_writeTermination As String
 
@@ -46,116 +49,47 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Initializes the <see cref="TcpClient"/> for the GpibLan I/O. </summary>
-''' <param name="client">                     Reference to the <see cref="TcpClient"/>. </param>
-''' <param name="readTerm">                   [Optiona, String, VbLf] the read termination. </param>
-''' <param name="writeTerm">                  [Optiona, String, VbLf] the write termination. </param>
-''' <param name="preventQueryUnterminated">   [Optional, Boolean, False] If true, read of write is turned on
-'''                                           which might cause the instrument to start with a
-'''                                           query unterminated error. If false, read after write is turned
-'''                                           of and the controller is set to read the response from the
-'''                                           instrument using the <c>++read</c> command.
-'''                                           </param>
-Public Sub Initialize(ByRef client As TcpClient, Optional ByVal readTerm As String = vbLf, _
+''' <param name="client">                  Reference to the <see cref="TcpClient"/>. </param>
+''' <param name="readTerm">                [Optiona, String, VbLf] the read termination. </param>
+''' <param name="writeTerm">               [Optiona, String, VbLf] the write termination. </param>
+''' <param name="readAfterWriteDelayMs">   [Optional, Integer, 5] The read after write delay. </param>
+Public Sub Initialize(ByVal client As TcpClient, _
+                      Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
-                      Optional ByVal preventQueryUnterminated As Boolean = False, _
-                      Optional ByVal readAfterWriteDelayMs = 5)
+                      Optional ByVal readAfterWriteDelayMs As Integer = 5)
     Set m_tcpClient = client
     m_readTermination = readTerm
     m_writeTermination = writeTerm
-    Me.DisableReadAfterWriteOnWrite = preventQueryUnterminated
     Me.ReadAfterWriteDelay = readAfterWriteDelayMs
     
-    Dim i As Integer
-    
-    ' from experiments it seems this needs to be set first.
-    Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
-    
-    Me.ReadAfterWriteEnabledSetter True
-    
-    If Not preventQueryUnterminated Then
-        ' If not preventing query unterminated, the read after write must be disabled.
-        ' The lan controller will then read from the instrument to the controller
-        ' on every read.
-        Me.ReadAfterWriteEnabledSetter False
-    End If
-    
-End Sub
-
-Private Sub InitReadAfterWrite()
-
-    Dim i As Integer
-    Dim opt As Integer: opt = 5 ' good options: 1, 2 ?, 5; bad options: 4, 3
-    
-    If opt = 1 Then
-    
-        ' Identity query time:         40-50 ms
-        ' Query Unterminated on write: YES
-        ' Crash on power toggle/Local: no
-    
-        Me.ReadAfterWriteEnabledGetter
-        
-        Me.ReadAfterWriteEnabledSetter True
-    
-    ElseIf opt = 2 Then
-    
-        ' Identity query time:         40-50 ms
-        ' Query Unterminated on write: YES
-        ' Crash on power toggle/Local: only if toggling when program already started.
-        m_readAfterWriteEnabled = False
-        Me.ReadAfterWriteEnabledSetter True
-    
-    ElseIf opt = 3 Then
-        
-        ' Identity query time:         74 ms
-        ' Query Unterminated on write: no
-        ' Crash on power toggle/Local: no
-        Me.ReadAfterWriteEnabledGetter
-        Me.ReadAfterWriteEnabledSetter False
-        
-        ' this takes it from 380 to 74! go figure!!!
-        ' Crash on power toggle/Local: no
-        DoEvents
-        
-        ' this takes it to 24 ms! go figure!!!
-        ' Crash on power toggle/Local: YES
-    
-    ElseIf opt = 4 Then
-    
-        ' Identity query time:         22 ms
-        ' Query Unterminated on write: no
-        ' Crash on power toggle:       YES
-        ' reading fails after the instrument power is toggled.
-        ' apparently, ++read works only if auto read is set first.
-        
-        m_readAfterWriteEnabled = True
-        Me.ReadAfterWriteEnabledSetter False
-    
-    ElseIf opt = 5 Then
-    
-        ' Identity query time:         48 ms
-        ' Query Unterminated on write: no
-        ' Crash on power toggle/local: no
-        
-        Me.ReadAfterWriteEnabledSetter True
-        
-        Me.ReadAfterWriteEnabledSetter False
-        
-    End If
-
+    ' this needs to be turned on if using the Keithley 2700 with
+    ' enabled read-after-write
+    Me.DisableReadAfterWriteOnWrite = False
+   
 End Sub
 
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
     
-    If m_tcpClient.Connected Then
-        ' leave the instrument in it's default condition to prevent
-        ' timeouts on the next read.
-        ' Me.ReadAfterWriteEnabledSetter True
-    End If
+    ' because the tcp client is passed by value we can null this
+    m_tcpClient = Nothing
 
     Set m_stopper = Nothing
 
 End Sub
+
+''' <summary>   Gets the enabled status. </summary>
+''' <value>   [Boolean] True if enabled.  </value>
+Public Property Get Enabled() As Boolean
+    Enabled = m_enabled
+End Property
+
+''' <summary>   Sets the enabled status. </summary>
+''' <param name=""value>   [Boolean] True if enabled.  </value>
+Public Property Let Enabled(ByVal value As Boolean)
+    m_enabled = value
+End Property
+
 
 ''' <summary>   Gets the Read After Write Delay. </summary>
 ''' <value>   An Integer. </value>
@@ -172,8 +106,8 @@ End Property
 ' DEVICE IO
 
 ''' <summary>   Sends a message to the device. </summary>
-''' <remarks>   If using the controller at port 1234, this
-''' method first sets the controller to auto off (++auto 0) to prevent it from
+''' <remarks>   If using the controller at port 1234 and auto read-after-write is on,
+''' this method first sets the controller to auto off (++auto 0) to prevent it from
 ''' setting the device to talk prematurely which might cause the device
 ''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
 ''' <param name="message">   The message. </param>
@@ -193,9 +127,9 @@ End Function
 
 ''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
-''' <remarks>   If using the controller at port 1234, this
-''' method first sets the controller to auto on (++auto 1) assuming auto was turned off on
-''' the previous read on <see cref="SendToDevice"/>. </remarks>
+''' <remarks>   If <see cref="ReadAfterWriteEnabled"/> is not enabled then
+''' this method uses the <c>++read</c> command to first read the data
+''' from the device to the controller. </remarks>
 ''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
 ''' <returns>   The received string. </returns>
@@ -226,6 +160,9 @@ End Function
 ' CONTROLLER I/O
 
 ''' <summary>   Gets the Disable Read After Write On Write. </summary>
+''' <remarks>   Read-After-Write should be disabled on non-query commands
+''' with instruments that throw Query Unterminated errors on such commands if
+''' Read-After-Write is on. </remarks>
 ''' <value>   A Boolean. </value>
 Public Property Get DisableReadAfterWriteOnWrite() As Boolean
     DisableReadAfterWriteOnWrite = m_disableReadAfterWriteOnWrite
@@ -238,6 +175,7 @@ Public Property Let DisableReadAfterWriteOnWrite(value As Boolean)
 End Property
 
 ''' <summary>   Sends a message to the controller. </summary>
+''' <remarks>   This method does not alter the auto Read-After-Write condition. </remarks>
 ''' <param name="message">   The message. </param>
 ''' <returns>   The number of sent characters. </returns>
 Public Function SendToController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
@@ -295,7 +233,7 @@ Public Function ReadFromDeviceToController() As Integer
 End Function
 
 ''' <summary>   Gets the read-after-write enabled status. </summary>
-''' <value>   True if wrte-after-write is enabled.  </value>
+''' <value>   [Boolean] True if read-after-write is enabled.  </value>
 Public Property Get ReadAfterWriteEnabled() As Boolean
     ReadAfterWriteEnabled = m_readAfterWriteEnabled
 End Property
@@ -351,7 +289,7 @@ End Function
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Gets the controller mode status. </summary>
-''' <value>   True if the GPIB-Lan is set as a controller. </value>
+''' <value>   [Boolean] True if the GPIB-Lan is set as a controller. </value>
 Public Property Get ControllerMode() As Boolean
     ControllerMode = m_controllerMode
 End Property
@@ -563,3 +501,133 @@ Public Function DelimitInteger(ByVal value As Integer, ByVal minValue As Integer
     If value > maxValue Then value = maxValue
     DelimitInteger = value
 End Function
+
+
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+'
+'  TCP Client Event Handlers
+'
+' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanged"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+
+    Const thisProcedureName As String = "m_tcpClient_ConnectionChanging"
+
+    On Error Resume Next
+
+    ' when connected, the read after write is turned off by default.
+    ' this is done to prevent Query Unterminated errors on instruments such as the Keithley 2700.
+    ' Where Read-After-Write is disabled, upon read, the controller is commanded to read from
+    ' the instrument using the <c>++read</c> command.
+    
+    If eventArgs.Connected Then
+    
+        ' from experiments it seems this needs to be set first.
+        Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
+    
+        Me.ReadAfterWriteEnabledSetter True
+    
+        ' defaults to turning off auto read-after-write
+        
+        Me.ReadAfterWriteEnabledSetter False
+        
+    End If
+    
+    If Err.Number <> 0 Then
+        UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
+        Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
+    End If
+    
+End Sub
+
+''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanging"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
+    Const thisProcedureName As String = "m_tcpClient_ConnectionChanging"
+    
+    On Error Resume Next
+    
+    If eventArgs.Connected Then
+    
+        ' leave the instrument with auto read-after-write off to prevent
+        ' query unterminated errors.
+        Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
+        Me.ReadAfterWriteEnabledSetter False
+        
+    End If
+
+    If Err.Number <> 0 Then
+        UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
+        Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
+    End If
+    
+End Sub
+
+''' <summary>   Experiments with options for setting read-after-write. </summary>
+Private Sub InitReadAfterWrite()
+
+    Dim i As Integer
+    Dim opt As Integer: opt = 5 ' good options: 1, 2 ?, 5; bad options: 4, 3
+    
+    If opt = 1 Then
+    
+        ' Identity query time:         40-50 ms
+        ' Query Unterminated on write: YES
+        ' Crash on power toggle/Local: no
+    
+        Me.ReadAfterWriteEnabledGetter
+        
+        Me.ReadAfterWriteEnabledSetter True
+    
+    ElseIf opt = 2 Then
+    
+        ' Identity query time:         40-50 ms
+        ' Query Unterminated on write: YES
+        ' Crash on power toggle/Local: only if toggling when program already started.
+        m_readAfterWriteEnabled = False
+        Me.ReadAfterWriteEnabledSetter True
+    
+    ElseIf opt = 3 Then
+        
+        ' Identity query time:         74 ms
+        ' Query Unterminated on write: no
+        ' Crash on power toggle/Local: no
+        Me.ReadAfterWriteEnabledGetter
+        Me.ReadAfterWriteEnabledSetter False
+        
+        ' this takes it from 380 to 74! go figure!!!
+        ' Crash on power toggle/Local: no
+        DoEvents
+        
+        ' this takes it to 24 ms! go figure!!!
+        ' Crash on power toggle/Local: YES
+    
+    ElseIf opt = 4 Then
+    
+        ' Identity query time:         22 ms
+        ' Query Unterminated on write: no
+        ' Crash on power toggle:       YES
+        ' reading fails after the instrument power is toggled.
+        ' apparently, ++read works only if auto read is set first.
+        
+        m_readAfterWriteEnabled = True
+        Me.ReadAfterWriteEnabledSetter False
+    
+    ElseIf opt = 5 Then
+    
+        ' Identity query time:         48 ms
+        ' Query Unterminated on write: no
+        ' Crash on power toggle/local: no
+        
+        Me.ReadAfterWriteEnabledSetter True
+        
+        Me.ReadAfterWriteEnabledSetter False
+        
+    End If
+
+End Sub
+
+
