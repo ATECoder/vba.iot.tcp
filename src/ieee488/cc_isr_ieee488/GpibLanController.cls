@@ -196,7 +196,7 @@ Public Function SendToDevice(ByVal message As String, _
     
     SendToDevice = m_tcpClient.SendMessage(message)
     
-    ' a read after write delay is necessary for propert operations.
+    ' a read after write delay is necessary for proper operations.
     
     m_stopper.Wait Me.ReadAfterWriteDelay
 
@@ -612,8 +612,13 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
     
         ' leave the instrument with auto read-after-write off to prevent
         ' query unterminated errors.
+        
         Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
         Me.ReadAfterWriteEnabledSetter False
+        
+        ' send the instrument back to local.
+        
+        Me.GoToLocal
         
     End If
 

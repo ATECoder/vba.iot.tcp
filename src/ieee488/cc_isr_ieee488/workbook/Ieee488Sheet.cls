@@ -28,6 +28,7 @@ Private Const m_StandardByteCell As String = "I12"
 Private Const m_srqCell As String = "C10"
 Private Const m_gpibAddressCell As String = "C12"
 Private Const m_readTimeoutCell As String = "C15"
+Private Const m_readAfterWriteEnabledCell As String = "C18"
 
 Private WithEvents m_session As cc_isr_Ieee488.Ieee488Session
 Attribute m_session.VB_VarHelpID = -1
@@ -108,23 +109,25 @@ End Sub
 Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.Clear
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateCommand
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateOpcQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.IdentityQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OperationCompleteCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OperationCompletedQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OptionsQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ResetKnownStateCommand
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.StandardEventEnableCommandFormat, "{0}", &H7F)
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.ResetKnownStateOpcQueryCommand
+    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.StandardEventEnableOpcQueryCommand, "{0}", &H7F)
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.StandardEventEnableQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.StandardEventStatusQueryCommand
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.ServiceRequestEnableCommandFormat, "{0}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableCommandFormat, _
+    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.ServiceRequestEnableOpcQueryCommand, "{0}", &H7F)
+    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableOpcQueryCommand, _
                                         "{0}", &H7F), "{1}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableCompleteCommandFormat, _
+    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableOpcQueryCommand, _
                                         "{0}", &H7F), "{1}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.OperationCompleteEnableCommandFormat, "{0}", &H7F)
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestEnableQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitOpcQueryCommand
    
 End Sub
 
@@ -153,6 +156,10 @@ Friend Sub WriteLine(ByVal message As String)
     Me.Session.WriteLine message
     
     Me.ReadStopWatch
+    
+    If Me.Session.ViSession.UsingGpibLan Then
+        Me.ReadAfterWriteEnabled = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
+    End If
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -639,6 +646,16 @@ Friend Property Let StatusByte(ByVal value As Integer)
     Range(m_statusByteCell).value = value
 End Property
 
+''' <summary>   Gets the Read After Write Enabled. </summary>
+Friend Property Get ReadAfterWriteEnabled() As Boolean
+    ReadAfterWriteEnabled = CBool(Range(m_readAfterWriteEnabledCell).value)
+End Property
+
+''' <summary>   Sets the Read After Write Enabled. </summary>
+Friend Property Let ReadAfterWriteEnabled(ByVal value As Boolean)
+    Range(m_readAfterWriteEnabledCell).value = value
+End Property
+
 ''' <summary>   Gets the Standard byte. </summary>
 Friend Property Get StandardByte() As Integer
     StandardByte = Range(m_StandardByteCell).value
@@ -658,12 +675,13 @@ End Property
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = usingGpibLanController
     Me.GoToLocalButton.Enabled = usingGpibLanController
-    Me.ListenTalkToggleButton.Enabled = usingGpibLanController
+    Me.ReadAfterWriteGetButton.Enabled = usingGpibLanController
+    Me.ReadAfterWriteSetButton.Enabled = usingGpibLanController
     Me.LocalLockoutButton.Enabled = usingGpibLanController
     Me.SerialPollButton.Enabled = usingGpibLanController
     Me.SRQButton.Enabled = usingGpibLanController
-    Me.GetGpibAddressButton.Enabled = usingGpibLanController
-    Me.SetGpibAddressButton.Enabled = usingGpibLanController
+    Me.GpibAddressGetButton.Enabled = usingGpibLanController
+    Me.GpibAddressSetButton.Enabled = usingGpibLanController
     Me.ReadTimeoutGetButton.Enabled = usingGpibLanController
     Me.ReadTimeoutSetButton.Enabled = usingGpibLanController
 End Sub
@@ -734,20 +752,24 @@ err_Handler:
 
 End Sub
 
-Private Sub ListenTalkToggleButton_Click()
+Private Sub ReadAfterWriteSetButton_Click()
 
-    Const thisProcedureName = "ListenTalkToggleButton"
+    Const thisProcedureName = "ReadAfterWriteSetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
     Me.RestartStopWatch
     
-    Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledSetter Not Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
+    Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledSetter Me.ReadAfterWriteEnabled
     
     Me.ReadStopWatch
     
-    ListenTalkToggleButton.Caption = IIf(Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+    ' if Read-After-Write is enabled, make sure to set the GPIB-Lan class to
+    ' turn it off on write.
+    
+    Me.Session.ViSession.GpibLan.DisableReadAfterWriteOnWrite = Me.ReadAfterWriteEnabled
+    
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -766,6 +788,40 @@ err_Handler:
     ' exit this procedure (not an active handler)
     On Error Resume Next
     GoTo exit_Handler
+
+End Sub
+
+Private Sub ReadAfterWriteGetButton_Click()
+
+    Const thisProcedureName = "ReadAfterWriteGetButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.ReadAfterWriteEnabled = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabledGetter
+    
+    Me.ReadStopWatch
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
 
 End Sub
 
@@ -837,7 +893,7 @@ End Sub
 
 Private Sub SetGibAddressButton_Click()
 
-    Const thisProcedureName = "SetGpibAddressButton_Click"
+    Const thisProcedureName = "GpibAddressSetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -868,9 +924,9 @@ err_Handler:
 
 End Sub
 
-Private Sub GetGpibAddressButton_Click()
+Private Sub GpibAddressGetButton_Click()
 
-    Const thisProcedureName = "GetGpibAddressButton_Click"
+    Const thisProcedureName = "GpibAddressGetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -995,7 +1051,7 @@ Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connec
     
     If Me.Session.ViSession.UsingGpibLan Then
     
-        Me.ListenTalkToggleButton.value = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
+        Me.ReadAfterWriteEnabled = Me.Session.ViSession.GpibLan.ReadAfterWriteEnabled
     
     End If
 

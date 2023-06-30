@@ -37,20 +37,22 @@ Follow this procedure for reading the instrument identity string:
 ##### Query Unterminated Errors and the GPIB-Lan controller
 
 The GPIB-Lan controller Read-After-Write feature addresses the instrument to talk after sending messages to the instrument.
-Instruments such as the Keithley 2700 Scanning Multimeter throw Query Unterminated errors when address to talk when not 
-having data to send. This can be addressed by turning off Read-After-Write and using the controller `++read` command when reading. 
-Thus, toggling the _Listen_ button on the IEEE488 test sheet could cause Query Unterminated errors. Here are some issues to keep in mind when using the IEEE488 test sheet:
+Instruments such as the Keithley 2700 Scanning Multimeter throw Query Unterminated errors when addressed to talk when not 
+having data to send. This can be addressed by turning off Read-After-Write and using the controller's `++read` command for reading from the instrument. 
+Thus, setting the Read-After-Write from the IEEE488 test sheet could cause Query Unterminated errors. 
+
+Here are some issues to keep in mind when using the IEEE488 test sheet:
 
 * By default, the Controller is initialized with Read-After-Write turned off.
-	* Thus, the _Listen/Talk_ button is in `Listen` mode when first connecting to the instrument.
-	* Internally, the program uses the controller `++read` command to get the readings from the instrument. 
-* Switching from `Listen` to `Talk`, which is akin to turning on the Read-After-Write settings, the instrument may issue a Query Unterminated error.
-	* Subsequent commands, which check the status byte for errors, may thus fail to run because of the error status of the instrument.
-	* Issuing the `*CLS` command clears this error provided the command is appended with `*OPC?`, which turns the command into a query thus avoiding the Query Unterminated error on the bare `*OPC`.
-* If the program is switched from `Listen` to `Talk`
-	* The program switches back to `Listen` before the next `Write` to prevent the Query Unterminated error.
-	* The program then reads back and updates the state of the _Listen/Talk_ button.
+	* Thus, the Read-After-Write state is `False` upon connecting to the instrument.
+	* Internally, the program uses the controller's `++read` command to get the readings from the instrument. 
+* Upon turning on Read-After-Write, the instrument may issue a Query Unterminated error.
+* Following instrument errors, commands, which check the status byte for errors, would fail to run because of the error status of the instrument.
+* Issuing the `*CLS` command clears this error condition provided the command is appended with `*OPC?`, which turns the command into a query thus avoiding the Query Unterminated error on the bare `*OPC`.
 * By Default, the program appends `*OPC?` to its implementation of the `*CLS` and `*RST` commands thus keeping the program in sync with the instrument.
+* If the program is switched to enable Read-After_write from the test sheet:
+	* the program is set to turn off Read-After_write on the next `Write` to prevent the Query Unterminated error.
+	* The program then updates the state of the Read-After-Write value on the sheet.
 
 ##### IEEE 488 Worksheet Testing 
 

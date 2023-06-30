@@ -1,18 +1,8 @@
 ### TODO
 
-iee488 Typos: 
-propert
-instrumet
-
-
 #### Tests
 
 #### Fixes
-* GPIB Lan: go to local on disconnect.
-* ieee488 sheet: when switch from talk to listen, turn on Turn of Talk on Write.
-* add *OPC? to the populated commands.
-* on the next write, toggle talk to listen.
-
 * vI: handle error on toggle connection. 
 
 #### Updates

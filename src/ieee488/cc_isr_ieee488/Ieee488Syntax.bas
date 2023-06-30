@@ -1,12 +1,19 @@
 Attribute VB_Name = "Ieee488Syntax"
 Option Explicit
 
-''' <summary>   Gets the Clear Status (CLS) command. </summary>
+''' <summary>   Gets the Clear Status (*CLS) command. </summary>
 ''' <remarks>
 ''' <see href="https://rfmw.em.keysight.com/spdhelpfiles/33500/webhelp/US/Content/__I_SCPI/IEEE-488_Subsystem.htm"/>
 ''' Clears the event registers in all register groups. Also clears the error queue.
 ''' </remarks>
 Public Const ClearExecutionStateCommand As String = "*CLS"
+
+''' <summary>   Gets the Clear Status Operation Complete Query command (*CLS; *OPC?). </summary>
+''' <remarks>
+''' <see href="https://rfmw.em.keysight.com/spdhelpfiles/33500/webhelp/US/Content/__I_SCPI/IEEE-488_Subsystem.htm"/>
+''' Clears the event registers in all register groups. Also clears the error queue.
+''' </remarks>
+Public Const ClearExecutionStateOpcQueryCommand As String = "*CLS; *OPC?"
 
 ''' <summary>   Gets the Identity query (*IDN?) command. </summary>
 ''' <remarks>
@@ -63,6 +70,9 @@ Public Const OptionsQueryCommand As String = "*OPT?"
 ''' </remarks>
 Public Const PowerOnStatusClearCommand As String = "*PSC {0}"
 
+''' <summary>   Power-On Status Clear Operation Complete Query Command (*PSC {0}; *OPC?). </summary>
+Public Const PowerOnStatusClearOpcQueryCommand As String = "*PSC {0}; *OPC?"
+
 ''' <summary>   Power-On Status Clear query command (*PSC?). </summary>
 ''' <remarks>
 ''' </remarks>
@@ -78,6 +88,16 @@ Public Const PowerOnStatusClearQueryCommand As String = "*PSC?"
 ''' </remarks>
 Public Const WaitCommand As String = "*WAI"
 
+''' <summary>   Gets the Wait with Operation Complete query command (*WAI; *OPC?). </summary>
+''' <remarks> Configures the instrument to wait for all pending operations to complete before executing any
+''' additional commands over the interface.
+''' For example, you can use this with the *TRG command to ensure that the instrument is ready for a trigger:
+''' <code>
+''' *TRG;*WAI;*TRG
+''' </code>
+''' </remarks>
+Public Const WaitOpcQueryCommand As String = "*WAI; *OPC?"
+
 ''' <summary>   Gets the Standard Event Enable (*ESE {0}) command. </summary>
 ''' <remarks>
 ''' Event Status Enable Command and Query. Enables bits in the enable register for the Standard Event Register group. The selected bits are then reported to bit 5 of the Status Byte Register.
@@ -85,7 +105,10 @@ Public Const WaitCommand As String = "*WAI"
 ''' For example, *PSC 0 preserves the enable register contents through power cycles.
 ''' *CLS does not clear enable register, does clear event register.
 ''' </remarks>
-Public Const StandardEventEnableCommandFormat = "*ESE {0}"
+Public Const StandardEventEnableCommand = "*ESE {0}"
+
+''' <summary>   Gets the Standard Event Enable Operation Complete query Command (*ESE {0}; *OPC?). </summary>
+Public Const StandardEventEnableOpcQueryCommand = "*ESE {0}; *OPC?"
 
 ''' <summary>   Gets the Standard Event Enable query (*ESE?) command. </summary>
 ''' <remarks> </remarks>
@@ -101,7 +124,7 @@ Public Const StandardEventEnableQueryCommand As String = "*ESE?"
 ''' </remarks>
 Public Const StandardEventStatusQueryCommand As String = "*ESR?"
 
-''' <summary>   Gets the Service Request Enable (*SRE) command. </summary>
+''' <summary>   Gets the Service Request Enable (*SRE {0}) command. </summary>
 ''' <remarks>
 ''' Service Request Enable. This command enables bits in the enable register for the Status Byte Register group.
 ''' To enable specific bits, specify the decimal value corresponding to the binary-weighted sum of the bits in
@@ -112,16 +135,20 @@ Public Const StandardEventStatusQueryCommand As String = "*ESR?"
 ''' For example, *PSC 0 preserves the contents of the enable register through power cycles.
 ''' Status Byte enable register is not cleared by *RST.
 ''' </remarks>
-Public Const ServiceRequestEnableCommandFormat = "*SRE {0}"
+Public Const ServiceRequestEnableCommand = "*SRE {0}"
+
+''' <summary>   Gets the Service Request Enable Operation Complete query command (*SRE {0}; *OPC?*). </summary>
+Public Const ServiceRequestEnableOpcQueryCommand = "*SRE {0}; *OPC?"
 
 ''' <summary>   Gets the Standard Event and Service Request Enable '*CLS; *ESE {0}; *SRE {1}' command format. </summary>
-Public Const StandardServiceEnableCommandFormat = "*CLS; *ESE {0}; *SRE {1}"
+Public Const StandardServiceEnableCommand = "*CLS; *ESE {0}; *SRE {1}"
 
-''' <summary>   Gets the Standard Event and Service Request Enable '*CLS; *ESE {0}; *SRE {1}; *OPC' command format. </summary>
-Public Const StandardServiceEnableCompleteCommandFormat = "*CLS; *ESE {0}; *SRE {1}; *OPC"
+''' <summary>   Gets the Standard Event and Service Request Enable operation complete query command
+''' '*CLS; *ESE {0}; *SRE {1}; *OPC?'. </summary>
+Public Const StandardServiceEnableOpcQueryCommand = "*CLS; *ESE {0}; *SRE {1}; *OPC?"
 
-''' <summary>   Gets the Operation Complete Enable '*CLS; *ESE {0}; *OPC' command format. </summary>
-Public Const OperationCompleteEnableCommandFormat = "*CLS; *ESE {0}; *OPC"
+''' <summary>   Gets the Standard Event and Service Request Enable '*CLS; *ESE {0}; *SRE {1}; *OPC' command. </summary>
+Public Const StandardServiceEnableOpcCommand = "*CLS; *ESE {0}; *SRE {1}; *OPC"
 
 ''' <summary>   Gets the Service Request Enable query (*SRE?) command. </summary>
 ''' <remarks> </remarks>
@@ -148,12 +175,18 @@ Public Const ServiceRequestQueryCommand As String = "*STB?"
 ''' </remarks>
 Public Const ResetKnownStateCommand As String = "*RST"
 
+''' <summary>   Gets the reset to known state operation complete query command (*RST; *OPC?) . </summary>
+Public Const ResetKnownStateOpcQueryCommand As String = "*RST; *OPC?"
+
 ''' <summary>   Trigger command (*TRG). </summary>
 ''' <remarks>
 ''' Trigger Command. Triggers a sweep, burst, arbitrary waveform advance, or LIST advance from the
 ''' remote interface if the bus (software) trigger source is currently selected (TRIGger[1|2]:SOURce BUS).
 ''' <remarks>
 Public Const TriggerCommand As String = "*TRG"
+
+''' <summary>   Trigger operation complete query command (*TRG; *OPC?). </summary>
+Public Const TriggerOpcQueryCommand As String = "*TRG; *OPC?"
 
 ''' <summary>   Self test query command (*TST?). </summary>
 ''' <remarks>

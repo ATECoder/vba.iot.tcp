@@ -237,10 +237,15 @@ Public Property Get ViSession() As ViSession
 End Property
 
 ''' <summary>   Clears Status (CLS) command. </summary>
-''' <returns>   [Long] The number of characters that were sent. </returns>
-Public Function ClearExecutionState() As Long
-    ClearExecutionState = Me.WriteLine(Ieee488Syntax.ClearExecutionStateCommand, False)
-End Function
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*CLS</c> command by querying <c>*CLS; *OPC?</c></param>
+Public Sub ClearExecutionState(Optional ByVal awaitOpc As Boolean = True)
+    If awaitOpc Then
+        Me.QueryLine Ieee488Syntax.ClearExecutionStateOpcQueryCommand, False, False
+    Else
+        Me.WriteLine Ieee488Syntax.ClearExecutionStateCommand, False
+    End If
+End Sub
 
 ''' <summary>   Returns the identity. </summary>
 ''' <value>   [String]. </value>
@@ -313,23 +318,33 @@ Public Function ServiceRequested(Optional ByVal canQuery As Boolean = False) As 
 End Function
 
 ''' <summary>   Issues a wait (*WAI) command. </summary>
-''' <returns>   [Long] The number of characters that were sent. </returns>
-Public Function Wait() As Long
-    
-    Wait = Me.WriteLine(Ieee488Syntax.WaitCommand)
-    
-End Function
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*WAI</c> command by querying <c>*WAI; *OPC?</c></param>
+Public Sub Wait(Optional ByVal awaitOpc As Boolean = True)
+    If awaitOpc Then
+        Me.QueryLine Ieee488Syntax.WaitOpcQueryCommand, False, False
+    Else
+        Me.WriteLine Ieee488Syntax.WaitCommand
+    End If
+End Sub
 
 ''' <summary>   Enables standard events using the (*ESE {0}) command. </summary>
 ''' <param name="standardEvents">   The standard event bits to enable. <param>
-''' <returns>   [Long] The number of characters that were sent. </returns>
-Public Function EnableStandardEvents(ByVal StandardEvents As Integer) As Long
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*ESE #</c> command by querying <c>*ESE #; *OPC?</c></param>
+Public Sub EnableStandardEvents(ByVal StandardEvents As Integer, _
+        Optional ByVal awaitOpc As Boolean = True)
     
     Dim command As String
-    command = StringExtensions.StringFormat(StandardEventEnableCommandFormat, StandardEvents)
-    EnableStandardEvents = Me.WriteLine(command)
+    If awaitOpc Then
+        command = StringExtensions.StringFormat(StandardEventEnableOpcQueryCommand, StandardEvents)
+        Me.QueryLine command, False, False
+    Else
+        command = StringExtensions.StringFormat(StandardEventEnableCommand, StandardEvents)
+        Me.WriteLine Ieee488Syntax.WaitCommand
+    End If
     
-End Function
+End Sub
 
 ''' <summary>   Returns the standard events enable byte using the *ESE? query command. </summary>
 ''' <returns>   The standard event register enable status value. </returns>
@@ -352,15 +367,23 @@ Public Function QueryStandardEventsStatus() As Integer
 End Function
 
 ''' <summary>   Enables Service Request using the (*SRE {0}) command. </summary>
-''' <param name="ServiceRequest">   The standard event bits to enable. <param>
-''' <returns>   [Long] The number of characters that were sent. </returns>
-Public Function EnableServiceRequest(ByVal serviceRequest As Integer) As Long
+''' <param name="ServiceRequest">   [Integer] The standard event bits to enable. <param>
+''' <param name="awaitOpc">         [Optional, Boolean, True] True to wait for operation completion
+'''                                 after issuing the <c>*SRE #</c> command by querying
+'''                                 <c>*SRE #; *OPC?</c></param>
+Public Sub EnableServiceRequest(ByVal serviceRequest As Integer, _
+        Optional ByVal awaitOpc As Boolean = True)
     
     Dim command As String
-    command = StringExtensions.StringFormat(ServiceRequestEnableCommandFormat, serviceRequest)
-    EnableServiceRequest = Me.WriteLine(command)
+    If awaitOpc Then
+        command = StringExtensions.StringFormat(ServiceRequestEnableOpcQueryCommand, serviceRequest)
+        Me.QueryLine command, False, False
+    Else
+        command = StringExtensions.StringFormat(ServiceRequestEnableCommand, serviceRequest)
+        Me.WriteLine command
+    End If
     
-End Function
+End Sub
 
 ''' <summary>   Returns the Service Request enable byte using the *SRE? query command. </summary>
 ''' <returns>   The service request event register enable status value. </returns>
@@ -383,12 +406,17 @@ Public Function QueryServiceRequestStatus() As Integer
 End Function
 
 ''' <summary>   Reset to known state (*RST) command. </summary>
-''' <returns>   [Long] The number of characters that were sent. </returns>
-Public Function ResetKnownState() As Long
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*SRE</c> command by querying <c>*SRE; *OPC?</c></param>
+Public Sub ResetKnownState(Optional ByVal awaitOpc As Boolean = True)
     
-    ResetKnownState = Me.WriteLine(Ieee488Syntax.ResetKnownStateCommand, False)
+    If awaitOpc Then
+        Me.QueryLine Ieee488Syntax.ResetKnownStateOpcQueryCommand, False, False
+    Else
+        Me.WriteLine Ieee488Syntax.ResetKnownStateCommand, False
+    End If
     
-End Function
+End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
