@@ -114,6 +114,11 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             sentCount = socket.SendMessage(command & vbLf)
             m_delayStopper.Wait 5
 
+            ' disables front panel operation of the currently addressed instrument.
+            
+            sentCount = socket.SendMessage("++llo" & vbLf)
+            m_delayStopper.Wait 5
+
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
             sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
@@ -170,16 +175,24 @@ Finally:
     End If
     
     On Error Resume Next
-    If socket.Connected Then
+    If Not socket Is Nothing Then
     
-        ' clear errors if any so as to leave the instrument without errors.
-        ' here we add *OPC? to prevent the query unterminated error.
-        sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-        socket.ReceiveRaw
-        m_delayStopper.Wait 5
+        If socket.Connected Then
         
-        socket.CloseConnection
-        
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+            socket.ReceiveRaw
+            m_delayStopper.Wait 5
+            
+            ' enables front panel operation of the currently addressed instrument.
+            
+            sentCount = socket.SendMessage("++loc" & vbLf)
+            m_delayStopper.Wait 5
+            
+            socket.CloseConnection
+        End If
+    
     End If
     
     ' terminate the socket, which should release the Winsock dll.
@@ -235,10 +248,6 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         
         Dim command As String
     
-        ' reset the instrument
-        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
-        m_delayStopper.Wait 5
-    
         If port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
@@ -246,11 +255,18 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
             ' instruments to talk after sending them a command in order to read their response. The
             ' feature called, Read-After-Write, saves the user from having to issue read commands
             ' repeatedly.
+            
             command = "++auto 1"
 
             ' send the command, which may cause Query Unterminated because we are setting the device to talk
             ' where there is nothing to talk.
+            
             sentCount = socket.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+            ' disables front panel operation of the currently addressed instrument.
+            
+            sentCount = socket.SendMessage("++llo" & vbLf)
             m_delayStopper.Wait 5
 
             ' clear errors if any so as to leave the instrument without errors.
@@ -307,15 +323,25 @@ Finally:
     End If
     
     On Error Resume Next
-    If socket.Connected Then
     
-        ' clear errors if any so as to leave the instrument without errors.
-        ' here we add *OPC? to prevent the query unterminated error.
-        sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-        socket.ReceiveRaw
-        m_delayStopper.Wait 5
+    If Not socket Is Nothing Then
+    
+        If socket.Connected Then
         
-        socket.CloseConnection
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+            socket.ReceiveRaw
+            m_delayStopper.Wait 5
+            
+            ' enables front panel operation of the currently addressed instrument.
+            
+            sentCount = socket.SendMessage("++loc" & vbLf)
+            m_delayStopper.Wait 5
+            
+            socket.CloseConnection
+        End If
+    
     End If
     
     ' terminate the socket, which should release the Winsock dll.
@@ -374,11 +400,19 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             ' instruments to talk after sending them a command in order to read their response. The
             ' feature called, Read-After-Write, saves the user from having to issue read commands
             ' repeatedly.
+            
             command = "++auto 1"
 
             ' send the command, which may cause Query Unterminated because we are setting the device to talk
             ' where there is nothing to talk.
+            
             sentCount = client.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+            
+            ' disables front panel operation of the currently addressed instrument.
+            
+            sentCount = client.SendMessage("++llo" & vbLf)
             m_delayStopper.Wait 5
 
             ' clear errors if any so as to leave the instrument without errors.
@@ -446,6 +480,12 @@ Finally:
             sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
             client.ReceiveRaw
             m_delayStopper.Wait 5
+            
+            ' enables front panel operation of the currently addressed instrument.
+            
+            sentCount = client.SendMessage("++loc" & vbLf)
+            m_delayStopper.Wait 5
+
             
             client.Disconnect
         End If

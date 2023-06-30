@@ -8,7 +8,6 @@ instrumet
 #### Tests
 
 #### Fixes
-* Winsock identity: go to local on disconnect.
 * GPIB Lan: go to local on disconnect.
 * ieee488 sheet: when switch from talk to listen, turn on Turn of Talk on Write.
 * add *OPC? to the populated commands.
