@@ -1,11 +1,5 @@
 ### TODO
 
-All: Update read-me files and add testing.md file.
-
-
-
-
-
 #### Tests
 
 #### Fixes

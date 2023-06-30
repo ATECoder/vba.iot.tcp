@@ -94,15 +94,12 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     ' report the connection state
     Range(m_connectedCell).value = socket.Connected
     
-    If socket.Connected Then
+    If repeatCount > 0 And socket.Connected Then
     
         Range(m_socketAddressCell).value = socket.SocketAddress
     
         Dim command As String
     
-        ' reset the instrument
-        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
-        
         If port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
@@ -112,8 +109,15 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             ' repeatedly.
             command = "++auto 1"
 
-            ' send the command
+            ' send the command, which may cause Query Unterminated because we are setting the device to talk
+            ' where there is nothing to talk.
             sentCount = socket.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+            socket.ReceiveRaw
             m_delayStopper.Wait 5
 
         End If
@@ -147,6 +151,10 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
+    ElseIf repeatCount <= 0 Then
+    
+        Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
+        
     Else
         Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
@@ -164,22 +172,14 @@ Finally:
     On Error Resume Next
     If socket.Connected Then
     
-        ' reset the instrument
-        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
-        ' m_delayStopper.Wait 5
-    
-        If port = PROLOGIX_PORT_NO Then
+        ' clear errors if any so as to leave the instrument without errors.
+        ' here we add *OPC? to prevent the query unterminated error.
+        sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
+        client.ReceiveRaw
+        m_delayStopper.Wait 5
         
-            ' clear auto read after write
-            command = "++auto 0"
-
-            ' send the command
-            ' sentCount = socket.SendMessage(command & vbLf)
-            m_delayStopper.Wait 5
-
-        End If
-    
         socket.CloseConnection
+        
     End If
     
     ' terminate the socket, which should release the Winsock dll.
@@ -228,7 +228,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     ' report the connection state
     Range(m_connectedCell).value = socket.Connected
     
-    If socket.Connected Then
+    If repeatCount > 0 And socket.Connected Then
     
         ' display the socket address
         Range(m_socketAddressCell).value = socket.SocketAddress
@@ -236,7 +236,8 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         Dim command As String
     
         ' reset the instrument
-        sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
+        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
+        m_delayStopper.Wait 5
     
         If port = PROLOGIX_PORT_NO Then
         
@@ -247,8 +248,16 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
             ' repeatedly.
             command = "++auto 1"
 
-            ' send the command
+            ' send the command, which may cause Query Unterminated because we are setting the device to talk
+            ' where there is nothing to talk.
             sentCount = socket.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+            socket.ReceiveRaw
+            m_delayStopper.Wait 5
 
         End If
         
@@ -279,6 +288,10 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
+    ElseIf repeatCount <= 0 Then
+    
+        Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
+        
     Else
         Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
@@ -296,18 +309,11 @@ Finally:
     On Error Resume Next
     If socket.Connected Then
     
-        ' reset the instrument
-        sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
-    
-        If port = PROLOGIX_PORT_NO Then
-        
-            ' clear auto read after write
-            command = "++auto 0"
-
-            ' send the command
-            sentCount = socket.SendMessage(command & vbLf)
-
-        End If
+        ' clear errors if any so as to leave the instrument without errors.
+        ' here we add *OPC? to prevent the query unterminated error.
+        sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
+        client.ReceiveRaw
+        m_delayStopper.Wait 5
         
         socket.CloseConnection
     End If
@@ -354,16 +360,13 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     ' report the connection state
     Range(m_connectedCell).value = client.Connected
     
-    If client.Connected Then
+    If repeateCount > 0 And client.Connected Then
     
         ' display the socket address.
         Range(m_socketAddressCell).value = client.TcpClientSocket.SocketAddress
         
         Dim command As String
     
-        ' reset the instrument
-        sentCount = client.SendMessage("*RST; *CLS" & vbLf)
-        
         If port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
@@ -373,8 +376,17 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             ' repeatedly.
             command = "++auto 1"
 
-            ' send the command
+            ' send the command, which may cause Query Unterminated because we are setting the device to talk
+            ' where there is nothing to talk.
             sentCount = client.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
+            client.ReceiveRaw
+            m_delayStopper.Wait 5
+            
 
         End If
         
@@ -391,6 +403,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             
             ' send the command
             client.SendMessage command & vbLf
+            m_delayStopper.Wait 5
         
             ' receive the reading
             Dim Identity As String
@@ -406,6 +419,10 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
+    ElseIf repeatCount <= 0 Then
+    
+        Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
+        
     Else
         Range(m_errorMessageCell).value = "connection failed without reporting an exception"
     End If
@@ -424,18 +441,11 @@ Finally:
     If Not client Is Nothing Then
         If client.Connected Then
             
-            ' reset the instrument
-            sentCount = client.SendMessage("*RST; *CLS" & vbLf)
-            
-            If port = PROLOGIX_PORT_NO Then
-            
-                ' clear auto read after write
-                command = "++auto 0"
-    
-                ' send the command
-                sentCount = client.SendMessage(command & vbLf)
-    
-            End If
+            ' clear errors if any so as to leave the instrument without errors.
+            ' here we add *OPC? to prevent the query unterminated error.
+            sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
+            client.ReceiveRaw
+            m_delayStopper.Wait 5
             
             client.Disconnect
         End If
