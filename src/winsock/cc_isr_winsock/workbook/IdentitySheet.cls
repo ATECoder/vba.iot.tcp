@@ -174,8 +174,8 @@ Finally:
     
         ' clear errors if any so as to leave the instrument without errors.
         ' here we add *OPC? to prevent the query unterminated error.
-        sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
-        client.ReceiveRaw
+        sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+        socket.ReceiveRaw
         m_delayStopper.Wait 5
         
         socket.CloseConnection
@@ -311,8 +311,8 @@ Finally:
     
         ' clear errors if any so as to leave the instrument without errors.
         ' here we add *OPC? to prevent the query unterminated error.
-        sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
-        client.ReceiveRaw
+        sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
+        socket.ReceiveRaw
         m_delayStopper.Wait 5
         
         socket.CloseConnection
@@ -360,7 +360,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     ' report the connection state
     Range(m_connectedCell).value = client.Connected
     
-    If repeateCount > 0 And client.Connected Then
+    If repeatCount > 0 And client.Connected Then
     
         ' display the socket address.
         Range(m_socketAddressCell).value = client.TcpClientSocket.SocketAddress
