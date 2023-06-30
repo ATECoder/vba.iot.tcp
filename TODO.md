@@ -1,9 +1,14 @@
 ### TODO
 
+All: Update read-me files and add testing.md file.
+
+
+
+
+
 #### Tests
 
 #### Fixes
-* get direct access to the *RST, SDC, and *CLS commands. Turn off RAW with this commands.
 * vI: handle error on toggle connection. 
 
 #### Updates

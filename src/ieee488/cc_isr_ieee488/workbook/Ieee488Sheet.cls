@@ -40,8 +40,6 @@ Public Property Get Session() As cc_isr_Ieee488.Ieee488Session
         
         Set m_session = cc_isr_Ieee488.Constructor.CreateIeee488Session
     
-        ' populate the combo box commands
-        PopulateCommandsComboBox
     End If
     Set Session = m_session
 End Property
@@ -100,6 +98,9 @@ Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
     Else
         EnableGpibLan False
     End If
+    
+    ' populate the combo box commands
+    PopulateCommandsComboBox
 
 End Sub
 
@@ -397,7 +398,7 @@ End Sub
 ''' <summary>   Handles the Read Status Byte button click event. </summary>
 Private Sub ReadStandardEventStatusButton_Click()
 
-    Const thisProcedureName = "ReadStatusByteButton_Click"
+    Const thisProcedureName = "ReadStandardEventStatusButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler

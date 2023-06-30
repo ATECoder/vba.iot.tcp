@@ -34,11 +34,11 @@ Private m_extTrigInitiated As Boolean
 
 ''' <summary>   The event that is raised upon completion of a a resistance measurement. </summary>
 ''' <param name="eventArgs">   An <see cref="ResistanceNumberEventArgs"/> event args. </param>
-Public Event ResistanceNumberMeasured(ByRef eventArgs As ResistanceNumberEventArgs)
+Public Event ResistanceNumberMeasured(ByVal eventArgs As ResistanceNumberEventArgs)
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
 ''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   Initializes the k2700 . </summary>
 Private Sub Class_Initialize()

@@ -13,18 +13,18 @@ Private Const m_receiveTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
 Private Const m_socketAddressCell As String = "C2"
-Private Const m_connectedSocketIdCell As String = "E2"
-Private Const m_sentMessageCell As String = "G2"
-Private Const m_receivedMessageLengthCell As String = "H2"
-Private Const m_receivedMessageCell As String = "I2"
-Private Const m_elapsedTimeCell As String = "J2"
+Private Const m_socketIdCell As String = "D2"
+Private Const m_connectedCell As String = "E2"
+Private Const m_sentMessageCell As String = "F2"
+Private Const m_receivedMessageLengthCell As String = "J2"
+Private Const m_receivedMessageCell As String = "K2"
+Private Const m_elapsedTimeCell As String = "L2"
 Private Const m_elapsedTimeFormat As String = "0.0"
-Private Const m_connectedCell As String = "F2"
-Private Const m_identityCell As String = "I2"
 Private Const m_errorMessageCell As String = "B4"
 
-Private Const m_statusByteCell As String = "F11"
 Private Const m_serialPollCell As String = "E11"
+Private Const m_statusByteCell As String = "F11"
+Private Const m_standardByteCell As String = "H11"
 
 Private Const m_srqCell As String = "C10"
 Private Const m_gpibAddressCell As String = "C12"
@@ -42,8 +42,8 @@ Private Const m_resistanceCountCell As String = "C27"
 Private Const m_externalTriggerStatusCell As String = "C28"
 
 Private Const m_resistanceNoTopRow As Integer = 2
-Private Const m_resistanceNoCol As String = "K"
-Private Const m_resistanceCol As String = "L"
+Private Const m_resistanceNoCol As String = "M"
+Private Const m_resistanceCol As String = "N"
 Private Const m_resistanceFormat As String = "0.00"
 
 ' defines the standard event timer.
@@ -102,7 +102,7 @@ End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Dim affirmative As Boolean: affirmative = eventArgs.Connected
     
@@ -283,7 +283,6 @@ err_Handler:
     
 End Function
 
-
 ''' <summary>   Handles the Toggle connection button click event. </summary>
 Friend Sub ConnectToggleButton_Click()
 
@@ -368,6 +367,39 @@ err_Handler:
     
 End Sub
 
+''' <summary>   Handles the Read Status Byte button click event. </summary>
+Private Sub ReadStandardEventStatusButton_Click()
+
+    Const thisProcedureName = "ReadStandardEventStatusButton"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.StandardByte = Me.Session.QueryStandardEventsStatus
+    
+    Me.ReadStopWatch
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
 
 ''' <summary>   Handles the Reset Known State button click event. </summary>
 Private Sub RSTButton_Click()
@@ -506,7 +538,9 @@ Private Sub WriteButton_Click()
     Dim isQuery As Boolean: isQuery = cc_isr_Core.StringExtensions.EndsWith(messageToSend, "?")
     If Not isQuery And Me.AutoStatusReadCheckBox.value Then
         Me.StatusByte = Me.Session.QueryServiceRequestStatus
+        Me.StandardByte = Me.Session.QueryStandardEventsStatus
     End If
+    
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -659,6 +693,16 @@ End Property
 ''' <summary>   Sets the status byte. </summary>
 Friend Property Let StatusByte(ByVal value As Integer)
     Range(m_statusByteCell).value = value
+End Property
+
+''' <summary>   Gets the Standard byte. </summary>
+Friend Property Get StandardByte() As Integer
+    StandardByte = Range(m_standardByteCell).value
+End Property
+
+''' <summary>   Sets the Standard byte. </summary>
+Friend Property Let StandardByte(ByVal value As Integer)
+    Range(m_standardByteCell).value = value
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -1533,7 +1577,7 @@ End Sub
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ResistanceNumberMeasured"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_VI.ResistanceNumberEventArgs"/> event arguments. </param>
-Private Sub m_k2700_ResistanceNumberMeasured(ByRef eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
+Private Sub m_k2700_ResistanceNumberMeasured(ByVal eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
 
     SetResistance eventArgs.ResistanceNumber, eventArgs.Resistance
     
@@ -1550,9 +1594,9 @@ Private Sub m_k2700_ResistanceNumberMeasured(ByRef eventArgs As cc_isr_VI.Resist
 
 End Sub
 
-''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ConnectionChanged"/> event. </summary>
+''' <summary>   Handles the K2700 <see cref="cc_isr_VI.K2700.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Private Sub m_k2700_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Me.Initialize eventArgs
 
@@ -1560,7 +1604,7 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
     
         ' report the socket number
         Range(m_socketAddressCell).value = Me.Session.VISession.socketAddress
-        Range(m_connectedSocketIdCell).value = Me.Session.SocketId
+        Range(m_socketIdCell).value = Me.Session.SocketId
         
         Me.Session.VISession.GpibLan.SelectiveDeviceClear
         Me.Session.ResetKnownState
@@ -1571,9 +1615,19 @@ Private Sub m_K2700_ConnectionChanged(ByRef eventArgs As cc_isr_Winsock.Connecti
     Else
     
         Range(m_socketAddressCell).value = ""
-        Range(m_connectedSocketIdCell).value = ""
+        Range(m_socketIdCell).value = ""
         
     End If
 
 End Sub
+
+''' <summary>   Handles the <see cref="cc_isr_VI.K2700.ConnectionChanging"/> event. </summary>
+''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_k2700_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+
+End Sub
+
+
+
+
 

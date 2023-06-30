@@ -1,38 +1,55 @@
 ### About
 
-[cc.isr.ieee488] is an Excel workbook for reading the identity string from an LXI instrument supporting the IEEE488 syntax.
+[cc.isr.ieee488] is an Excel workbook for interacting with an instrument that supports that IEEE 488.2 standard with commands such as *IDN? and *CLS.
 
-### How to Use
+#### Dependencies
 
-The workbook includes a test sheet for reading the instrument identity string as follows:
-* Open the Excel file.
-* Select the Identity sheet.
-* Enter the instrument IP address.
-* Enter the instrument port
-  * 5025 for an LXI instrument or
-  * 1234 for a GPIB instrument connected via a Prologix controller.
-* Click _Read Identity_ to read the instrument identity.  
+The [cc.isr.Ieee488] workbook depends on the following Workbooks:
 
+##### [cc.isr.Core]
 
-### Key Features
+* [cc.isr.Core] is an Excel workbook with core Visual Basic for Applications code.
 
-* Provides rudimentary SCPI methods for reading the instrument identity.
-* Using Windows Winsock32 calls to construct sockets for communicating with the instrument.
+##### [cc.isr.Winsock]
 
-### Main Types
+* [cc.isr.winsock] is an Excel workbook implementing TCP Client and Server classes with Windows Wisock API.
+
+#### Worksheets
+
+The [cc.isr.Ieee488] workbook includes two worksheets: IEEE488 and Identity.
+
+##### Identity Worksheet
+
+* Allows the operator to query the instrument identity using the *IDN? command.
+
+##### IEEE 488 Worksheet
+
+* Allows the operator to command and query the instrument using IEEE488.2 commands and queries.
+
+#### Key Features
+
+* Provides IEEE 488.2 commands and queries for communicating with the instrument.
+* Uses Windows Winsock32 calls to construct sockets for communicating with the instrument by way of a GPIB-Lan controller.
+* Provides GPIB-Lan commands and queries for communicating with the GPIB-Lan controller.
+
+#### Main Types
 
 The main types provided by this library are:
 
-* _ViSession_ Encapsulates the _TcpCllient_ and defines termination and timeout.
+* _GpibLanController_: Communicates with the instrument by way of a GPIB-Lan controller.
+* _ViSession_ Uses a _TcpCllient_ to communicate with the instrument by sending and receiving messages by way of the GPIB-Lan controller.
 * _IEEE488Session_ implement the core IEEE488 methods for communicating with an LXI Instrument.
 
-### Testing
+#### [Testing]
 
-To enable unit testing, the Excel _Trust Center_, which can be found from the _Search_ box, and check _Trust access to the VBA project object model_ from the _Macro Settings_ in the _Trust Center_.  
+Testing information is included in the [Testing] document.
 
-### Feedback
+#### Feedback
 
-[cc.isr.ieee488] is released as open source under the MIT license.
-Bug reports and contributions are welcome at the [cc.isr.ieee488] repository.
+[cc.isr.Ieee488] is released as open source under the MIT license.
+Bug reports and contributions are welcome at the [cc.isr.Ieee488] repository.
 
-[cc.isr.ieee488]: https://github.com/ATECoder/vba.iot.tcp/src/ieee488
+[cc.isr.Ieee488]: https://github.com/ATECoder/vba.iot.tcp/src/ieee488
+[cc.isr.Winsock]: https://github.com/ATECoder/vba.iot.tcp/src/Winsock
+[cc.isr.Core]: https://github.com/ATECoder/vba.iot.tcp/src/core
+[Testing]: ./testing.md

@@ -94,7 +94,7 @@ Public Function Disconnect() As Boolean
     eventArgs.Initialize Me.Connected
     OnConnectionChanging eventArgs
     
-    If eventArgs.Cancel Then
+    If Not eventArgs.Cancel Then
     
         Me.TcpClientSocket.CloseConnection
         

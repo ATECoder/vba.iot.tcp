@@ -28,6 +28,7 @@ Private Const m_averageElapsedTimeCell As String = "H3"
 Private Const m_elapsedTimeCell As String = "H4"
 Private Const m_elapsedTimeFormat As String = "0.0"
 Private Const m_identityCell As String = "H2"
+Private m_delayStopper As cc_isr_Core.StopWatch
 
 ''' <summary>   Reads the identity form the instrument with the
 ''' IP address and port defined in the parent sheet. </summary>
@@ -38,6 +39,7 @@ Private Sub ReadIdentityButton_Click()
     Dim repeatCount As Integer
     Dim timeout As Integer
     
+    Set m_delayStopper = cc_isr_Core.Constructor.CreateStopWatch
     timeout = Range(m_receiveTimeoutCell).value
     repeatCount = Range(m_repeatCountCell).value
     host = Range(m_inputHostCell).value
@@ -80,7 +82,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     Dim sentCount As Integer
     Dim readCount As Integer
     
-    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
+    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
     Dim socket As New IPv4StreamSocket
     Dim totalMilliseconds As Double
     
@@ -98,6 +100,9 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     
         Dim command As String
     
+        ' reset the instrument
+        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
+        
         If port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
@@ -109,6 +114,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
 
             ' send the command
             sentCount = socket.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
 
         End If
         
@@ -121,16 +127,17 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             DoEvents
             
             loopCount = loopCount + 1
-            sw.Restart
+            stopper.Restart
             
             ' send the command
             sentCount = socket.SendMessage(command & vbLf)
-        
+            m_delayStopper.Wait 5
+            
             ' receive the reading
             Dim Identity As String
             Identity = socket.ReceiveRaw()
     
-            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
             
             Range(m_receivedMessageLengthCell).value = Len(Identity)
             Range(m_receivedMessageCell).value = Identity
@@ -156,6 +163,22 @@ Finally:
     
     On Error Resume Next
     If socket.Connected Then
+    
+        ' reset the instrument
+        ' sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
+        ' m_delayStopper.Wait 5
+    
+        If port = PROLOGIX_PORT_NO Then
+        
+            ' clear auto read after write
+            command = "++auto 0"
+
+            ' send the command
+            ' sentCount = socket.SendMessage(command & vbLf)
+            m_delayStopper.Wait 5
+
+        End If
+    
         socket.CloseConnection
     End If
     
@@ -193,7 +216,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     Dim sentCount As Integer
     Dim readCount As Integer
     
-    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
+    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
     Dim socket As New IPv4StreamSocket
     Dim totalMilliseconds As Double
     
@@ -211,6 +234,9 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         Range(m_socketAddressCell).value = socket.SocketAddress
         
         Dim command As String
+    
+        ' reset the instrument
+        sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
     
         If port = PROLOGIX_PORT_NO Then
         
@@ -235,7 +261,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
             DoEvents
             
             loopCount = loopCount + 1
-            sw.Restart
+            stopper.Restart
             
             ' send the command
             socket.SendMessage command & vbLf
@@ -243,7 +269,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
             ' receive the reading
             readCount = socket.ReceiveTerminatedMessage(buffer, maximumLength, vbLf)
     
-            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
             
             Range(m_receivedMessageLengthCell).value = readCount
             Range(m_receivedMessageCell).value = buffer
@@ -269,6 +295,20 @@ Finally:
     
     On Error Resume Next
     If socket.Connected Then
+    
+        ' reset the instrument
+        sentCount = socket.SendMessage("*RST; *CLS" & vbLf)
+    
+        If port = PROLOGIX_PORT_NO Then
+        
+            ' clear auto read after write
+            command = "++auto 0"
+
+            ' send the command
+            sentCount = socket.SendMessage(command & vbLf)
+
+        End If
+        
         socket.CloseConnection
     End If
     
@@ -299,7 +339,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     Range(m_elapsedTimeCell).value = ""
     Range(m_errorMessageCell).value = ""
 
-    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
+    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
     Dim totalMilliseconds As Double
     
     Dim sentCount As Integer
@@ -321,6 +361,9 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         
         Dim command As String
     
+        ' reset the instrument
+        sentCount = client.SendMessage("*RST; *CLS" & vbLf)
+        
         If port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
@@ -344,7 +387,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             DoEvents
             
             loopCount = loopCount + 1
-            sw.Restart
+            stopper.Restart
             
             ' send the command
             client.SendMessage command & vbLf
@@ -353,7 +396,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             Dim Identity As String
             Identity = client.ReceiveRaw()
     
-            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
             
             Range(m_receivedMessageLengthCell).value = Len(Identity)
             Range(m_receivedMessageCell).value = Identity
@@ -380,6 +423,20 @@ Finally:
     On Error Resume Next
     If Not client Is Nothing Then
         If client.Connected Then
+            
+            ' reset the instrument
+            sentCount = client.SendMessage("*RST; *CLS" & vbLf)
+            
+            If port = PROLOGIX_PORT_NO Then
+            
+                ' clear auto read after write
+                command = "++auto 0"
+    
+                ' send the command
+                sentCount = client.SendMessage(command & vbLf)
+    
+            End If
+            
             client.Disconnect
         End If
     End If

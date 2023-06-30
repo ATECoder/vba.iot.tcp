@@ -65,7 +65,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     Range(m_elapsedTimeCell).value = ""
     Range(m_errorMessageCell).value = ""
 
-    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch()
+    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch()
     Dim totalMilliseconds As Double
     
     Dim Session As New Ieee488Session
@@ -92,17 +92,17 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
             DoEvents
            
             loopCount = loopCount + 1
-            sw.Restart
+            stopper.Restart
             
             Dim Identity As String
             
-            If Me.UsingViSessionIOCheckBox Then
+            If Me.UseViSessionOptionButton Then
                 Identity = Session.ViSession.QueryLine(command)
             Else
                 Identity = Session.QueryLine(command)
             End If
             
-            totalMilliseconds = totalMilliseconds + sw.ElapsedMilliseconds
+            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
             
             Range(m_receivedMessageLengthCell).value = Len(Identity)
             Range(m_receivedMessageCell).value = Identity

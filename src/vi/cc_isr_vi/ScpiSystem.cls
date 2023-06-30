@@ -35,7 +35,7 @@ End Property
 
 ''' <summary>   Returns a reference to the IEEE488 Session. </summary>
 ''' <param name="session">    A references to a connected <see cref="Ieee488Session"/> </param>
-Public Sub Initialize(ByRef connectedSession As Ieee488Session)
+Public Sub Initialize(ByVal connectedSession As Ieee488Session)
     Set m_session = connectedSession
 End Sub
 

@@ -107,6 +107,16 @@ Catch {
 	return
 }
 
+$SOURCE = [IO.Path]::Combine($CWD, "testing.md")
+Try {
+	echo coping $SOURCE to $BUILD_DIRECTORY
+	copy-item $SOURCE -destination $BUILD_DIRECTORY
+}
+Catch {
+    echo $_.Exception.Message
+	return
+}
+
 # Open excel as hidden
 
 $excel = New-Object -ComObject Excel.Application
