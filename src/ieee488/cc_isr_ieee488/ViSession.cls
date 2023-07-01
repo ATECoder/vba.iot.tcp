@@ -49,13 +49,21 @@ Private Sub Class_Initialize()
     Me.ReadAfterWriteDelay = READ_AFTER_WRITE_DELAY_DEFAULT
     
     Set m_gpibLan = New GpibLanController
-    m_gpibLan.Initialize m_tcpClient, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
+    m_gpibLan.Initialize m_tcpClient, New ErrTracer, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
     
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Terminate()
     Me.Dispose
+End Sub
+
+''' <summary>   Initializes the <see cref="IErrTracer"/> for the <see cref="ViSession"/>. </summary>
+''' <param name="tracer">   <see cref="IErrTracer"/> implementation. </param>
+Public Sub Initialize(ByVal tracer As IErrTracer)
+    
+    m_gpibLan.Initialize m_tcpClient, tracer, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
+   
 End Sub
 
 ''' <summary>   Closes and releases the TCP Client. </summary>

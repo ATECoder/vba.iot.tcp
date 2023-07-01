@@ -35,10 +35,14 @@ End Sub
 ''' <summary>   Handles the workbook after save event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+
     On Error Resume Next
     If Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
+
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>

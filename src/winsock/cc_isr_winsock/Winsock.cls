@@ -147,7 +147,9 @@ End Property
 
 ''' <summary>   Terminates Winsock if all sockets released their association with this instance. </summary>
 Public Sub Dispose()
+    
     On Error Resume Next
+    
     If m_initiated And Not m_disposed And (m_socketCount = 0) Then
         m_disposed = True
         m_initiated = False
@@ -159,5 +161,8 @@ Public Sub Dispose()
                       UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
         End If
     End If
+    
+    On Error GoTo 0
+
 End Sub
 

@@ -41,6 +41,7 @@ Private Sub eventTimer_Tick()
     Else
         Range("B4") = Range("B4") - TimeValue("00:00:01")
     End If
+    On Error GoTo 0
 End Sub
 
     

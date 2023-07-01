@@ -41,6 +41,7 @@ Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     If Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
+    On Error GoTo 0
 End Sub
 
 ''' <summary>   Handles the Workbook deactivate event. </summary>

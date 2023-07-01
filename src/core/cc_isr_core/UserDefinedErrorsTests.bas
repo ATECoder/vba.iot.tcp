@@ -48,7 +48,8 @@ err_Handler:
     Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(errorMessage) > 0, "error message should build")
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
+
     GoTo exit_Handler
 
 End Function

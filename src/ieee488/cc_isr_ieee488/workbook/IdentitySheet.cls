@@ -140,6 +140,8 @@ Finally:
         Range(m_errorMessageCell).value = errorMessage
     End If
 
+    On Error GoTo 0
+    
 End Sub
 
 

@@ -29,17 +29,18 @@ Private Const m_standardByteCell As String = "H11"
 Private Const m_srqCell As String = "C10"
 Private Const m_gpibAddressCell As String = "C12"
 Private Const m_readTimeoutCell As String = "C15"
+Private Const m_readAfterWriteEnabledCell As String = "C18"
 
-Private Const m_timerIntervalCell As String = "C19"
-Private Const m_card1Cell As String = "C20"
-Private Const m_card2Cell As String = "C21"
-Private Const m_card1ScanListCell As String = "C22"
-Private Const m_card2ScanListCell As String = "C23"
-Private Const m_inputsCell As String = "C24"
-Private Const m_resistanceNoCell As String = "C25"
-Private Const m_resistanceCell As String = "C26"
-Private Const m_resistanceCountCell As String = "C27"
-Private Const m_externalTriggerStatusCell As String = "C28"
+Private Const m_timerIntervalCell As String = "C22"
+Private Const m_card1Cell As String = "C23"
+Private Const m_card2Cell As String = "C24"
+Private Const m_card1ScanListCell As String = "C25"
+Private Const m_card2ScanListCell As String = "C26"
+Private Const m_inputsCell As String = "C27"
+Private Const m_resistanceNoCell As String = "C28"
+Private Const m_resistanceCell As String = "C29"
+Private Const m_resistanceCountCell As String = "C30"
+Private Const m_externalTriggerStatusCell As String = "C31"
 
 Private Const m_resistanceNoTopRow As Integer = 2
 Private Const m_resistanceNoCol As String = "M"
@@ -675,6 +676,16 @@ Friend Property Let receivedMessage(ByVal value As String)
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
 
+''' <summary>   Gets the Read After Write Enabled. </summary>
+Friend Property Get ReadAfterWriteEnabled() As Boolean
+    ReadAfterWriteEnabled = Range(m_readAfterWriteEnabledCell).value
+End Property
+
+''' <summary>   Sets the Read After Write Enabled. </summary>
+Friend Property Let ReadAfterWriteEnabled(ByVal value As Boolean)
+    Range(m_readAfterWriteEnabledCell).value = value
+End Property
+
 ''' <summary>   Gets the sent message. </summary>
 Friend Property Get SentMessage() As String
     SentMessage = Range(m_sentMessageCell).value
@@ -715,8 +726,9 @@ End Property
 Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = usingGpibLanController
     Me.GoToLocalButton.Enabled = usingGpibLanController
-    Me.ListenTalkToggleButton.Enabled = usingGpibLanController
     Me.LocalLockoutButton.Enabled = usingGpibLanController
+    Me.ReadAfterWriteSetButton.Enabled = usingGpibLanController
+    Me.ReadAfterWriteGetButton.Enabled = usingGpibLanController
     Me.SerialPollButton.Enabled = usingGpibLanController
     Me.SRQButton.Enabled = usingGpibLanController
     Me.GetGpibAddressButton.Enabled = usingGpibLanController
@@ -791,20 +803,55 @@ err_Handler:
 
 End Sub
 
-Private Sub ListenTalkToggleButton_Click()
+Private Sub ReadAfterWriteSetButton_Click()
 
-    Const thisProcedureName = "ListenTalkToggleButton"
+    Const thisProcedureName = "ReadAfterWriteSetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
     Me.RestartStopWatch
     
-    Me.Session.VISession.GpibLan.ReadAfterWriteEnabledSetter Not Me.Session.VISession.GpibLan.ReadAfterWriteEnabled
+    Me.Session.VISession.GpibLan.ReadAfterWriteEnabledSetter Me.ReadAfterWriteEnabled
     
     Me.ReadStopWatch
     
-    Me.ListenTalkToggleButton.Caption = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+    Me.Session.VISession.GpibLan.DisableReadAfterWriteOnWrite = Me.ReadAfterWriteEnabled
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    
+    ' display the error message
+    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+Private Sub ReadAfterWriteGetButton_Click()
+
+    Const thisProcedureName = "ReadAfterWriteGetButton_Click"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.RestartStopWatch
+    
+    Me.ReadAfterWriteEnabled = Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter
+    
+    Me.ReadStopWatch
+    
+    Me.Session.VISession.GpibLan.DisableReadAfterWriteOnWrite = Me.ReadAfterWriteEnabled
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -1610,7 +1657,9 @@ Private Sub m_k2700_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connecti
         Me.Session.ResetKnownState
         Me.Session.ClearExecutionState
         
-        Me.ListenTalkToggleButton.Caption = IIf(Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter, "Talk", "Listen")
+        If Me.Session.VISession.UsingGpibLan Then
+            Me.ReadAfterWriteEnabled = Me.Session.VISession.GpibLan.ReadAfterWriteEnabledGetter
+        End If
     
     Else
     

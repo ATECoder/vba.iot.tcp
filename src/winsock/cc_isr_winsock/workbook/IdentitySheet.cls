@@ -175,6 +175,7 @@ Finally:
     End If
     
     On Error Resume Next
+    
     If Not socket Is Nothing Then
     
         If socket.Connected Then
@@ -201,6 +202,9 @@ Finally:
     If Len(errorMessage) > 0 Then
         Range(m_errorMessageCell).value = errorMessage
     End If
+    
+    On Error GoTo 0
+    
 
 End Sub
 
@@ -351,6 +355,8 @@ Finally:
         Range(m_errorMessageCell).value = errorMessage
     End If
 
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Uses the Tcp Client to send the identity query and reads back the identity
@@ -472,6 +478,7 @@ Finally:
     End If
     
     On Error Resume Next
+    
     If Not client Is Nothing Then
         If client.Connected Then
             
@@ -497,6 +504,8 @@ Finally:
     If Len(errorMessage) > 0 Then
         Range(m_errorMessageCell).value = errorMessage
     End If
+
+    On Error GoTo 0
 
 End Sub
 

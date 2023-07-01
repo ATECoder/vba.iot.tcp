@@ -34,6 +34,9 @@ Private WithEvents m_tcpClient As TcpClient
 
 Private m_writeTermination As String
 
+Private m_errTracer As cc_isr_Core.IErrTracer
+
+
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 ''' <remarks>   This GPIB Lan class uses the Prologix GPIB-Ethernet Controller. </remarks>
 Private Sub Class_Initialize()
@@ -41,6 +44,7 @@ Private Sub Class_Initialize()
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_controllerMode = True
+    m_errTracer = New ErrTracer
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -49,15 +53,18 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Initializes the <see cref="TcpClient"/> for the GpibLan I/O. </summary>
-''' <param name="client">                  Reference to the <see cref="TcpClient"/>. </param>
+''' <param name="client">                  <see cref="TcpClient"/> object. </param>
+''' <param name="tracer">                  <see cref="IErrTracer"/> implementation. </param>
 ''' <param name="readTerm">                [Optiona, String, VbLf] the read termination. </param>
 ''' <param name="writeTerm">               [Optiona, String, VbLf] the write termination. </param>
 ''' <param name="readAfterWriteDelayMs">   [Optional, Integer, 5] The read after write delay. </param>
 Public Sub Initialize(ByVal client As TcpClient, _
+                      ByVal tracer As IErrTracer, _
                       Optional ByVal readTerm As String = vbLf, _
                       Optional ByVal writeTerm As String = vbLf, _
                       Optional ByVal readAfterWriteDelayMs As Integer = 5)
     
+    Set m_errTraces = tracer
     Set m_tcpClient = client
     m_readTermination = readTerm
     m_writeTermination = writeTerm
@@ -77,6 +84,8 @@ Public Sub Dispose()
 
     Set m_stopper = Nothing
 
+    Set m_errTracer = Nothing
+    
 End Sub
 
 ''' <summary>   Gets the enabled status. </summary>
@@ -263,13 +272,13 @@ End Function
 ''' <returns>   [String] The received message. </returns>
 Public Function ReceiveFromController(Optional trimEnd As Boolean = True) As String
 
-    Dim receivedMessage As String: receivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
+    Dim ReceivedMessage As String: ReceivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
                                                                             termination:=m_readTermination)
     
     ' messages that come from the controller have a CR + LF termination. The Receive Raw method
     ' may stop at the LF termination, in which case the CR termination needs to be trimmed.
     If trimEnd Then
-        ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(receivedMessage, vbCr)
+        ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(ReceivedMessage, vbCr)
     End If
     
 End Function
@@ -338,10 +347,10 @@ End Sub
 Public Function GpibAddressGetter() As String
     
     GpibAddressGetter = "-1"
-    Dim receivedMessage As String: receivedMessage = Me.QueryController("++addr")
-    Dim addresses() As String: addresses = Split(receivedMessage, " ")
+    Dim ReceivedMessage As String: ReceivedMessage = Me.QueryController("++addr")
+    Dim addresses() As String: addresses = Split(ReceivedMessage, " ")
     If 0 = UBound(addresses) Then
-        GpibAddressGetter = receivedMessage
+        GpibAddressGetter = ReceivedMessage
     ElseIf 1 = UBound(addresses) - LBound(addresses) + 1 Then
         GpibAddressGetter = addresses(1)
         If 1 < UBound(addresses) - LBound(addresses) + 1 Then
@@ -562,7 +571,7 @@ End Function
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Const thisProcedureName As String = "m_tcpClient_ConnectionChanging"
+    Const p_procedureName As String = "m_tcpClient_ConnectionChanging"
 
     On Error Resume Next
     
@@ -590,8 +599,8 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
     
     If Err.Number <> 0 Then
         ' report any error when debugging this code.
-        UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
-        Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
+        UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
+        m_errTracer.TraceError
     End If
     
 End Sub
@@ -600,7 +609,7 @@ End Sub
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
 Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
-    Const thisProcedureName As String = "m_tcpClient_ConnectionChanging"
+    Const p_procedureName As String = "m_tcpClient_ConnectionChanging"
     
     On Error Resume Next
     
@@ -624,8 +633,8 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
 
     If Err.Number <> 0 Then
         ' report any error when debugging this code.
-        UserDefinedErrors.SetErrSource thisProcedureName, MODULE_NAME
-        Debug.Print UserDefinedErrors.BuildStandardErrorMessage()
+        UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
+        m_errTracer.TraceError
     End If
     
 End Sub

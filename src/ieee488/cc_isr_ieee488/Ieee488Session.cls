@@ -24,12 +24,23 @@ Public Event ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChan
 Private Sub Class_Initialize()
     
     Set m_viSession = New ViSession
+    m_viSession.Initialize New ErrTracer
     
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="ViSession"/>. </summary>
 Private Sub Class_Terminate()
+    
     Me.Dispose
+
+End Sub
+
+''' <summary>   Initializes the <see cref="IErrTracer"/> for the <see cref="Ieee488Session"/>. </summary>
+''' <param name="tracer">   <see cref="IErrTracer"/> implementation. </param>
+Public Sub Initialize(ByVal tracer As IErrTracer)
+   
+    m_viSession.Initialize tracer
+   
 End Sub
 
 ''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
@@ -90,11 +101,11 @@ End Property
 ''' <returns>   True if the TCP Client is connected. </returns>
 Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
    
-    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
-    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
-    OnConnectionChanging eventArgs
+    Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    OnConnectionChanging p_eventArgs
     
-    If Not eventArgs.cancel Then
+    If Not p_eventArgs.cancel Then
     
         OpenConnection = Me.ViSession.OpenConnection(host, port, timeoutMs)
         
@@ -240,11 +251,15 @@ End Property
 ''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
 '''                           after issuing the <c>*CLS</c> command by querying <c>*CLS; *OPC?</c></param>
 Public Sub ClearExecutionState(Optional ByVal awaitOpc As Boolean = True)
+    
+    Dim p_command As String: p_command = Ieee488Syntax.ClearExecutionStateCommand
     If awaitOpc Then
-        Me.QueryLine Ieee488Syntax.ClearExecutionStateOpcQueryCommand, False, False
+        p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
+        Me.QueryLine p_command, False, False
     Else
-        Me.WriteLine Ieee488Syntax.ClearExecutionStateCommand, False
+        Me.WriteLine p_command, False
     End If
+
 End Sub
 
 ''' <summary>   Returns the identity. </summary>
@@ -321,38 +336,43 @@ End Function
 ''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
 '''                           after issuing the <c>*WAI</c> command by querying <c>*WAI; *OPC?</c></param>
 Public Sub Wait(Optional ByVal awaitOpc As Boolean = True)
+    
+    Dim p_command As String: p_command = Ieee488Syntax.WaitCommand
     If awaitOpc Then
-        Me.QueryLine Ieee488Syntax.WaitOpcQueryCommand, False, False
+        p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
+        Me.QueryLine p_command, False, False
     Else
-        Me.WriteLine Ieee488Syntax.WaitCommand
+        Me.WriteLine p_command
     End If
+
 End Sub
 
 ''' <summary>   Enables standard events using the (*ESE {0}) command. </summary>
-''' <param name="standardEvents">   The standard event bits to enable. <param>
-''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
-'''                           after issuing the <c>*ESE #</c> command by querying <c>*ESE #; *OPC?</c></param>
-Public Sub EnableStandardEvents(ByVal StandardEvents As Integer, _
+''' <param name="enabledBits">   [Integer] The standard event bits to enable. <param>
+''' <param name="awaitOpc">      [Optional, Boolean, True] True to wait for operation completion
+'''                              after issuing the <c>*ESE #</c> command by querying <c>*ESE #; *OPC?</c></param>
+Public Sub EnableStandardEvents(ByVal enabledBits As Integer, _
         Optional ByVal awaitOpc As Boolean = True)
     
-    Dim command As String
+    Dim p_command As String
+    p_command = StringExtensions.StringFormat(StandardEventEnableOpcQueryCommand, enabledBits)
     If awaitOpc Then
-        command = StringExtensions.StringFormat(StandardEventEnableOpcQueryCommand, StandardEvents)
-        Me.QueryLine command, False, False
+        p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
+        Me.QueryLine p_command, False, False
     Else
-        command = StringExtensions.StringFormat(StandardEventEnableCommand, StandardEvents)
-        Me.WriteLine Ieee488Syntax.WaitCommand
+        p_command = StringExtensions.StringFormat(StandardEventEnableCommand, enabledBits)
+        Me.WriteLine p_command
     End If
     
 End Sub
 
 ''' <summary>   Returns the standard events enable byte using the *ESE? query command. </summary>
-''' <returns>   The standard event register enable status value. </returns>
+''' <returns>   [Integer] The standard event register enable status value. </returns>
 Public Function QueryStandardEventsEnable() As Integer
     
-    Dim StandardEvents As String
-    StandardEvents = Me.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
-    QueryStandardEventsEnable = CInt(StandardEvents)
+    Dim p_enabledBits As String
+    p_enabledBits = Me.QueryLine(Ieee488Syntax.StandardEventEnableQueryCommand)
+    QueryStandardEventsEnable = CInt(p_enabledBits)
 
 End Function
 
@@ -360,9 +380,9 @@ End Function
 ''' <returns>   The standard event register status value. </returns>
 Public Function QueryStandardEventsStatus() As Integer
     
-    Dim StandardEvents As String
-    StandardEvents = Me.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
-    QueryStandardEventsStatus = CInt(StandardEvents)
+    Dim p_StatusBits As String
+    p_StatusBits = Me.QueryLine(Ieee488Syntax.StandardEventStatusQueryCommand)
+    QueryStandardEventsStatus = CInt(p_StatusBits)
     
 End Function
 
@@ -374,13 +394,13 @@ End Function
 Public Sub EnableServiceRequest(ByVal serviceRequest As Integer, _
         Optional ByVal awaitOpc As Boolean = True)
     
-    Dim command As String
+    Dim p_command As String
+    p_command = StringExtensions.StringFormat(ServiceRequestEnableCommand, serviceRequest)
     If awaitOpc Then
-        command = StringExtensions.StringFormat(ServiceRequestEnableOpcQueryCommand, serviceRequest)
-        Me.QueryLine command, False, False
+        p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
+        Me.QueryLine p_command, False, False
     Else
-        command = StringExtensions.StringFormat(ServiceRequestEnableCommand, serviceRequest)
-        Me.WriteLine command
+        Me.WriteLine p_command
     End If
     
 End Sub
@@ -389,9 +409,9 @@ End Sub
 ''' <returns>   The service request event register enable status value. </returns>
 Public Function QueryServiceRequestEnable() As Integer
     
-    Dim serviceRequest As String
-    serviceRequest = Me.QueryLine(Ieee488Syntax.ServiceRequestEnableQueryCommand)
-    QueryServiceRequestEnable = CInt(serviceRequest)
+    Dim p_enabledBits As String
+    p_enabledBits = Me.QueryLine(Ieee488Syntax.ServiceRequestEnableQueryCommand)
+    QueryServiceRequestEnable = CInt(p_enabledBits)
     
 End Function
 
@@ -399,9 +419,9 @@ End Function
 ''' <returns>   The service request event register status value. </returns>
 Public Function QueryServiceRequestStatus() As Integer
     
-    Dim serviceRequest As String
-    serviceRequest = Me.QueryLine(Ieee488Syntax.ServiceRequestQueryCommand)
-    QueryServiceRequestStatus = CInt(serviceRequest)
+    Dim p_eventStatus As String
+    p_eventStatus = Me.QueryLine(Ieee488Syntax.ServiceRequestQueryCommand)
+    QueryServiceRequestStatus = CInt(p_eventStatus)
     
 End Function
 
@@ -410,10 +430,12 @@ End Function
 '''                           after issuing the <c>*SRE</c> command by querying <c>*SRE; *OPC?</c></param>
 Public Sub ResetKnownState(Optional ByVal awaitOpc As Boolean = True)
     
+    Dim p_command As String: p_command = Ieee488Syntax.ResetKnownStateCommand
     If awaitOpc Then
-        Me.QueryLine Ieee488Syntax.ResetKnownStateOpcQueryCommand, False, False
+        p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
+        Me.QueryLine p_command, False, False
     Else
-        Me.WriteLine Ieee488Syntax.ResetKnownStateCommand, False
+        Me.WriteLine p_command, False
     End If
     
 End Sub

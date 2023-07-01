@@ -25,11 +25,14 @@ End Property
 ''' <summary>   Handles the Workbook activate event. </summary>
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
+    
     On Error Resume Next
     
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
     
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Handles the workbook after save event. </summary>
@@ -39,6 +42,7 @@ Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     If Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
+    On Error GoTo 0
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>

@@ -39,6 +39,8 @@ Public Sub Dispose()
     
     If disconnected And Not m_tcpClientSocket Is Nothing Then Set m_tcpClientSocket = Nothing
     
+    On Error GoTo 0
+
 End Sub
 
 
