@@ -18,92 +18,91 @@ Public Sub Execute(ByVal testDataSheet As Worksheet, Optional usingRemoteWorkboo
     On Error GoTo Finally
     
     If usingRemoteWorkbook Then
-        Dim wb As Workbook: Set wb = testDataSheet.Parent
-        Dim filePath As String: filePath = wb.FullName
+        Dim p_workbook As Workbook: Set p_workbook = testDataSheet.Parent
+        Dim p_filePath As String: p_filePath = p_workbook.FullName
     End If
 
-    Dim moduleFullName As String
+    Dim p_moduleFullName As String
    
-    Dim messages As New VBA.Collection
-    Dim passedCount As Integer
-    Dim failedCount As Integer
-    Dim row As Integer
-    row = 1
+    Dim p_passedCount As Integer
+    Dim p_failedCount As Integer
+    Dim p_rowNo As Integer
+    p_rowNo = 1
     
     testDataSheet.Rows("2:" & testDataSheet.Rows.count).ClearContents
     testDataSheet.Range("B1", "B" & testDataSheet.Rows.count).Interior.ColorIndex = 0
     
-    moduleFullName = testDataSheet.Range("B" & row).value
+    p_moduleFullName = testDataSheet.Range("B" & p_rowNo).value
     
     ' get the module info
-    Dim module As ModuleInfo
-    Set module = cc_isr_Core.Constructor.CreateModuleInfo
-    module.FromModuleFullName moduleFullName
+    Dim p_moduleInfo As ModuleInfo
+    Set p_moduleInfo = cc_isr_Core.Constructor.CreateModuleInfo
+    p_moduleInfo.FromModuleFullName p_moduleFullName
     
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Project"
-    testDataSheet.Range("B" & row).value = module.projectName
+    p_rowNo = p_rowNo + 1
+    testDataSheet.Range("A" & p_rowNo).value = "Project"
+    testDataSheet.Range("B" & p_rowNo).value = p_moduleInfo.ProjectName
     
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Module"
-    testDataSheet.Range("B" & row).value = module.moduleName
+    p_rowNo = p_rowNo + 1
+    testDataSheet.Range("A" & p_rowNo).value = "module"
+    testDataSheet.Range("B" & p_rowNo).value = p_moduleInfo.ModuleName
    
-    row = row + 1
-    Dim passCountRow As Integer: passCountRow = row
-    testDataSheet.Range("A" & passCountRow).value = "Passed"
+    p_rowNo = p_rowNo + 1
+    Dim p_passCountRow As Integer: p_passCountRow = p_rowNo
+    testDataSheet.Range("A" & p_passCountRow).value = "Passed"
     
-    row = row + 1
-    Dim failCountRow As Integer: failCountRow = row
-    testDataSheet.Range("A" & failCountRow).value = "Failed"
+    p_rowNo = p_rowNo + 1
+    Dim p_failCountRow As Integer: p_failCountRow = p_rowNo
+    testDataSheet.Range("A" & p_failCountRow).value = "Failed"
     
-    row = row + 1
-    Dim durationRow As Integer: durationRow = row
-    testDataSheet.Range("A" & durationRow).value = "Duration"
+    p_rowNo = p_rowNo + 1
+    Dim p_durationRow As Integer: p_durationRow = p_rowNo
+    testDataSheet.Range("A" & p_durationRow).value = "Duration"
    
-    row = row + 1
-    testDataSheet.Range("A" & row).value = "Test Name"
-    testDataSheet.Range("B" & row).value = "Outcome"
+    p_rowNo = p_rowNo + 1
+    testDataSheet.Range("A" & p_rowNo).value = "Test Name"
+    testDataSheet.Range("B" & p_rowNo).value = "Outcome"
     
-    Dim macros As Collection: Set macros = WorkbookUtilities.EnumerateMacros(module)
-    Dim macro As MacroInfo
+    Dim p_macros As Collection: Set p_macros = WorkbookUtilities.EnumerateMacros(p_moduleInfo)
+    Dim p_macroInfo As MacroInfo
     
-    Dim sw As StopWatch: Set sw = cc_isr_Core.Constructor.CreateStopWatch
+    Dim p_stopper As StopWatch: Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch
     
-    For Each macro In macros
+    For Each p_macroInfo In p_macros
         
         DoEvents
         
-        Dim arg As String: arg = macro.FullName
+        Dim p_macroFullName As String: p_macroFullName = p_macroInfo.FullName
         If usingRemoteWorkbook Then
-            arg = "'" & filePath & "'!" & arg
+            p_macroFullName = "'" & p_filePath & "'!" & p_macroFullName
         End If
         
-        Set Assert = Application.Run(arg)
+        Set Assert = Application.Run(p_macroFullName)
         
-        row = row + 1
+        p_rowNo = p_rowNo + 1
         
         If IsObject(Assert) Then
-            testDataSheet.Range("A" & row).value = macro.macroName
+            testDataSheet.Range("A" & p_rowNo).value = p_macroInfo.MacroName
             If Assert.AssertSuccessful Then
-                passedCount = passedCount + 1
-                testDataSheet.Range("B" & row).value = "passed"
-                testDataSheet.Range("B" & row).Interior.ColorIndex = 4
+                p_passedCount = p_passedCount + 1
+                testDataSheet.Range("B" & p_rowNo).value = "passed"
+                testDataSheet.Range("B" & p_rowNo).Interior.ColorIndex = 4
             Else
-                failedCount = failedCount + 1
-                testDataSheet.Range("B" & row).value = Assert.AssertMessage
-                testDataSheet.Range("B" & row).Interior.ColorIndex = 3
+                p_failedCount = p_failedCount + 1
+                testDataSheet.Range("B" & p_rowNo).value = Assert.AssertMessage
+                testDataSheet.Range("B" & p_rowNo).Interior.ColorIndex = 3
             End If
         Else
-            testDataSheet.Range("B" & row).value = "assert not defined"
+            testDataSheet.Range("B" & p_rowNo).value = "assert not defined"
         End If
         
-    Next macro
+    Next p_macroInfo
     
-    sw.StopCounter
+    p_stopper.StopCounter
     
-    testDataSheet.Range("B" & passCountRow).value = passedCount
-    testDataSheet.Range("B" & failCountRow).value = failedCount
-    testDataSheet.Range("B" & durationRow).value = CStr(sw.ElapsedMilliseconds) & " ms"
+    testDataSheet.Range("B" & p_passCountRow).value = p_passedCount
+    testDataSheet.Range("B" & p_failCountRow).value = p_failedCount
+    testDataSheet.Range("B" & p_durationRow).value = CStr(p_stopper.ElapsedMilliseconds) & " ms"
     
     Exit Sub
 

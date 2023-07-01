@@ -58,35 +58,34 @@ End Sub
 '''< remarks>   This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
 ''' <see href="https://web.archive.org/web/20160418020100/http://www.utteraccess.com/wiki/Index.php/Singleton"/>
-''' </remarks>
-''' <returns>   If successful, returns zero. Otherwise, it returns the extended error code
-''' in the return value for this function.
-''' </returns>
-Public Function Initialize()
+''' <returns>  [Long] The return value is zero if the operation was successful. Otherwise, the value
+''' ws32_SOCKET_ERROR is returned, a specific error number can be retrieved by calling WSAGetLastError.
+''' and the error is raised.
+''' <returns>
+Public Function Initialize() As Long
 
-    Dim result As Long
-    result = 0
+    Dim p_result As Long: p_result = 0
 
     ' skip if the class was already initialized.
     If m_initiated Then
-        Initialize = result
+        Initialize = p_result
         Exit Function
     End If
     
-    Dim startUpInfo As wsock32.ws32_WSADATA
+    Dim p_startUpInfo As wsock32.ws32_WSADATA
     
     ' Initialize Winsock DLL
     
-    result = WSAStartup(wsock32.ws32_VERSION, startUpInfo)
+    p_result = WSAStartup(wsock32.ws32_VERSION, p_startUpInfo)
     
-    If result <> 0 Then
-        Err.Raise UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Cleanup", _
-                  UserDefinedErrors.WinsockStartingError.Description & " Last error: " & CStr(result)
+    If p_result <> 0 Then
+        Err.Raise UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Initialize", _
+                  UserDefinedErrors.WinsockStartingError.Description & " Last error: " & CStr(Winsock.LastError)
     End If
-    m_initiated = (result = 0)
+    m_initiated = (p_result = 0)
     m_disposed = False
     m_socketCount = 0
-    Initialize = result
+    Initialize = p_result
 
 End Function
 
@@ -124,20 +123,28 @@ Public Property Get Disposed() As Boolean
 End Property
 
 ''' <summary>   returns the last Winsock 32 error . </summary>
-Public Property Get lastError() As Long
-    lastError = WSAGetLastError()
+Public Property Get LastError() As Long
+    LastError = WSAGetLastError()
 End Property
 
 ''' <summary>   Terminates use of the Winsock dll. </summary>
-Public Function Cleanup()
+''' <returns>
+''' The return value is zero if the operation was successful. Otherwise, the value
+''' ws32_SOCKET_ERROR is returned, a specific error number can be retrieved by calling WSAGetLastError.
+''' and the error is raised.
+''' <returns>
+Public Function Cleanup() As Long
+    
     ' Shutdown Winsock DLL
-    Dim result As Long
-    result = WSACleanup()
-    If result = wsock32.ws32_SOCKET_ERROR Then
+    Dim p_result As Long
+    
+    p_result = WSACleanup()
+    If p_result = wsock32.ws32_SOCKET_ERROR Then
         Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                  UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
     End If
-    Cleanup = result
+    Cleanup = p_result
+
 End Function
 
 ''' <summary>   Returns the number of sockets associated with this Winsock instance. </summary>
@@ -153,12 +160,12 @@ Public Sub Dispose()
     If m_initiated And Not m_disposed And (m_socketCount = 0) Then
         m_disposed = True
         m_initiated = False
+        
         ' Shutdown Winsock DLL
-        Dim result As Long
-        result = WSACleanup()
-        If result <> 0 Then
-            Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Dispose", _
-                      UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.lastError)
+        Dim p_result As Long: p_result = WSACleanup()
+        If p_result = wsock32.ws32_SOCKET_ERROR Then
+            Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                      UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
         End If
     End If
     

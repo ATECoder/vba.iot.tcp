@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Implements cc_isr_Winsock.IConnectable
+
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
 
 Private Const READ_AFTER_WRITE_DELAY_DEFAULT = 5
@@ -66,49 +68,9 @@ Public Sub Initialize(ByVal tracer As IErrTracer)
    
 End Sub
 
-''' <summary>   Closes and releases the TCP Client. </summary>
-Public Sub Dispose()
-
-    If Me.Connected Then
-        Me.CloseConnection
-    End If
-    
-    ' dispose the GPIB-Lan controller only after closing the connection.
-    
-    If Not m_gpibLan Is Nothing Then
-        m_gpibLan.Dispose
-    End If
-    Set m_gpibLan = Nothing
-    
-    If Not m_tcpClient Is Nothing Then
-        m_tcpClient.Dispose
-    End If
-    Set m_tcpClient = Nothing
-    
-    Set m_stopper = Nothing
-
-End Sub
-
 ''' <summary>   Gets a reference to the GPIB Lan. </summary>
 Public Property Get GpibLan() As GpibLanController
     Set GpibLan = m_gpibLan
-End Property
-
-''' <summary>   Returns the connection state of the client. </summary>
-''' <returns>   True if the TCP Client socket is connected; otherwise, False. </returns>
-Public Property Get Connected() As Boolean
-    If m_tcpClient Is Nothing Then
-        Connected = False
-    Else
-        Connected = m_tcpClient.Connected
-    End If
-End Property
-
-''' <summary>   Returns true if a connection can be made. </summary>
-''' <returns>   True if a connection can be made. </returns>
-Public Property Get CanConnect() As Boolean
-    CanConnect = Not Me.Connected And _
-                 Not m_tcpClient.TcpClientSocket Is Nothing
 End Property
 
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
@@ -129,7 +91,7 @@ Public Property Get SocketAddress() As String
     If Me.Connected Then
         SocketAddress = m_tcpClient.TcpClientSocket.SocketAddress
     Else
-        SocketAddress = ""
+        SocketAddress = vbNullString
     End If
 End Property
 
@@ -185,58 +147,6 @@ Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
     m_receiveTimeout = timeoutMs
     
 End Sub
-
-''' <summary>   Opens a TCP Client connection. </summary>
-''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        [Long] The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
-''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
-   
-    m_usingGpibLan = port = GPIB_LAN_PORT_NO
-    
-    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
-    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
-    OnConnectionChanging eventArgs
-    
-    If Not eventArgs.cancel Then
-    
-        ' enable/disable the GPIB-Lan controller; this ensure that the controller correctly handles the
-        ' Tcp Client connection events.
-        
-        m_gpibLan.Enabled = Me.UsingGpibLan
-        
-        m_tcpClient.ConnectTo host, port
-        
-        Me.SetReceiveTimeout timeoutMs
-        
-        OnConnectionChanged Me.Connected
-        
-    End If
-
-    OpenConnection = Me.Connected
-   
-End Function
-
-''' <summary>   Closes the TCP Client connection. </summary>
-''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
-Public Function CloseConnection() As Boolean
-
-    Dim eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
-    Set eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
-    OnConnectionChanging eventArgs
-    
-    If Not eventArgs.cancel Then
-    
-        CloseConnection = m_tcpClient.Disconnect
-    
-        OnConnectionChanged Me.Connected
-    
-    End If
-    
-    CloseConnection = Not Me.Connected
-    
-End Function
 
 ''' <summary>   Returns true if the TCP Connection uses the Prologix
 ''' GPIB-Lan interface device. </summary>
@@ -300,26 +210,181 @@ Public Function QueryLine(ByVal message As String, _
         DoEvents
         QueryLine = Me.Read(maxLength, trimEnd)
     Else
-        QueryLine = ""
+        QueryLine = vbNullString
     End If
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
-'  Vi Session Events
+'  Connectable implementation
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Gets a reference to the connectable <see cref="cc_isr_Winsoc.TcpClient"/> object . </summary>
+''' <value>   [<see cref="cc_isr_Winsock.IConnectable"/>]. </value>
+Public Property Get Connectable() As cc_isr_Winsock.IConnectable
+    Set Connectable = m_tcpClient
+End Property
+
+''' <summary>   Returns the connection state of the client. </summary>
+''' <value>   [Boolean] True if the TCP Client socket is connected; otherwise, False. </value>
+Public Property Get Connected() As Boolean
+    
+    Connected = IConnectable_Connected
+
+End Property
+
+''' <summary>   Returns the connection state of the client. </summary>
+''' <value>   [Boolean] True if the TCP Client socket is connected; otherwise, False. </value>
+Private Property Get IConnectable_Connected() As Boolean
+    
+    If m_tcpClient Is Nothing Then
+        IConnectable_Connected = False
+    Else
+        IConnectable_Connected = Me.Connectable.Connected
+    End If
+
+End Property
+
+''' <summary>   Returns true if a connection can be made. </summary>
+''' <value>   [Boolean] True if a connection can be made. </value>
+Public Property Get CanConnect() As Boolean
+    
+    CanConnect = IConnectable_CanConnect
+
+End Property
+
+''' <summary>   Returns true if a connection can be made. </summary>
+''' <value>   [Boolean] True if a connection can be made. </value>
+Private Property Get IConnectable_CanConnect() As Boolean
+
+    If Me.Connectable Is Nothing Then
+        IConnectable_CanConnect = False
+    Else
+        IConnectable_CanConnect = Me.Connectable.CanConnect
+    End If
+
+End Property
+
+
+''' <summary>   Closes and releases the TCP Client. </summary>
+Public Sub Dispose()
+    
+    IConnectable_Dispose
+
+End Sub
+
+''' <summary>   Closes and releases the TCP Client. </summary>
+Private Sub IConnectable_Dispose()
+
+    If Me.Connectable.Connected Then
+        Me.Connectable.CloseConnection
+    End If
+    
+    ' dispose the GPIB-Lan controller only after closing the connection.
+    
+    If Not m_gpibLan Is Nothing Then
+        m_gpibLan.Dispose
+    End If
+    Set m_gpibLan = Nothing
+    
+    If Not Me.Connectable Is Nothing Then
+        Me.Connectable.Dispose
+    End If
+    
+    Set m_tcpClient = Nothing
+    
+    Set m_stopper = Nothing
+    
+End Sub
+
+''' <summary>   Opens a TCP Client connection to the specified host at the specified port
+''' as sets the connection timeout. </summary>
+''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        [Long] The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <returns>   True if the TCP Client is connected. </returns>
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
+    
+    IConnectable_OpenConnection host, port, timeoutMs
+
+End Function
+
+''' <summary>   Opens a TCP Client connection to the specified host at the specified port
+''' as sets the connection timeout. </summary>
+''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        [Long] The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <returns>   True if the TCP Client is connected. </returns>
+Private Function IConnectable_OpenConnection(ByVal host As String, ByVal port As Long, _
+        Optional ByVal timeoutMs As Long = 500&) As Boolean
+
+    m_usingGpibLan = port = GPIB_LAN_PORT_NO
+    
+    Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    IConnectable_OnConnectionChanging p_eventArgs
+    
+    If Not p_eventArgs.cancel Then
+    
+        ' enable/disable the GPIB-Lan controller; this ensure that the controller correctly handles the
+        ' Tcp Client connection events.
+        
+        m_gpibLan.Enabled = Me.UsingGpibLan
+        
+        Connectable.OpenConnection host, port, timeoutMs
+        
+        OnConnectionChanged Connectable.Connected
+        
+    End If
+
+    IConnectable_OpenConnection = Connectable.Connected
+    
+End Function
+
+''' <summary>   Closes the TCP Client connection. </summary>
+''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
+Public Function CloseConnection() As Boolean
+    
+    CloseConnection = IConnectable_CloseConnection
+    
+End Function
+
+''' <summary>   Closes the TCP Client connection. </summary>
+''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
+Private Function IConnectable_CloseConnection() As Boolean
+
+    Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    IConnectable_OnConnectionChanging p_eventArgs
+    
+    If Not p_eventArgs.cancel Then
+    
+        IConnectable_CloseConnection = Connectable.CloseConnection
+    
+        OnConnectionChanged Connectable.Connected
+    
+    End If
+    
+    IConnectable_CloseConnection = Not Connectable.Connected
+
+End Function
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
-    RaiseEvent ConnectionChanged( _
-            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+    IConnectable_OnConnectionChanged cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected)
+End Sub
+
+''' <summary>   Raises the <see cref="Connectionchanged"/> event. </summary>
+''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
+Private Sub IConnectable_OnConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+    RaiseEvent ConnectionChanged(eventArgs)
 End Sub
 
 ''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
 ''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
-Private Sub OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+Private Sub IConnectable_OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
     RaiseEvent ConnectionChanging(eventArgs)
 End Sub
 
@@ -332,12 +397,10 @@ End Sub
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
-
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanging"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
 Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
-
 End Sub
 

@@ -14,20 +14,21 @@ Option Explicit
 ''' <param name="c">   The character to trim. </param>
 ''' <returns>   A string. <returns>
 Public Function TrimLeft(ByVal text As String, ByVal c As String) As String
-    Dim textLength As Long
-    textLength = Len(text)
     
-    Dim firstCharacter As String
+    Dim p_textLength As Long
+    p_textLength = Len(text)
     
-    Do While textLength > 0
-        firstCharacter = Left(text, 1)
+    Dim p_firstCharacter As String
+    
+    Do While p_textLength > 0
+        p_firstCharacter = Left(text, 1)
         
-        If firstCharacter <> c Then
+        If p_firstCharacter <> c Then
             Exit Do
         End If
         
-        text = Right(text, textLength - 1)
-        textLength = Len(text)
+        text = Right(text, p_textLength - 1)
+        p_textLength = Len(text)
     Loop
     
     TrimLeft = text
@@ -39,20 +40,20 @@ End Function
 ''' <param name="c">   The character to trim. </param>
 ''' <returns>   A string. <returns>
 Public Function TrimRight(ByVal text As String, ByVal c As String) As String
-    Dim textLength As Long
-    textLength = Len(text)
     
-    Dim lastCharacter As String
+    Dim p_textLength As Long: p_textLength = Len(text)
+    
+    Dim p_lastCharacter As String
         
-    Do While textLength > 0
-        lastCharacter = Right(text, 1)
+    Do While p_textLength > 0
+        p_lastCharacter = Right(text, 1)
         
-        If lastCharacter <> c Then
+        If p_lastCharacter <> c Then
             Exit Do
         End If
         
-        text = Left(text, textLength - 1)
-        textLength = Len(text)
+        text = Left(text, p_textLength - 1)
+        p_textLength = Len(text)
     Loop
     
     TrimRight = text
@@ -66,6 +67,7 @@ End Function
 ''' <returns>   A string. <returns>
 Public Function Substring(ByVal text As String, ByVal startIndex As Integer, _
         Optional ByVal Length As Variant) As String
+    
     If startIndex > Len(text) Then
         startIndex = Len(text)
     End If
@@ -79,6 +81,7 @@ Public Function Substring(ByVal text As String, ByVal startIndex As Integer, _
     End If
 
     Substring = Left(Right(text, Len(text) - startIndex), Length)
+    
 End Function
 
 ''' <summary>   Checks whether the given text starts with the given sequence. </summary>
@@ -89,7 +92,9 @@ End Function
 ''' <returns>   A Boolean <returns>
 Public Function StartsWith(ByVal text As String, ByVal startText As String, _
                            Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    
     StartsWith = 1 = InStr(1, text, startText, compareMethod)
+
 End Function
 
 ''' <summary>   Checks whether the given text ends with the given sequence. </summary>
@@ -99,7 +104,9 @@ End Function
 ''' <returns>   A Boolean. <returns>
 Public Function EndsWith(ByVal text As String, ByVal endText As String, _
                            Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+    
     EndsWith = 0 = StrComp(Right(text, Len(endText)), endText, compareMethod)
+
 End Function
 
 ''' <summary>   Gets the character at the given index from the given string. </summary>
@@ -108,7 +115,9 @@ End Function
 ''' <param name="index">   The index of the character to get. </param>
 ''' <returns>   A string. <returns>
 Public Function CharAt(ByVal text As String, ByVal index As Integer) As String
+    
     CharAt = Mid(text, index, 1)
+
 End Function
 
 ''' <summary>   Repeats the given string the given amount of times. </summary>
@@ -117,12 +126,13 @@ End Function
 ''' <param name="count">   The amount of times to repeat the given string. </param>
 ''' <returns>   A string. <returns>
 Public Function Repeat(ByVal text As String, ByVal count As Long) As String
-    Repeat = ""
     
+    Repeat = vbNullString
     Dim i As Long
     For i = 1 To count
         Repeat = Repeat & text
     Next
+
 End Function
 
 ''' <summary>   Converts a regular string to a Unicode string,
@@ -130,13 +140,15 @@ End Function
 ''' <param name="text">   The string to convert. </param>
 ''' <returns>   A string. <returns>
 Public Function StringToWideString(ByVal text As String) As String
+    
     StringToWideString = StrConv(text, vbUnicode)
+
 End Function
 
 ''' <summary>   Returns true if the value is null or empty. </summary>
 ''' <returns>   true if the value is null or empty. </returns>
 Public Function IsNullOrEmpty(ByVal text As String) As Boolean
-    IsNullOrEmpty = (text = "")
+    IsNullOrEmpty = (text = vbNullString)
 End Function
 
 ''' <summary>   Replaces braced numerical value with tokens similar to VB.NET String.Format
@@ -144,11 +156,13 @@ End Function
 ''' <param name="mask">     The mask such as 'A{0} b{1}'. </param>
 ''' <param name="tokens">   The parameter list matching the mask. </param>
 Public Function StringFormat(ByVal mask As String, ParamArray tokens() As Variant) As String
+    
     Dim i As Long
     For i = 0 To UBound(tokens)
         mask = Replace$(mask, "{" & i & "}", tokens(i))
     Next
     StringFormat = mask
+
 End Function
 
 ''' <summary>   Pops an element from a delimited string. </summary>
@@ -163,20 +177,19 @@ End Function
 ''' original string if the delimiter was not located. </returns>
 Public Function Pop(ByRef delimitedString As String, ByVal delimiter As String) As String
 
-  Dim lPos As Long
-  
   ' find the delimiter in the string
-  lPos = InStr(1, delimitedString, delimiter, vbTextCompare)
+  
+  Dim p_position As Long: p_position = InStr(1, delimitedString, delimiter, vbTextCompare)
   
   ' check if we have a delimiter in the string
-  If lPos > 0 Then
+  If p_position > 0 Then
   
     ' if we have a delimiter, return the string all the
     ' way up to but not including the delimiter
-    Pop = Left$(delimitedString, lPos - 1)
+    Pop = Left$(delimitedString, p_position - 1)
     
     ' return the string past the delimiter
-    delimitedString = Mid$(delimitedString, lPos + Len(delimiter))
+    delimitedString = Mid$(delimitedString, p_position + Len(delimiter))
     
   Else
     ' if the string does not include the delimiter, we

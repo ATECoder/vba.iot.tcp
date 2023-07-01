@@ -13,16 +13,19 @@ Attribute VB_Exposed = True
 ''' <param name="key">          The key to check for in the collection. </param>
 ''' <returns>   True if the key is contained in the collection. </returns>
 Public Function ContainsKey(ByVal col As VBA.Collection, ByVal key As Variant) As Boolean
-    Dim found As Boolean
-    found = False
+    
+    Dim p_found As Boolean
+    p_found = False
     Dim colItem As Variant
     For Each colItem In col
         DoEvents
         If colItem = key Then
-            found = True
+            p_found = True
             Exit For
         End If
     Next colItem
+    ContainsKey = p_found
+
 #If False Then
     ' this causes error 5 event if doing this:
     Print col.item(1)
@@ -34,7 +37,7 @@ Public Function ContainsKey(ByVal col As VBA.Collection, ByVal key As Variant) A
     col key ' Just try it. If it fails, Err.Number will be nonzero.
     ContainsKey = (Err.Number = 0)
 #End If
-    ContainsKey = found
+
 End Function
 
 ''' <summary>   Returns true if the object is contained in the collection. </summary>
@@ -44,16 +47,16 @@ End Function
 ''' <returns>   True if the contained collection is fully contained in the collection. </returns>
 Public Function ContainsAll(ByVal col As VBA.Collection, ByVal contained As VBA.Collection) As Boolean
     
-    Dim result As Boolean: result = True
-    Dim key As Variant
-    For Each key In contained
+    Dim p_result As Boolean: p_result = True
+    Dim p_key As Variant
+    For Each p_key In contained
         DoEvents
-        If Not ContainsKey(col, key) Then
-            result = False
+        If Not ContainsKey(col, p_key) Then
+            p_result = False
             Exit For
         End If
-    Next key
-    ContainsAll = result
+    Next p_key
+    ContainsAll = p_result
     
 End Function
 
@@ -64,16 +67,16 @@ End Function
 '''                            subject collection. </param>
 Public Function FindMissingItem(ByVal col As VBA.Collection, ByVal contained As VBA.Collection) As Variant
     
-    Dim result As Variant: Set result = Nothing
-    Dim key As Variant
-    For Each key In contained
+    Dim p_result As Variant: Set p_result = Nothing
+    Dim p_key As Variant
+    For Each p_key In contained
         DoEvents
-        If Not ContainsKey(col, key) Then
-            result = key
+        If Not ContainsKey(col, p_key) Then
+            p_result = p_key
             Exit For
         End If
-    Next key
-    Set FindMissingItem = result
+    Next p_key
+    Set FindMissingItem = p_result
     
 End Function
 
@@ -83,14 +86,14 @@ End Function
 ''' <returns>   The number of items that were added. </returns>
 Public Function AddItems(ByVal source As VBA.Collection, ByVal destination As VBA.Collection) As Integer
     
-    Dim count As Integer: count = 0
-    Dim item As Variant
-    For Each item In source
+    Dim p_count As Integer: p_count = 0
+    Dim p_item As Variant
+    For Each p_item In source
         DoEvents
-        destination.Add item
-        count = count + 1
-    Next item
-    AddRange = count
+        destination.Add p_item
+        p_count = p_count + 1
+    Next p_item
+    AddRange = p_count
     
 End Function
 

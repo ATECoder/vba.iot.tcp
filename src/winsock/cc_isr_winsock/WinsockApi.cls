@@ -102,6 +102,7 @@ End Sub
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
 Public Sub FD_SET_REMOVE(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set)
+    
     Dim i As Integer
     i = 0
     Do While i < socketSet.fd_count
@@ -112,25 +113,27 @@ Public Sub FD_SET_REMOVE(ByVal socket_id As Long, ByRef socketSet As wsock32.ws3
         End If
         i = i + 1
     Loop
+
 End Sub
 
 ''' <summary>   Checks to see if s is a member of set and returns TRUE if so.. </summary>
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
 Public Function FD_SET_CONTAINS(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set) As Boolean
-    Dim isFound As Boolean
-    isFound = False
+    
+    Dim p_found As Boolean: p_found = False
+    
     Dim i As Integer
     i = 0
     
     Do While i < socketSet.fd_count
         If socketSet.fd_array(i) = socket_id Then
-            isFound = True
+            p_found = True
             Exit Do
         End If
         i = i + 1
     Loop
-    FD_SET_CONTAINS = isFound
+    FD_SET_CONTAINS = p_found
    
 End Function
 
@@ -138,8 +141,8 @@ End Function
 ''' <param name="socket_Id">   [in] A descriptor that identifies a socket. </param>
 ''' <param name="socketSet">   [in, out] A pointer to the set of sockets. </param>
 Public Sub FD_SET_ADD(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_fd_set)
-    Dim i As Integer
-    i = 0
+    
+    Dim i As Integer: i = 0
     
     Do While i < socketSet.fd_count
         If socketSet.fd_array(i) = socket_id Then
@@ -154,6 +157,7 @@ Public Sub FD_SET_ADD(ByVal socket_id As Long, ByRef socketSet As wsock32.ws32_f
             socketSet.fd_count = socketSet.fd_count + 1
         End If
     End If
+    
 End Sub
 
 ''' <summary>   Determines the readability status of one or more sockets, waiting if necessary, to perform synchronous I/O. </summary>
@@ -167,20 +171,20 @@ End Sub
 Public Function DetermineReadability(ByRef readSocketSet As wsock32.ws32_fd_set, _
                                      Optional ByVal timeoutMs As Long = 500) As Integer
 
-    Dim time As wsock32.ws32_Time_Value
-    time.tv_sec = timeoutMs / 1000
-    time.tv_usec = 1000 * (timeoutMs Mod 1000)
+    Dim p_time As wsock32.ws32_Time_Value
+    p_time.tv_sec = timeoutMs / 1000
+    p_time.tv_usec = 1000 * (timeoutMs Mod 1000)
     
-    Dim emptyFdSet As wsock32.ws32_fd_set
+    Dim p_emptyFdSet As wsock32.ws32_fd_set
     
-    Dim selectResult As Integer
-    selectResult = select_(0, readSocketSet, emptyFdSet, emptyFdSet, time)
+    Dim p_selectResult As Integer
+    p_selectResult = select_(0, readSocketSet, p_emptyFdSet, p_emptyFdSet, p_time)
 
-    If selectResult = wsock32.ws32_SOCKET_ERROR Then
+    If p_selectResult = wsock32.ws32_SOCKET_ERROR Then
         Err.Raise UserDefinedErrors.SocketSetStatusError.Code, "IdentityReader.WinsockApi.DetermineReadability", _
-                  UserDefinedErrors.SocketSetStatusError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketSetStatusError.Description & " Last error: " & CStr(Winsock.LastError)
     End If
-    DetermineReadability = selectResult
+    DetermineReadability = p_selectResult
 
 End Function
 

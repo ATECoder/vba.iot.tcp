@@ -20,7 +20,7 @@ Private Const m_receivedMessageLengthCell As String = "J2"
 Private Const m_receivedMessageCell As String = "K2"
 Private Const m_elapsedTimeCell As String = "L2"
 Private Const m_elapsedTimeFormat As String = "0.0"
-Private Const m_errorMessageCell As String = "B4"
+Private Const m_lastErrorMessageCell As String = "B4"
 
 Private Const m_serialPollCell As String = "E11"
 Private Const m_statusByteCell As String = "F11"
@@ -105,26 +105,26 @@ End Sub
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Dim affirmative As Boolean: affirmative = eventArgs.Connected
+    Dim p_connected As Boolean: p_connected = eventArgs.Connected
     
-    Me.ConnectToggleButton.value = affirmative
+    Me.ConnectToggleButton.value = p_connected
     
     ' report the connection state
-    Range(m_connectedCell).value = affirmative
+    Range(m_connectedCell).value = p_connected
         
-    Me.RSTButton.Enabled = affirmative
-    Me.CLSButton.Enabled = affirmative
-    Me.QueryButton.Enabled = affirmative
-    Me.ReadButton.Enabled = affirmative
-    Me.ReadStatusByteButton.Enabled = affirmative
-    Me.WriteButton.Enabled = affirmative
+    Me.RSTButton.Enabled = p_connected
+    Me.CLSButton.Enabled = p_connected
+    Me.QueryButton.Enabled = p_connected
+    Me.ReadButton.Enabled = p_connected
+    Me.ReadStatusByteButton.Enabled = p_connected
+    Me.WriteButton.Enabled = p_connected
     
-    Me.ReadCardsButton.Enabled = affirmative
-    Me.SetScansButton.Enabled = affirmative
-    Me.QueryInputsButton.Enabled = affirmative
-    Me.ReadResistanceButton.Enabled = affirmative
+    Me.ReadCardsButton.Enabled = p_connected
+    Me.SetScansButton.Enabled = p_connected
+    Me.QueryInputsButton.Enabled = p_connected
+    Me.ReadResistanceButton.Enabled = p_connected
     
-    If affirmative Then
+    If p_connected Then
         EnableGpibLan Me.Session.VISession.UsingGpibLan
     Else
         EnableGpibLan False
@@ -134,25 +134,40 @@ End Sub
 
 ''' <summary>   Populates the Commands combo box. </summary>
 Friend Sub PopulateCommandsComboBox()
+    Const p_procedureName = "PopulateCommandsComboBox"
+    
+    On Error Resume Next
+    
     Me.CommandsComboBox.Clear
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateCommand
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateCommand & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.IdentityQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OperationCompleteCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OperationCompletedQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.OptionsQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ResetKnownStateCommand
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.StandardEventEnableCommandFormat, "{0}", &H7F)
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.ResetKnownStateCommand & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
+    Me.CommandsComboBox.AddItem cc_isr_Core.StringExtensions.StringFormat( _
+            cc_isr_Ieee488.StandardEventEnableCommand, &H7F) & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.StandardEventEnableQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.StandardEventStatusQueryCommand
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.ServiceRequestEnableCommandFormat, "{0}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableCommandFormat, _
-                                        "{0}", &H7F), "{1}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(Replace(cc_isr_Ieee488.StandardServiceEnableCompleteCommandFormat, _
-                                        "{0}", &H7F), "{1}", &H7F)
-    Me.CommandsComboBox.AddItem Replace(cc_isr_Ieee488.OperationCompleteEnableCommandFormat, "{0}", &H7F)
+    Me.CommandsComboBox.AddItem cc_isr_Core.StringExtensions.StringFormat( _
+            cc_isr_Ieee488.ServiceRequestEnableCommand, &H7F) & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
+    Me.CommandsComboBox.AddItem cc_isr_Core.StringExtensions.StringFormat( _
+            cc_isr_Ieee488.StandardServiceEnableCommand, &H7F, &H7F) & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
+    Me.CommandsComboBox.AddItem cc_isr_Core.StringExtensions.StringFormat( _
+            cc_isr_Ieee488.StandardServiceEnableCommand, &H7F, &H7F) & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestEnableQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ServiceRequestQueryCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand
+    Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand & _
+            ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
    
     Me.CommandsComboBox.AddItem ":FUNC 'RES',(@101:120)"
     Me.CommandsComboBox.AddItem ":FUNC 'RES',(@201:220)"
@@ -161,17 +176,32 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem ":SYST:ERR?"
     Me.CommandsComboBox.AddItem ":SYST:FRSW?"
    
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+        
+    End If
+    
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Restarts the stop watch and clears the elapsed time cell. </summary>
 Friend Sub RestartStopWatch()
-    Range(m_elapsedTimeCell).value = ""
+    
+    Range(m_elapsedTimeCell).value = vbNullString
     Me.StopWatch.Restart
+
 End Sub
 
 ''' <summary>   Reads the stop watch and updates the elapsed time cell. </summary>
 Friend Sub ReadStopWatch()
+    
     Range(m_elapsedTimeCell).value = Format(Me.StopWatch.ElapsedMilliseconds, m_elapsedTimeFormat)
+
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -184,7 +214,7 @@ End Sub
 ''' <param name="message">   [String] to send to the instrument. </param>
 Friend Sub WriteLine(ByVal message As String)
 
-    Const thisProcedureName = "WriteLine"
+    Const p_procedureName = "WriteLine"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -198,16 +228,17 @@ Friend Sub WriteLine(ByVal message As String)
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -219,7 +250,7 @@ End Sub
 ''' <param name="message">   [String] to send to the instrument. </param>
 Friend Function QueryLine(ByVal message As String) As String
 
-    Const thisProcedureName = "QueryLine"
+    Const p_procedureName = "QueryLine"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -233,16 +264,17 @@ Friend Function QueryLine(ByVal message As String) As String
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Function
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -253,7 +285,7 @@ End Function
 ''' <summary>   Read from the instrument handling any errors. </summary>
 Friend Function Read() As String
 
-    Const thisProcedureName = "Read"
+    Const p_procedureName = "Read"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -267,16 +299,17 @@ Friend Function Read() As String
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Function
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -287,28 +320,24 @@ End Function
 ''' <summary>   Handles the Toggle connection button click event. </summary>
 Friend Sub ConnectToggleButton_Click()
 
-    Const thisProcedureName = "ConnectToggleButton_Click"
+    Const p_procedureName = "ConnectToggleButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
     Me.RestartStopWatch
 
-    Dim host As String
-    Dim port As Integer
-    Dim timeout As Integer
-    
-    timeout = Me.ReceiveTimeout
-    host = Me.host
-    port = Me.port
-    
+    Dim p_host As String: p_host = Me.host
+    Dim p_port As Integer: p_port = Me.port
+    Dim p_timeout As Integer: p_timeout = Me.ReceiveTimeout
+      
     If Not ConnectToggleButton.value And Me.K2700.Connected Then
         
         Me.K2700.CloseConnection
         
     ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
     
-        Me.K2700.OpenConnection Me.host, Me.port, timeout
+        Me.K2700.OpenConnection p_host, p_port, p_timeout
         
     End If
     
@@ -317,16 +346,17 @@ Friend Sub ConnectToggleButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -337,7 +367,7 @@ End Sub
 ''' <summary>   Handles the Clear Know State button click event. </summary>
 Private Sub CLSButton_Click()
     
-    Const thisProcedureName = "CLSButton_Click"
+    Const p_procedureName = "CLSButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -351,16 +381,17 @@ Private Sub CLSButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -371,7 +402,7 @@ End Sub
 ''' <summary>   Handles the Read Status Byte button click event. </summary>
 Private Sub ReadStandardEventStatusButton_Click()
 
-    Const thisProcedureName = "ReadStandardEventStatusButton"
+    Const p_procedureName = "ReadStandardEventStatusButton"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -385,16 +416,17 @@ Private Sub ReadStandardEventStatusButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -405,7 +437,7 @@ End Sub
 ''' <summary>   Handles the Reset Known State button click event. </summary>
 Private Sub RSTButton_Click()
     
-    Const thisProcedureName = "RSTButton_Click"
+    Const p_procedureName = "RSTButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -419,16 +451,17 @@ Private Sub RSTButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -439,7 +472,7 @@ End Sub
 ''' <summary>   Handles the Selective device clear button click event. </summary>
 Private Sub SDCButton_Click()
     
-    Const thisProcedureName = "SDCButton_Click"
+    Const p_procedureName = "SDCButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -453,16 +486,17 @@ Private Sub SDCButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -473,7 +507,7 @@ End Sub
 ''' <summary>   Handles the Read Status Byte button click event. </summary>
 Friend Sub ReadStatusByteButton_Click()
     
-    Const thisProcedureName = "ReadStatusByteButton_Click"
+    Const p_procedureName = "ReadStatusByteButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -497,16 +531,17 @@ Friend Sub ReadStatusByteButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -517,27 +552,27 @@ End Sub
 ''' <summary>   Handles the Write button click event. </summary>
 Private Sub WriteButton_Click()
 
-    Const thisProcedureName = "WriteButton_Click"
+    Const p_procedureName = "WriteButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.SentMessage = ""
-    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
+    Me.SentMessage = vbNullString
+    Dim p_messageToSend As String: p_messageToSend = Me.CommandsComboBox.value
     
     Me.RestartStopWatch
     
-    Me.WriteLine messageToSend
+    Me.WriteLine p_messageToSend
     
     Me.ReadStopWatch
     
-    Me.SentMessage = messageToSend
+    Me.SentMessage = p_messageToSend
     If Me.Session.VISession.UsingGpibLan And Me.AutoStatusReadCheckBox.value Then
         Range(m_serialPollCell).value = Me.Session.VISession.GpibLan.SerialPoll
     End If
     
-    Dim isQuery As Boolean: isQuery = cc_isr_Core.StringExtensions.EndsWith(messageToSend, "?")
-    If Not isQuery And Me.AutoStatusReadCheckBox.value Then
+    Dim p_isQuery As Boolean: p_isQuery = cc_isr_Core.StringExtensions.EndsWith(p_messageToSend, "?")
+    If Not p_isQuery And Me.AutoStatusReadCheckBox.value Then
         Me.StatusByte = Me.Session.QueryServiceRequestStatus
         Me.StandardByte = Me.Session.QueryStandardEventsStatus
     End If
@@ -546,16 +581,17 @@ Private Sub WriteButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -566,35 +602,36 @@ End Sub
 ''' <summary>   Handles the Read button click event. </summary>
 Private Sub ReadButton_Click()
 
-    Const thisProcedureName = "ReadButton_Click"
+    Const p_procedureName = "ReadButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.receivedMessage = ""
-    Dim messageReceived As String
+    Me.receivedMessage = vbNullString
+    Dim p_messageReceived As String
     
     Me.RestartStopWatch
     
-    messageReceived = Me.Read
+    p_messageReceived = Me.Read
     
     Me.ReadStopWatch
     
-    Me.receivedMessage = messageReceived
+    Me.receivedMessage = p_messageReceived
    
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -605,38 +642,39 @@ End Sub
 ''' <summary>   Handles the Query button click event. </summary>
 Private Sub QueryButton_Click()
     
-    Const thisProcedureName = "QueryButton_Click"
+    Const p_procedureName = "QueryButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.receivedMessage = ""
-    Me.SentMessage = ""
-    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
-    Dim messageReceived As String
+    Me.receivedMessage = vbNullString
+    Me.SentMessage = vbNullString
+    Dim p_messageToSend As String: p_messageToSend = Me.CommandsComboBox.value
+    Dim p_messageReceived As String
     
     Me.RestartStopWatch
     
-    messageReceived = Me.QueryLine(messageToSend)
+    p_messageReceived = Me.QueryLine(p_messageToSend)
     
     Me.ReadStopWatch
     
-    Me.receivedMessage = messageReceived
-    Me.SentMessage = messageToSend
+    Me.receivedMessage = p_messageReceived
+    Me.SentMessage = p_messageToSend
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -716,6 +754,16 @@ Friend Property Let StandardByte(ByVal value As Integer)
     Range(m_standardByteCell).value = value
 End Property
 
+''' <summary>   Gets the Last Error Message. </summary>
+Friend Property Get LastErrorMessage() As String
+    LastErrorMessage = Me.LastErrorMessage
+End Property
+
+''' <summary>   Sets the Last Error Message. </summary>
+Friend Property Let LastErrorMessage(ByVal value As String)
+    Me.LastErrorMessage = value
+End Property
+
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
 ' GPIB LAN
@@ -739,7 +787,7 @@ End Sub
 
 Private Sub GoToLocalButton_Click()
 
-    Const thisProcedureName = "GoToLocalButton_Click"
+    Const p_procedureName = "GoToLocalButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -753,16 +801,17 @@ Private Sub GoToLocalButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -772,7 +821,7 @@ End Sub
 
 Private Sub LocalLockoutButton_Click()
 
-    Const thisProcedureName = "LocalLockoutButton_Click"
+    Const p_procedureName = "LocalLockoutButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -786,16 +835,17 @@ Private Sub LocalLockoutButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -805,7 +855,7 @@ End Sub
 
 Private Sub ReadAfterWriteSetButton_Click()
 
-    Const thisProcedureName = "ReadAfterWriteSetButton_Click"
+    Const p_procedureName = "ReadAfterWriteSetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -821,16 +871,17 @@ Private Sub ReadAfterWriteSetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -840,7 +891,7 @@ End Sub
 
 Private Sub ReadAfterWriteGetButton_Click()
 
-    Const thisProcedureName = "ReadAfterWriteGetButton_Click"
+    Const p_procedureName = "ReadAfterWriteGetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -856,16 +907,17 @@ Private Sub ReadAfterWriteGetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -875,7 +927,7 @@ End Sub
 
 Private Sub SerialPollButton_Click()
 
-    Const thisProcedureName = "SerialPollButton_Click"
+    Const p_procedureName = "SerialPollButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -889,16 +941,17 @@ Private Sub SerialPollButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -908,7 +961,7 @@ End Sub
 
 Private Sub SRQButton_Click()
 
-    Const thisProcedureName = "SRQButton_Click"
+    Const p_procedureName = "SRQButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -922,16 +975,17 @@ Private Sub SRQButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -941,7 +995,7 @@ End Sub
 
 Private Sub GetGpibAddressButton_Click()
 
-    Const thisProcedureName = "GetGpibAddressButton_Click"
+    Const p_procedureName = "GetGpibAddressButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -955,16 +1009,17 @@ Private Sub GetGpibAddressButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -974,7 +1029,7 @@ End Sub
 
 Private Sub SetGpibAddressButton_Click()
 
-    Const thisProcedureName = "SetGpibAddressButton_Click"
+    Const p_procedureName = "SetGpibAddressButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -988,16 +1043,17 @@ Private Sub SetGpibAddressButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1008,7 +1064,7 @@ End Sub
 
 Private Sub ReadTimeoutGetButton_Click()
 
-    Const thisProcedureName = "ReadTimeoutGetButton_Click"
+    Const p_procedureName = "ReadTimeoutGetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1022,16 +1078,17 @@ Private Sub ReadTimeoutGetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1041,7 +1098,7 @@ End Sub
 
 Private Sub ReadTimeoutSetButton_Click()
 
-    Const thisProcedureName = "ReadTimeoutSetButton_Click"
+    Const p_procedureName = "ReadTimeoutSetButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1055,16 +1112,17 @@ Private Sub ReadTimeoutSetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1126,9 +1184,9 @@ Private Sub SetResistance(ByVal resistanceNo As Integer, ByVal resistanceValue A
     Range(m_resistanceNoCell).value = resistanceNo
     Range(m_resistanceCell).value = resistanceValue
     
-    Dim row As Integer: row = m_resistanceNoTopRow + resistanceNo - 1
-    Range(m_resistanceNoCol & CStr(row)).value = "R" & CStr(resistanceNo)
-    Range(m_resistanceCol & CStr(row)).value = Format(resistanceValue, m_resistanceFormat)
+    Dim p_rowNo As Integer: p_rowNo = m_resistanceNoTopRow + resistanceNo - 1
+    Range(m_resistanceNoCol & CStr(p_rowNo)).value = "R" & CStr(resistanceNo)
+    Range(m_resistanceCol & CStr(p_rowNo)).value = Format(resistanceValue, m_resistanceFormat)
     
 End Sub
 
@@ -1147,7 +1205,7 @@ End Sub
 ''' <summary> Queries the Inputs status. </summary>
 Private Sub QueryInputsButton_Click()
 
-    Const thisProcedureName = "QueryInputsButton_Click"
+    Const p_procedureName = "QueryInputsButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1161,16 +1219,17 @@ Private Sub QueryInputsButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1181,7 +1240,7 @@ End Sub
 ''' <summary> </summary>
 Private Sub ReadCardsButton_Click()
     
-    Const thisProcedureName = "ReadCardsButton_Click"
+    Const p_procedureName = "ReadCardsButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1198,16 +1257,17 @@ Private Sub ReadCardsButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1218,7 +1278,7 @@ End Sub
 ''' <summary>   Read a single or all resistances from the front or read panel. </summary>
 Private Sub ReadResistanceButton_Click()
     
-    Const thisProcedureName = "ReadResistanceButton_Click"
+    Const p_procedureName = "ReadResistanceButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1232,17 +1292,17 @@ Private Sub ReadResistanceButton_Click()
     End If
     
     If Me.FrontReadRequired And Not Me.K2700.IsFrontInputs Then
-        Range(m_errorMessageCell).value = "Please release the front panel INPUTS button to its FRONT (F) position"
+        Me.LastErrorMessage = "Please release the front panel INPUTS button to its FRONT (F) position"
         GoTo exit_Handler
     ElseIf Not Me.FrontReadRequired And Me.K2700.IsFrontInputs Then
-        Range(m_errorMessageCell).value = "Please depress the front panel INPUTS button to its REAR (R) position"
+        Me.LastErrorMessage = "Please depress the front panel INPUTS button to its REAR (R) position"
         GoTo exit_Handler
     End If
 
     ' configure measuring a single resistance on each read.
     Me.K2700.ConfigureSingleResistanceReading
 
-    Dim resistanceNo As Integer
+    Dim p_resistanceNo As Integer
 
     If Me.AutoIncrementResistanceNoEnabled Then
         
@@ -1250,31 +1310,31 @@ Private Sub ReadResistanceButton_Click()
         Me.ClearReadings 0
 
         ' scan all the resistance
-        For resistanceNo = 1 To Me.ResistanceCount
+        For p_resistanceNo = 1 To Me.ResistanceCount
         
             ' allow events to occur
             DoEvents
             
             ' set the current resistance
-            m_currentResistanceNo = resistanceNo
+            m_currentResistanceNo = p_resistanceNo
             
             Me.RestartStopWatch
             If Me.FrontReadRequired Then
-                Me.K2700.ReadFrontResistance resistanceNo
+                Me.K2700.ReadFrontResistance p_resistanceNo
             Else
-                Me.K2700.ReadRearResistance resistanceNo
+                Me.K2700.ReadRearResistance p_resistanceNo
             End If
             Me.ReadStopWatch
         
-        Next resistanceNo
+        Next p_resistanceNo
 
     Else
-        resistanceNo = Me.SelectedResistanceNumber
+        p_resistanceNo = Me.SelectedResistanceNumber
         Me.RestartStopWatch
         If Me.FrontReadRequired Then
-            Me.K2700.ReadFrontResistance resistanceNo
+            Me.K2700.ReadFrontResistance p_resistanceNo
         Else
-            Me.K2700.ReadRearResistance resistanceNo
+            Me.K2700.ReadRearResistance p_resistanceNo
         End If
         ' Range("C22").value = Me.K2700.ReadRearResistance(ResistanceNumber)
         Me.ReadStopWatch
@@ -1286,16 +1346,17 @@ exit_Handler:
     Me.ReadResistanceButton.Enabled = True
     Me.ExtTrigToggleButton.Enabled = True
     
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1306,7 +1367,7 @@ End Sub
 ''' <summary>   Sets and displays the scan list for the cards. </summary>
 Private Sub SetScansButton_Click()
 
-    Const thisProcedureName = "SetScansButton_Click"
+    Const p_procedureName = "SetScansButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1323,16 +1384,17 @@ Private Sub SetScansButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1344,10 +1406,10 @@ End Sub
 ''' <param name="offsetResistance">    The offset resistance value to use for clearing the readings. </param>
 Public Sub ClearReadings(ByVal offsetResistance As Single)
 
-    Dim ResistanceNumber As Integer
-    For ResistanceNumber = 1 To Me.ResistanceCount
-        SetResistance ResistanceNumber, offsetResistance
-    Next ResistanceNumber
+    Dim p_resistanceNumber As Integer
+    For p_resistanceNumber = 1 To Me.ResistanceCount
+        SetResistance p_resistanceNumber, offsetResistance
+    Next p_resistanceNumber
   
 End Sub
 
@@ -1355,7 +1417,7 @@ End Sub
 ''' <param name="timerInterval"> The polling timer interval. </param>
 Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100)
 
-    Const thisProcedureName = "SetExternalTriggerMode"
+    Const p_procedureName = "SetExternalTriggerMode"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1381,7 +1443,7 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
             Me.ExternalTrigEnabled = False
             
             ' display the proper message
-            Range(m_errorMessageCell).value = "Please release the front panel INPUTS button to its FRONT (F) position"
+            Me.LastErrorMessage = "Please release the front panel INPUTS button to its FRONT (F) position"
               
             ' and get out
             GoTo exit_Handler
@@ -1418,16 +1480,17 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1438,7 +1501,7 @@ End Sub
 ''' <summary>   Handles the external trigger toggle button. </summary>
 Private Sub ExtTrigToggleButton_Click()
 
-    Const thisProcedureName = "ExtTrigToggleButton_Click"
+    Const p_procedureName = "ExtTrigToggleButton_Click"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1470,6 +1533,7 @@ Private Sub ExtTrigToggleButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1479,10 +1543,10 @@ err_Handler:
     Me.PauseTimer
   
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1505,7 +1569,7 @@ End Sub
 ''' </remarks>
 Private Sub HandleTimerEvent()
 
-    Const thisProcedureName = "HandleTimerEvent"
+    Const p_procedureName = "HandleTimerEvent"
     
     ' Trap errors to the error handler
     On Error GoTo err_Handler
@@ -1515,34 +1579,33 @@ Private Sub HandleTimerEvent()
     ' prevent reenty
     m_handlingTimerEvent = True
     
-    Dim resistanceNo As Integer
+    Dim p_resistanceNo As Integer
     
     ' check if scan or single
     If AutoIncrementResistanceNoEnabled Then
       
         ' select the current resistance
-        resistanceNo = m_currentResistanceNo
+        p_resistanceNo = m_currentResistanceNo
           
     Else
     
         ' get the cell number
-        resistanceNo = Me.SelectedResistanceNumber
+        p_resistanceNo = Me.SelectedResistanceNumber
     
     End If
       
     ' allow other events to occur
     DoEvents
     
-    Dim isDone As Boolean
-    isDone = Not Me.ExternalTrigEnabled
+    Dim p_isDone As Boolean: p_isDone = Not Me.ExternalTrigEnabled
     
     ' stop the timer.
-    If isDone Then Me.PauseTimer
+    If p_isDone Then Me.PauseTimer
     
-    Me.K2700.MonitorExternalTrigger resistanceNo, isDone
+    Me.K2700.MonitorExternalTrigger p_resistanceNo, p_isDone
     
     ' if we ended manual mode, enable the rest of the buttons
-    If isDone Then
+    If p_isDone Then
     
         ' EnableButtons
         Range(m_externalTriggerStatusCell) = "External Trigger off"
@@ -1558,6 +1621,7 @@ exit_Handler:
     ' release reenty prevention
     m_handlingTimerEvent = False
 
+    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1571,10 +1635,10 @@ err_Handler:
     Me.ReadResistanceButton.Enabled = True
     
     ' append the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, Me.name
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    Range(m_errorMessageCell).value = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1585,6 +1649,7 @@ End Sub
 ''' <summary>   Starts the event timer. </summary>
 ''' <param name="timerInterval">   Specifies the timer interval in milliseconds. </param>
 Friend Sub StartTimer(Optional ByVal timerInterval As Long = 100)
+    
     m_handlingTimerEvent = False
     m_pauseRequested = False
     If m_eventTimer Is Nothing Then
@@ -1593,27 +1658,35 @@ Friend Sub StartTimer(Optional ByVal timerInterval As Long = 100)
     Else
         m_eventTimer.ResumeTimer
     End If
+
 End Sub
 
 ''' <summary>   Requests pausing the timer. </summary>
 Friend Sub PauseTimer()
+    
     m_pauseRequested = True
+
 End Sub
 
 ''' <summary>   Aborts the timer. </summary>
 Friend Sub AbortTimer()
+  
   ' we need to figure out how to recreate the timer
   m_eventTimer.StopTimer
+
 End Sub
 
 ''' <summary>   Handles a timer tick event. </summary>
 Private Sub m_eventTimer_Tick()
+    
     On Error Resume Next
     If m_pauseRequested Then
         m_eventTimer.PauseTimer
     Else
         HandleTimerEvent
     End If
+    On Error GoTo 0
+
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -1663,8 +1736,8 @@ Private Sub m_k2700_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connecti
     
     Else
     
-        Range(m_socketAddressCell).value = ""
-        Range(m_socketIdCell).value = ""
+        Range(m_socketAddressCell).value = vbNullString
+        Range(m_socketIdCell).value = vbNullString
         
     End If
 

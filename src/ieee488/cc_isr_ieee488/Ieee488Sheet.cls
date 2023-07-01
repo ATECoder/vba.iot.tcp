@@ -55,17 +55,17 @@ End Property
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
 
-    Dim p_disconnected As Boolean
+    Dim disconnected As Boolean
     
     If m_session Is Nothing Then
-        p_disconnected = True
+        disconnected = True
     Else
-        p_disconnected = Not m_session.Connected
+        disconnected = Not m_session.Connected
     End If
     
-    If Not p_disconnected Then p_disconnected = m_session.CloseConnection
+    If Not disconnected Then disconnected = m_session.CloseConnection
     
-    If p_disconnected And Not m_session Is Nothing Then
+    If disconnected And Not m_session Is Nothing Then
         m_session.Dispose
         Set m_session = Nothing
     End If
@@ -115,9 +115,8 @@ Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
         ' display the error message
         Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
         
+        On Error GoTo 0
     End If
-
-    On Error GoTo 0
 
 End Sub
 
@@ -166,25 +165,20 @@ Friend Sub PopulateCommandsComboBox()
         ' display the error message
         Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
         
+        On Error GoTo 0
     End If
-    
-    On Error GoTo 0
     
 End Sub
 
 ''' <summary>   Restarts the stop watch and clears the elapsed time cell. </summary>
 Friend Sub RestartStopWatch()
-    
-    Range(m_elapsedTimeCell).value = vbNullString
+    Range(m_elapsedTimeCell).value = ""
     Me.StopWatch.Restart
-
 End Sub
 
 ''' <summary>   Reads the stop watch and updates the elapsed time cell. </summary>
 Friend Sub ReadStopWatch()
-    
     Range(m_elapsedTimeCell).value = Format(Me.StopWatch.ElapsedMilliseconds, m_elapsedTimeFormat)
-
 End Sub
 
 ''' <summary>   Write line handling an error messages. </summary>
@@ -209,8 +203,6 @@ Friend Sub WriteLine(ByVal message As String)
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-    
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -223,7 +215,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -246,7 +238,6 @@ Friend Function QueryLine(ByVal message As String) As String
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Function
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -259,7 +250,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Function
@@ -281,7 +272,6 @@ Friend Function Read() As String
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Function
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -294,7 +284,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Function
@@ -309,9 +299,13 @@ Friend Sub ConnectToggleButton_Click()
     
     Me.RestartStopWatch
 
-    Dim p_host As String: p_host = Me.host
-    Dim p_port As Long: p_port = Me.port
-    Dim p_timeout As Long: p_timeout = Me.ReceiveTimeout
+    Dim host As String
+    Dim port As Integer
+    Dim timeout As Integer
+    
+    timeout = Me.ReceiveTimeout
+    host = Me.host
+    port = Me.port
     
     If Not ConnectToggleButton.value And Me.Session.Connected Then
         
@@ -319,7 +313,7 @@ Friend Sub ConnectToggleButton_Click()
         
     ElseIf ConnectToggleButton.value And Not Me.Session.Connected Then
     
-        Me.Session.OpenConnection p_host, p_port, p_timeout
+        Me.Session.OpenConnection Me.host, Me.port, timeout
     
     End If
     
@@ -328,7 +322,6 @@ Friend Sub ConnectToggleButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -341,7 +334,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -363,7 +356,6 @@ Private Sub CLSButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -376,7 +368,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -398,7 +390,6 @@ Private Sub RSTButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -411,7 +402,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -433,7 +424,6 @@ Private Sub SDCButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -446,7 +436,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -468,7 +458,6 @@ Private Sub ReadStandardEventStatusButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -481,7 +470,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -504,8 +493,6 @@ Friend Sub ReadStatusByteButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -518,7 +505,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
     
 End Sub
@@ -531,30 +518,28 @@ Private Sub WriteButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.SentMessage = vbNullString
-    Dim p_messageToSend As String: p_messageToSend = Me.CommandsComboBox.value
+    Me.SentMessage = ""
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
     
     Me.RestartStopWatch
     
-    Me.WriteLine p_messageToSend
+    Me.WriteLine messageToSend
     
     Me.ReadStopWatch
     
-    Me.SentMessage = p_messageToSend
+    Me.SentMessage = messageToSend
     If Me.Session.ViSession.UsingGpibLan And Me.AutoStatusReadCheckBox.value Then
         Range(m_serialPollCell).value = Me.Session.ViSession.GpibLan.SerialPoll
     End If
     
-    Dim p_isQuery As Boolean: p_isQuery = cc_isr_Core.StringExtensions.EndsWith(p_messageToSend, "?")
-    If Not p_isQuery And Me.AutoStatusReadCheckBox.value Then
+    Dim isQuery As Boolean: isQuery = cc_isr_Core.StringExtensions.EndsWith(messageToSend, "?")
+    If Not isQuery And Me.AutoStatusReadCheckBox.value Then
         Me.StatusByte = Me.Session.QueryServiceRequestStatus
         Me.StandardByte = Me.Session.QueryStandardEventsStatus
     End If
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
-
-    On Error GoTo 0
 
     Exit Sub
 
@@ -568,7 +553,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -581,21 +566,19 @@ Private Sub ReadButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReceivedMessage = vbNullString
-    Dim p_messageReceived As String
+    Me.ReceivedMessage = ""
+    Dim messageReceived As String
     
     Me.RestartStopWatch
     
-    p_messageReceived = Me.Read
+    messageReceived = Me.Read
     
     Me.ReadStopWatch
     
-    Me.ReceivedMessage = p_messageReceived
+    Me.ReceivedMessage = messageReceived
    
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
-
-    On Error GoTo 0
 
     Exit Sub
 
@@ -609,7 +592,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -622,24 +605,22 @@ Private Sub QueryButton_Click()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    Me.ReceivedMessage = vbNullString
-    Me.SentMessage = vbNullString
-    Dim p_messageToSend As String: p_messageToSend = Me.CommandsComboBox.value
-    Dim p_messageReceived As String
+    Me.ReceivedMessage = ""
+    Me.SentMessage = ""
+    Dim messageToSend As String: messageToSend = Me.CommandsComboBox.value
+    Dim messageReceived As String
     
     Me.RestartStopWatch
     
-    p_messageReceived = Me.QueryLine(p_messageToSend)
+    messageReceived = Me.QueryLine(messageToSend)
     
     Me.ReadStopWatch
     
-    Me.ReceivedMessage = p_messageReceived
-    Me.SentMessage = p_messageToSend
+    Me.ReceivedMessage = messageReceived
+    Me.SentMessage = messageToSend
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
-
-    On Error GoTo 0
 
     Exit Sub
 
@@ -653,7 +634,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -770,8 +751,6 @@ Private Sub GoToLocalButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -784,7 +763,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -805,8 +784,6 @@ Private Sub LocalLockoutButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -819,7 +796,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -846,8 +823,6 @@ Private Sub ReadAfterWriteSetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -860,7 +835,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -881,8 +856,6 @@ Private Sub ReadAfterWriteGetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -895,7 +868,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 
@@ -917,8 +890,6 @@ Private Sub SerialPollButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -931,7 +902,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -952,8 +923,6 @@ Private Sub SRQButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -966,7 +935,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -987,8 +956,6 @@ Private Sub SetGibAddressButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1001,7 +968,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -1022,8 +989,6 @@ Private Sub GpibAddressGetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1036,7 +1001,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -1057,8 +1022,6 @@ Private Sub ReadTimeoutGetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1071,7 +1034,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -1092,8 +1055,6 @@ Private Sub ReadTimeoutSetButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    On Error GoTo 0
-
     Exit Sub
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1106,7 +1067,7 @@ err_Handler:
     Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
-    On Error Resume Next
+    On Error GoTo 0
     GoTo exit_Handler
 
 End Sub
@@ -1132,8 +1093,8 @@ Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connec
     
     Else
     
-        Range(m_socketAddressCell).value = vbNullString
-        Range(m_socketIdCell).value = vbNullString
+        Range(m_socketAddressCell).value = ""
+        Range(m_socketIdCell).value = ""
         
     End If
     

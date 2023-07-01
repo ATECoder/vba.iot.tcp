@@ -34,26 +34,22 @@ Private m_delayStopper As cc_isr_Core.StopWatch
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
 
-    Dim host As String
-    Dim port As Integer
-    Dim repeatCount As Integer
-    Dim timeout As Integer
+    Dim p_host As String: p_host = Range(m_inputHostCell).value
+    Dim p_port As Integer: p_port = Range(m_inputPortCell).value
+    Dim p_repeatCount As Integer: p_repeatCount = Range(m_repeatCountCell).value
+    Dim p_timeout As Integer: p_timeout = Range(m_receiveTimeoutCell).value
     
     Set m_delayStopper = cc_isr_Core.Constructor.CreateStopWatch
-    timeout = Range(m_receiveTimeoutCell).value
-    repeatCount = Range(m_repeatCountCell).value
-    host = Range(m_inputHostCell).value
-    port = Range(m_inputPortCell).value
     
     If Me.UsingWinsockReadRawButton.value Then
         ' read identity using basic winsock.
-        ReadIdentity host, port, repeatCount, timeout
+        ReadIdentity p_host, p_port, p_repeatCount, p_timeout
     ElseIf Me.UsingTcpClientOptionButton Then
         ' read identity using the Tcp Client.
-        TcpClientReadIdentity host, port, repeatCount, timeout
+        TcpClientReadIdentity p_host, p_port, p_repeatCount, p_timeout
     ElseIf Me.UseWinsockWithBufferOptionButton Then
         ' read identity using winsock with buffer.
-        ReadIdentityUsingBuffer host, port, repeatCount, timeout
+        ReadIdentityUsingBuffer p_host, p_port, p_repeatCount, p_timeout
     End If
     
 End Sub
@@ -66,39 +62,35 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
 
     On Error GoTo Finally
     
-    Range(m_socketAddressCell) = ""
-    Range(m_connectedSocketIdCell).value = ""
-    Range(m_connectedCell).value = ""
-    Range(m_sentMessageCell).value = ""
-    Range(m_receivedMessageLengthCell).value = ""
-    Range(m_receivedMessageCell).value = ""
-    Range(m_elapsedTimeCell).value = ""
-    Range(m_errorMessageCell).value = ""
+    Range(m_socketAddressCell) = vbNullString
+    Range(m_connectedSocketIdCell).value = vbNullString
+    Range(m_connectedCell).value = vbNullString
+    Range(m_sentMessageCell).value = vbNullString
+    Range(m_receivedMessageLengthCell).value = vbNullString
+    Range(m_receivedMessageCell).value = vbNullString
+    Range(m_elapsedTimeCell).value = vbNullString
+    Range(m_errorMessageCell).value = vbNullString
 
-    Dim maximumLength As Integer
-    maximumLength = 1024
-    Dim buffer As String * 1024
+    Dim p_sentCount As Integer
+    Dim p_readCount As Integer
     
-    Dim sentCount As Integer
-    Dim readCount As Integer
-    
-    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
-    Dim socket As New IPv4StreamSocket
-    Dim totalMilliseconds As Double
+    Dim p_stopper As StopWatch: Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch
+    Dim p_socket As New IPv4StreamSocket
+    Dim p_totalMilliseconds As Double
     
     ' report the socket number
-    Range(m_connectedSocketIdCell).value = socket.SocketId
+    Range(m_connectedSocketIdCell).value = p_socket.SocketId
     
-    socket.OpenConnection host, port
+    p_socket.OpenConnection host, port
     
     ' report the connection state
-    Range(m_connectedCell).value = socket.Connected
+    Range(m_connectedCell).value = p_socket.Connected
     
-    If repeatCount > 0 And socket.Connected Then
+    If repeatCount > 0 And p_socket.Connected Then
     
-        Range(m_socketAddressCell).value = socket.SocketAddress
+        Range(m_socketAddressCell).value = p_socket.SocketAddress
     
-        Dim command As String
+        Dim p_command As String
     
         If port = PROLOGIX_PORT_NO Then
         
@@ -107,54 +99,54 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
             ' instruments to talk after sending them a command in order to read their response. The
             ' feature called, Read-After-Write, saves the user from having to issue read commands
             ' repeatedly.
-            command = "++auto 1"
+            p_command = "++auto 1"
 
             ' send the command, which may cause Query Unterminated because we are setting the device to talk
             ' where there is nothing to talk.
-            sentCount = socket.SendMessage(command & vbLf)
+            p_sentCount = p_socket.SendMessage(p_command & vbLf)
             m_delayStopper.Wait 5
 
             ' disables front panel operation of the currently addressed instrument.
             
-            sentCount = socket.SendMessage("++llo" & vbLf)
+            p_sentCount = p_socket.SendMessage("++llo" & vbLf)
             m_delayStopper.Wait 5
 
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-            socket.ReceiveRaw
+            p_sentCount = p_socket.SendMessage("*CLS; *OPC?" & vbLf)
+            p_socket.ReceiveRaw
             m_delayStopper.Wait 5
 
         End If
         
-        command = "*IDN?"
-        Range(m_sentMessageCell).value = command
+        p_command = "*IDN?"
+        Range(m_sentMessageCell).value = p_command
        
-        Dim loopCount As Integer
-        Do While loopCount < repeatCount
+        Dim p_loopCount As Integer
+        Do While p_loopCount < repeatCount
             
             DoEvents
             
-            loopCount = loopCount + 1
-            stopper.Restart
+            p_loopCount = p_loopCount + 1
+            p_stopper.Restart
             
             ' send the command
-            sentCount = socket.SendMessage(command & vbLf)
+            p_sentCount = p_socket.SendMessage(p_command & vbLf)
             m_delayStopper.Wait 5
             
             ' receive the reading
-            Dim Identity As String
-            Identity = socket.ReceiveRaw()
+            Dim p_identity As String
+            p_identity = p_socket.ReceiveRaw()
     
-            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
+            p_totalMilliseconds = p_totalMilliseconds + p_stopper.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value = Len(Identity)
-            Range(m_receivedMessageCell).value = Identity
+            Range(m_receivedMessageLengthCell).value = Len(p_identity)
+            Range(m_receivedMessageCell).value = p_identity
     
         Loop
   
-        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
-        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     ElseIf repeatCount <= 0 Then
     
@@ -166,48 +158,47 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     
 Finally:
 
-    Dim errorMessage As String
+    Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
-                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+            p_errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
+                             " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
     
     On Error Resume Next
     
-    If Not socket Is Nothing Then
+    If Not p_socket Is Nothing Then
     
-        If socket.Connected Then
+        If p_socket.Connected Then
         
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-            socket.ReceiveRaw
+            p_sentCount = p_socket.SendMessage("*CLS; *OPC?" & vbLf)
+            p_socket.ReceiveRaw
             m_delayStopper.Wait 5
             
             ' enables front panel operation of the currently addressed instrument.
             
-            sentCount = socket.SendMessage("++loc" & vbLf)
+            p_sentCount = p_socket.SendMessage("++loc" & vbLf)
             m_delayStopper.Wait 5
             
-            socket.CloseConnection
+            p_socket.CloseConnection
         End If
     
     End If
     
     ' terminate the socket, which should release the Winsock dll.
-    Set socket = Nothing
+    Set p_socket = Nothing
     
-    If Len(errorMessage) > 0 Then
-        Range(m_errorMessageCell).value = errorMessage
+    If Len(p_errorMessage) > 0 Then
+        Range(m_errorMessageCell).value = p_errorMessage
     End If
     
     On Error GoTo 0
     
 
 End Sub
-
 
 ''' <summary>   Sends the identity query and reads back the identity from the instrument. </summary>
 ''' <param name="host">   The host IPv4 dotted address. </param>
@@ -217,40 +208,39 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
 
     On Error GoTo Finally
     
-    Range(m_socketAddressCell) = ""
-    Range(m_connectedSocketIdCell).value = ""
-    Range(m_connectedCell).value = ""
-    Range(m_sentMessageCell).value = ""
-    Range(m_receivedMessageLengthCell).value = ""
-    Range(m_receivedMessageCell).value = ""
-    Range(m_elapsedTimeCell).value = ""
-    Range(m_errorMessageCell).value = ""
+    Range(m_socketAddressCell) = vbNullString
+    Range(m_connectedSocketIdCell).value = vbNullString
+    Range(m_connectedCell).value = vbNullString
+    Range(m_sentMessageCell).value = vbNullString
+    Range(m_receivedMessageLengthCell).value = vbNullString
+    Range(m_receivedMessageCell).value = vbNullString
+    Range(m_elapsedTimeCell).value = vbNullString
+    Range(m_errorMessageCell).value = vbNullString
 
-    Dim maximumLength As Integer
-    maximumLength = 1024
-    Dim buffer As String * 1024
+    Dim p_maximumLength As Integer: p_maximumLength = 1024
+    Dim p_buffer As String * 1024
     
-    Dim sentCount As Integer
-    Dim readCount As Integer
+    Dim p_sentCount As Integer
+    Dim p_readCount As Integer
     
-    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
-    Dim socket As New IPv4StreamSocket
-    Dim totalMilliseconds As Double
+    Dim p_stopper As StopWatch: Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch
+    Dim p_socket As New IPv4StreamSocket
+    Dim p_totalMilliseconds As Double
     
     ' report the socket number
-    Range(m_connectedSocketIdCell).value = socket.SocketId
+    Range(m_connectedSocketIdCell).value = p_socket.SocketId
     
-    socket.OpenConnection host, port
+    p_socket.OpenConnection host, port
     
     ' report the connection state
-    Range(m_connectedCell).value = socket.Connected
+    Range(m_connectedCell).value = p_socket.Connected
     
-    If repeatCount > 0 And socket.Connected Then
+    If repeatCount > 0 And p_socket.Connected Then
     
         ' display the socket address
-        Range(m_socketAddressCell).value = socket.SocketAddress
+        Range(m_socketAddressCell).value = p_socket.SocketAddress
         
-        Dim command As String
+        Dim p_command As String
     
         If port = PROLOGIX_PORT_NO Then
         
@@ -260,53 +250,53 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
             ' feature called, Read-After-Write, saves the user from having to issue read commands
             ' repeatedly.
             
-            command = "++auto 1"
+            p_command = "++auto 1"
 
             ' send the command, which may cause Query Unterminated because we are setting the device to talk
             ' where there is nothing to talk.
             
-            sentCount = socket.SendMessage(command & vbLf)
+            p_sentCount = p_socket.SendMessage(p_command & vbLf)
             m_delayStopper.Wait 5
 
             ' disables front panel operation of the currently addressed instrument.
             
-            sentCount = socket.SendMessage("++llo" & vbLf)
+            p_sentCount = p_socket.SendMessage("++llo" & vbLf)
             m_delayStopper.Wait 5
 
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-            socket.ReceiveRaw
+            p_sentCount = p_socket.SendMessage("*CLS; *OPC?" & vbLf)
+            p_socket.ReceiveRaw
             m_delayStopper.Wait 5
 
         End If
         
-        command = "*IDN?"
-        Range(m_sentMessageCell).value = command
+        p_command = "*IDN?"
+        Range(m_sentMessageCell).value = p_command
         
-        Dim loopCount As Integer
-        Do While loopCount < repeatCount
+        Dim p_loopCount As Integer
+        Do While p_loopCount < repeatCount
             
             DoEvents
             
-            loopCount = loopCount + 1
-            stopper.Restart
+            p_loopCount = p_loopCount + 1
+            p_stopper.Restart
             
             ' send the command
-            socket.SendMessage command & vbLf
+            p_socket.SendMessage p_command & vbLf
         
             ' receive the reading
-            readCount = socket.ReceiveTerminatedMessage(buffer, maximumLength, vbLf)
+            p_readCount = p_socket.ReceiveTerminatedMessage(p_buffer, p_maximumLength, vbLf)
     
-            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
+            p_totalMilliseconds = p_totalMilliseconds + p_stopper.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value = readCount
-            Range(m_receivedMessageCell).value = buffer
+            Range(m_receivedMessageLengthCell).value = p_readCount
+            Range(m_receivedMessageCell).value = p_buffer
     
         Loop
   
-        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
-        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     ElseIf repeatCount <= 0 Then
     
@@ -318,41 +308,41 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     
 Finally:
 
-    Dim errorMessage As String
+    Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
-                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+            p_errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
+                             " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
     
     On Error Resume Next
     
-    If Not socket Is Nothing Then
+    If Not p_socket Is Nothing Then
     
-        If socket.Connected Then
+        If p_socket.Connected Then
         
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = socket.SendMessage("*CLS; *OPC?" & vbLf)
-            socket.ReceiveRaw
+            p_sentCount = p_socket.SendMessage("*CLS; *OPC?" & vbLf)
+            p_socket.ReceiveRaw
             m_delayStopper.Wait 5
             
             ' enables front panel operation of the currently addressed instrument.
             
-            sentCount = socket.SendMessage("++loc" & vbLf)
+            p_sentCount = p_socket.SendMessage("++loc" & vbLf)
             m_delayStopper.Wait 5
             
-            socket.CloseConnection
+            p_socket.CloseConnection
         End If
     
     End If
     
     ' terminate the socket, which should release the Winsock dll.
-    Set socket = Nothing
+    Set p_socket = Nothing
     
-    If Len(errorMessage) > 0 Then
-        Range(m_errorMessageCell).value = errorMessage
+    If Len(p_errorMessage) > 0 Then
+        Range(m_errorMessageCell).value = p_errorMessage
     End If
 
     On Error GoTo 0
@@ -368,36 +358,36 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
 
     On Error GoTo Finally
     
-    Range(m_socketAddressCell) = ""
-    Range(m_connectedSocketIdCell).value = ""
-    Range(m_connectedCell).value = ""
-    Range(m_sentMessageCell).value = ""
-    Range(m_receivedMessageLengthCell).value = ""
-    Range(m_receivedMessageCell).value = ""
-    Range(m_elapsedTimeCell).value = ""
-    Range(m_errorMessageCell).value = ""
+    Range(m_socketAddressCell) = vbNullString
+    Range(m_connectedSocketIdCell).value = vbNullString
+    Range(m_connectedCell).value = vbNullString
+    Range(m_sentMessageCell).value = vbNullString
+    Range(m_receivedMessageLengthCell).value = vbNullString
+    Range(m_receivedMessageCell).value = vbNullString
+    Range(m_elapsedTimeCell).value = vbNullString
+    Range(m_errorMessageCell).value = vbNullString
 
-    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch
-    Dim totalMilliseconds As Double
+    Dim p_stopper As StopWatch: Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch
+    Dim p_totalMilliseconds As Double
     
-    Dim sentCount As Integer
-    Dim client As TcpClient
-    Set client = New TcpClient
+    Dim p_sentCount As Integer
+    Dim p_client As TcpClient
+    Set p_client = New TcpClient
     
-    client.ConnectTo host, port
+    p_client.OpenConnection host, port
     
     ' report the socket number
-    Range(m_connectedSocketIdCell).value = client.TcpClientSocket.SocketId
+    Range(m_connectedSocketIdCell).value = p_client.TcpClientSocket.SocketId
    
     ' report the connection state
-    Range(m_connectedCell).value = client.Connected
+    Range(m_connectedCell).value = p_client.Connected
     
-    If repeatCount > 0 And client.Connected Then
+    If repeatCount > 0 And p_client.Connected Then
     
         ' display the socket address.
-        Range(m_socketAddressCell).value = client.TcpClientSocket.SocketAddress
+        Range(m_socketAddressCell).value = p_client.TcpClientSocket.SocketAddress
         
-        Dim command As String
+        Dim p_command As String
     
         If port = PROLOGIX_PORT_NO Then
         
@@ -407,57 +397,57 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
             ' feature called, Read-After-Write, saves the user from having to issue read commands
             ' repeatedly.
             
-            command = "++auto 1"
+            p_command = "++auto 1"
 
             ' send the command, which may cause Query Unterminated because we are setting the device to talk
             ' where there is nothing to talk.
             
-            sentCount = client.SendMessage(command & vbLf)
+            p_sentCount = p_client.SendMessage(p_command & vbLf)
             m_delayStopper.Wait 5
 
             
             ' disables front panel operation of the currently addressed instrument.
             
-            sentCount = client.SendMessage("++llo" & vbLf)
+            p_sentCount = p_client.SendMessage("++llo" & vbLf)
             m_delayStopper.Wait 5
 
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
-            client.ReceiveRaw
+            p_sentCount = p_client.SendMessage("*CLS; *OPC?" & vbLf)
+            p_client.ReceiveRaw
             m_delayStopper.Wait 5
             
 
         End If
         
-        command = "*IDN?"
-        Range(m_sentMessageCell).value = command
+        p_command = "*IDN?"
+        Range(m_sentMessageCell).value = p_command
         
-        Dim loopCount As Integer
-        Do While loopCount < repeatCount
+        Dim p_loopCount As Integer
+        Do While p_loopCount < repeatCount
             
             DoEvents
             
-            loopCount = loopCount + 1
-            stopper.Restart
+            p_loopCount = p_loopCount + 1
+            p_stopper.Restart
             
             ' send the command
-            client.SendMessage command & vbLf
+            p_client.SendMessage p_command & vbLf
             m_delayStopper.Wait 5
         
             ' receive the reading
-            Dim Identity As String
-            Identity = client.ReceiveRaw()
+            Dim p_identity As String
+            p_identity = p_client.ReceiveRaw()
     
-            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
+            p_totalMilliseconds = p_totalMilliseconds + p_stopper.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value = Len(Identity)
-            Range(m_receivedMessageCell).value = Identity
+            Range(m_receivedMessageLengthCell).value = Len(p_identity)
+            Range(m_receivedMessageCell).value = p_identity
     
         Loop
   
-        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
-        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     ElseIf repeatCount <= 0 Then
     
@@ -469,40 +459,40 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     
 Finally:
 
-    Dim errorMessage As String
+    Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            errorMessage = "Reading identity failed using Tcp Client " & UserDefinedErrors.FormattedErr & _
-                           " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
+            p_errorMessage = "Reading identity failed using Tcp Client " & UserDefinedErrors.FormattedErr & _
+                             " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
     
     On Error Resume Next
     
-    If Not client Is Nothing Then
-        If client.Connected Then
+    If Not p_client Is Nothing Then
+        If p_client.Connected Then
             
             ' clear errors if any so as to leave the instrument without errors.
             ' here we add *OPC? to prevent the query unterminated error.
-            sentCount = client.SendMessage("*CLS; *OPC?" & vbLf)
-            client.ReceiveRaw
+            p_sentCount = p_client.SendMessage("*CLS; *OPC?" & vbLf)
+            p_client.ReceiveRaw
             m_delayStopper.Wait 5
             
             ' enables front panel operation of the currently addressed instrument.
             
-            sentCount = client.SendMessage("++loc" & vbLf)
+            p_sentCount = p_client.SendMessage("++loc" & vbLf)
             m_delayStopper.Wait 5
 
             
-            client.Disconnect
+            p_client.CloseConnection
         End If
     End If
     
     ' terminate the client
-    Set client = Nothing
+    Set p_client = Nothing
     
-    If Len(errorMessage) > 0 Then
-        Range(m_errorMessageCell).value = errorMessage
+    If Len(p_errorMessage) > 0 Then
+        Range(m_errorMessageCell).value = p_errorMessage
     End If
 
     On Error GoTo 0

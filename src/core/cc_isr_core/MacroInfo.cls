@@ -17,69 +17,82 @@ Private m_macroName As String
 ''' <param name="project">     The project name. </param>
 ''' <param name="component">   The component code module name. </param>
 ''' <param name="macroName">   The name of the macro. </param>
-Public Sub Initialize(ByVal projectName As String, ByVal codeModuleName As String, ByVal macroName As String)
-    m_projectName = projectName
+Public Sub Initialize(ByVal ProjectName As String, ByVal codeModuleName As String, ByVal MacroName As String)
+    m_projectName = ProjectName
     m_moduleName = codeModuleName
-    m_macroName = macroName
+    m_macroName = MacroName
 End Sub
 
 ''' <summary>   Initializes this class. </summary>
 ''' <param name="project">     A reference to the module info. </param>
 ''' <param name="macroName">   The name of the macro. </param>
-Public Sub InitializeModuelMacro(ByVal module As ModuleInfo, ByVal macroName As String)
-    m_projectName = module.projectName
-    m_moduleName = module.moduleName
-    m_macroName = macroName
+Public Sub InitializeModuelMacro(ByVal module As ModuleInfo, ByVal MacroName As String)
+    m_projectName = module.ProjectName
+    m_moduleName = module.ModuleName
+    m_macroName = MacroName
 End Sub
 
 ''' <summary>   Initializes this class from a macro full name. </summary>
 ''' <param name="macroFullName">     the macro full name. </param>
 Public Sub FromMacroFullName(ByVal macroFullName As String)
-    Dim names() As String: names() = Split(macroFullName, ".")
-    m_projectName = names(LBound(names))
-    m_moduleName = names(LBound(names) + 1)
-    m_macroName = names(LBound(names) + 2)
+    
+    Dim p_names() As String: p_names() = Split(macroFullName, ".")
+    m_projectName = p_names(LBound(p_names))
+    m_moduleName = p_names(LBound(p_names) + 1)
+    m_macroName = p_names(LBound(p_names) + 2)
+
 End Sub
 
 ''' <summary>   Creates a clone of the this macro info. </summary>
 Public Function Clone() As MacroInfo
+    
     Set Clone = New MacroInfo
-    Clone.Initialize Me.projectName, Me.moduleName, Me.macroName
+    Clone.Initialize Me.ProjectName, Me.ModuleName, Me.MacroName
+
 End Function
 
 ''' <summary>   Gets the macro name. </summary>
-Public Property Get macroName() As String
-    macroName = m_macroName
+Public Property Get MacroName() As String
+    
+    MacroName = m_macroName
+
 End Property
 
 ''' <summary>   Gets the project name. </summary>
-Public Property Get projectName() As String
-    projectName = m_projectName
+Public Property Get ProjectName() As String
+    
+    ProjectName = m_projectName
+
 End Property
 
 ''' <summary>   Gets the module name. </summary>
-Public Property Get moduleName() As String
-    moduleName = m_moduleName
+Public Property Get ModuleName() As String
+    
+    ModuleName = m_moduleName
+
 End Property
 
 ''' <summary>   Gets the full name. </summary>
 Public Property Get FullName() As String
 Attribute FullName.VB_Description = "Get the macro full name"
 Attribute FullName.VB_UserMemId = 0
+    
     FullName = m_projectName & "." & m_moduleName & "." & m_macroName
+
 End Property
 
 ''' <summary>   Checks if the two macros are equal referring to the same
 ''  macro in the project. </summary>
 ''' <param name="macro">   The macro to check for equality. </param>
 Public Function Equals(ByVal macro As MacroInfo) As Boolean
+    
     If IsObject(macro) Then
-        Equals = (0 = StrComp(Me.projectName, macro.projectName)) And _
-                 (0 = StrComp(Me.moduleName, macro.moduleName)) And _
-                 (0 = StrComp(Me.macroName, macro.macroName))
+        Equals = (0 = StrComp(Me.ProjectName, macro.ProjectName)) And _
+                 (0 = StrComp(Me.ModuleName, macro.ModuleName)) And _
+                 (0 = StrComp(Me.MacroName, macro.MacroName))
     Else
         Equals = False
     End If
-End Function
 
+End Function
 

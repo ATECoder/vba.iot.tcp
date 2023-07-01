@@ -30,18 +30,20 @@ Private Sub Workbook_Activate()
     cc_isr_Core.UserDefinedErrors.Initialize
     
     ' activate the sheets to initialize values.
-    Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
+    ' Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
     
 End Sub
 
 ''' <summary>   Handles the workbook after save event. </summary>
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+    
     On Error Resume Next
     If Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
     On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Handles the Workbook deactivate event. </summary>

@@ -43,20 +43,6 @@ Public Sub Initialize(ByVal tracer As IErrTracer)
    
 End Sub
 
-''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
-Public Sub Dispose()
-    
-    If Me.Connected Then
-        Me.CloseConnection
-    End If
-    
-    If Not m_viSession Is Nothing Then
-        m_viSession.Dispose
-    End If
-    Set m_viSession = Nothing
-
-End Sub
-
 ''' <summary>   Returns a descriptor identifying the socket. </summary>
 ''' <value>   The socket identifying descriptor if connected; otherwise, -1. </value>
 Public Property Get SocketId() As Long
@@ -66,76 +52,6 @@ Public Property Get SocketId() As Long
         SocketId = Me.ViSession.SocketId
     End If
 End Property
-
-
-''' <summary>   Returns the connection state of the <see cref="ViSession"/>. </summary>
-''' <value>   [Boolean] True if the <see cref="ViSession"/> is connected via the TCP Client socket;
-''' otherwise, False. </value>
-Public Property Get Connected() As Boolean
-    
-    If m_viSession Is Nothing Then
-        Connected = False
-    Else
-        Connected = Me.ViSession.Connected
-    End If
-
-End Property
-
-''' <summary>   Returns true if a connection can be made. </summary>
-''' <value>   [Boolean] True if a connection can be made. </value>
-Public Property Get CanConnect() As Boolean
-    
-    If Me.ViSession Is Nothing Then
-        CanConnect = False
-    Else
-        CanConnect = Me.ViSession.CanConnect
-    End If
-
-End Property
-
-''' <summary>   Opens a TCP Client connection to the specified host at the specified port
-''' as sets the connection timeout. </summary>
-''' <param name="host">        An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
-''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long) As Boolean
-   
-    Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
-    Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
-    OnConnectionChanging p_eventArgs
-    
-    If Not p_eventArgs.cancel Then
-    
-        OpenConnection = Me.ViSession.OpenConnection(host, port, timeoutMs)
-        
-        OnConnectionChanged Me.Connected
-     
-    End If
-   
-    OpenConnection = Me.Connected
-   
-End Function
-
-''' <summary>   Closes the TCP Client connection. </summary>
-''' <returns>   True if disconnection succeeded; otherwise, false. </returns>
-Public Function CloseConnection() As Boolean
-
-    Dim p_args As cc_isr_Winsock.ConnectionChangingEventArgs
-    Set p_args = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
-    OnConnectionChanging p_args
-    
-    If Not p_args.cancel Then
-    
-        CloseConnection = Me.ViSession.CloseConnection
-        
-        OnConnectionChanged Me.Connected
-     
-    End If
-
-    CloseConnection = Not Me.Connected
-
-End Function
 
 ''' <summary>   Sends a message. </summary>
 ''' <param name="message">                 [String] The message to send to the instrument. </param>
@@ -191,15 +107,15 @@ Public Function Read(Optional ByVal queryStatusBeforeRead As Boolean = True, _
         ' check if we have data to read.
     
         ' read the status byte and check for errors.
-        Dim StatusByte As Integer: StatusByte = Me.ViSession.GpibLan.SerialPoll()
+        Dim p_statusByte As Integer: p_statusByte = Me.ViSession.GpibLan.SerialPoll()
     
         ' check if message available.
-        If 0 = (StatusByte And ServiceRequests.MessageAvailable) Then
+        If 0 = (p_statusByte And ServiceRequests.MessageAvailable) Then
         
             ' raise the write error adding some information
             Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
                       UserDefinedErrors.InvalidOperationError.Description & _
-                      " SRQ=0x" & Hex(StatusByte) & _
+                      " SRQ=0x" & Hex(p_statusByte) & _
                       ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
                       ") trying reading the instrument at " & Me.ViSession.SocketAddress & "."
         
@@ -236,7 +152,7 @@ Public Function QueryLine(ByVal message As String, _
         DoEvents
         QueryLine = Me.Read(queryStatusBeforeRead, maxLength, trimEnd)
     Else
-        QueryLine = ""
+        QueryLine = vbNullString
     End If
 
 End Function
@@ -348,19 +264,20 @@ Public Sub Wait(Optional ByVal awaitOpc As Boolean = True)
 End Sub
 
 ''' <summary>   Enables standard events using the (*ESE {0}) command. </summary>
-''' <param name="enabledBits">   [Integer] The standard event bits to enable. <param>
-''' <param name="awaitOpc">      [Optional, Boolean, True] True to wait for operation completion
-'''                              after issuing the <c>*ESE #</c> command by querying <c>*ESE #; *OPC?</c></param>
-Public Sub EnableStandardEvents(ByVal enabledBits As Integer, _
+''' <param name="bitMask">    [Integer] Defines the bits corresponding to the standard events
+'''                           to enable. <param>
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*ESE #</c> command by querying <c>*ESE #; *OPC?</c></param>
+Public Sub EnableStandardEvents(ByVal bitMask As Integer, _
         Optional ByVal awaitOpc As Boolean = True)
     
     Dim p_command As String
-    p_command = StringExtensions.StringFormat(StandardEventEnableOpcQueryCommand, enabledBits)
+    p_command = StringExtensions.StringFormat(Ieee488Syntax.StandardEventEnableCommand, bitMask)
     If awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
         Me.QueryLine p_command, False, False
     Else
-        p_command = StringExtensions.StringFormat(StandardEventEnableCommand, enabledBits)
+        p_command = StringExtensions.StringFormat(StandardEventEnableCommand, bitMask)
         Me.WriteLine p_command
     End If
     
@@ -387,15 +304,16 @@ Public Function QueryStandardEventsStatus() As Integer
 End Function
 
 ''' <summary>   Enables Service Request using the (*SRE {0}) command. </summary>
-''' <param name="ServiceRequest">   [Integer] The standard event bits to enable. <param>
-''' <param name="awaitOpc">         [Optional, Boolean, True] True to wait for operation completion
-'''                                 after issuing the <c>*SRE #</c> command by querying
-'''                                 <c>*SRE #; *OPC?</c></param>
-Public Sub EnableServiceRequest(ByVal serviceRequest As Integer, _
+''' <param name="bitMask">    [Integer] Defines the bits corresponding to the service request
+'''                           events to enable. <param>
+''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
+'''                           after issuing the <c>*SRE #</c> command by querying
+'''                           <c>*SRE #; *OPC?</c></param>
+Public Sub EnableServiceRequest(ByVal bitMask As Integer, _
         Optional ByVal awaitOpc As Boolean = True)
     
     Dim p_command As String
-    p_command = StringExtensions.StringFormat(ServiceRequestEnableCommand, serviceRequest)
+    p_command = StringExtensions.StringFormat(Ieee488Syntax.ServiceRequestEnableCommand, bitMask)
     If awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
         Me.QueryLine p_command, False, False
@@ -442,23 +360,160 @@ End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
-' Connection Events
+'  Connectable implementation
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
+
+''' <summary>   Gets a reference to the connectable <see cref="cc_isr_Winsoc.TcpClient"/> object . </summary>
+''' <value>   [<see cref="cc_isr_Winsock.IConnectable"/>]. </value>
+Public Property Get Connectable() As cc_isr_Winsock.IConnectable
+    Set Connectable = m_viSession
+End Property
+
+''' <summary>   Returns the connection state of the client. </summary>
+''' <value>   [Boolean] True if the VI Session is connected; otherwise, False. </value>
+Public Property Get Connected() As Boolean
+    
+    Connected = IConnectable_Connected
+
+End Property
+
+''' <summary>   Returns the connection state of the <see cref="ViSession"/>. </summary>
+''' <value>   [Boolean] True if the <see cref="ViSession"/> is connected; otherwise, False. </value>
+Private Property Get IConnectable_Connected() As Boolean
+    
+    If Me.Connectable Is Nothing Then
+        IConnectable_Connected = False
+    Else
+        IConnectable_Connected = Me.Connectable.Connected
+    End If
+
+End Property
+
+''' <summary>   Returns true if a connection can be made. </summary>
+''' <value>   [Boolean] True if a connection can be made. </value>
+Public Property Get CanConnect() As Boolean
+    
+    CanConnect = IConnectable_CanConnect
+
+End Property
+
+''' <summary>   Returns true if a connection can be made. </summary>
+''' <value>   [Boolean] True if a connection can be made. </value>
+Private Property Get IConnectable_CanConnect() As Boolean
+
+    If Me.Connectable Is Nothing Then
+        IConnectable_CanConnect = False
+    Else
+        IConnectable_CanConnect = Me.Connectable.CanConnect
+    End If
+
+End Property
+
+''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
+Public Sub Dispose()
+    
+    IConnectable_Dispose
+
+End Sub
+
+''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
+Private Sub IConnectable_Dispose()
+
+    If Me.Connectable.Connected Then
+        Me.Connectable.CloseConnection
+    End If
+    
+    If Not Me.Connectable Is Nothing Then
+        Me.Connectable.Dispose
+    End If
+    
+    Set m_viSession = Nothing
+    
+End Sub
+
+''' <summary>   Opens a VI Session connection to the specified host at the specified port
+''' as sets the connection timeout. </summary>
+''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        [Long] The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <returns>   [Boolean] True if the VI Session is connected. </returns>
+Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
+    
+    IConnectable_OpenConnection host, port, timeoutMs
+
+End Function
+
+''' <summary>   Opens a VI Session connection to the specified host at the specified port
+''' as sets the connection timeout. </summary>
+''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="port">        [Long] The port that the server is listening on. </param>
+''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <returns>   [Boolean] True if the VI Session is connected. </returns>
+Private Function IConnectable_OpenConnection(ByVal host As String, ByVal port As Long, _
+        Optional ByVal timeoutMs As Long = 500&) As Boolean
+
+    Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    IConnectable_OnConnectionChanging p_eventArgs
+    
+    If Not p_eventArgs.cancel Then
+    
+        Connectable.OpenConnection host, port, timeoutMs
+        
+        OnConnectionChanged Connectable.Connected
+        
+    End If
+
+    IConnectable_OpenConnection = Connectable.Connected
+    
+End Function
+
+''' <summary>   Closes the VI Session connection. </summary>
+''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
+Public Function CloseConnection() As Boolean
+    
+    CloseConnection = IConnectable_CloseConnection
+    
+End Function
+
+''' <summary>   Closes the VI Session connection. </summary>
+''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
+Private Function IConnectable_CloseConnection() As Boolean
+
+    Dim p_args As cc_isr_Winsock.ConnectionChangingEventArgs
+    Set p_args = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
+    IConnectable_OnConnectionChanging p_args
+   
+    If Not p_args.cancel Then
+    
+        IConnectable_CloseConnection = Connectable.CloseConnection
+    
+        OnConnectionChanged Connectable.Connected
+    
+    End If
+    
+    IConnectable_CloseConnection = Not Connectable.Connected
+
+End Function
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
-    RaiseEvent ConnectionChanged( _
-            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+    IConnectable_OnConnectionChanged cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected)
+End Sub
+
+''' <summary>   Raises the <see cref="Connectionchanged"/> event. </summary>
+''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
+Private Sub IConnectable_OnConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+    RaiseEvent ConnectionChanged(eventArgs)
 End Sub
 
 ''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
 ''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
-Private Sub OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+Private Sub IConnectable_OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
     RaiseEvent ConnectionChanging(eventArgs)
 End Sub
-
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
@@ -466,7 +521,7 @@ End Sub
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
-''' <summary>   Handles the <see cref="cc_isr_Ieee488.m_viSession.ConnectionChanged"/> event. </summary>
+''' <summary>   Handles the <see cref="cc_isr_Ieee488.ViSession.ConnectionChanged"/> event. </summary>
 ''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_viSession_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 

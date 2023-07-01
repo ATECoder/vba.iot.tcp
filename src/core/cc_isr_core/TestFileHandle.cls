@@ -16,27 +16,31 @@ Private m_fileStream As TextStream
 ''' <returns>   A <see cref="TestFileHandle"/>. <returns>
 Public Function CreateTestFile() As TestFileHandle
     
-    Dim fso As FileSystemObject: Set fso = New FileSystemObject
+    Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
     ' Creates a specified file name and returns a TextStream object that can be used to read from
     ' or write to the file.
-    Dim handle As TestFileHandle: Set handle = New TestFileHandle
-    handle.FileName = fso.BuildPath(ActiveWorkbook.path, fso.GetTempName())
-    Set handle.FileStream = fso.CreateTextFile(handle.FileName, True)
-    Set CreateTestFile = handle
+    Dim p_handle As TestFileHandle: Set p_handle = New TestFileHandle
+    p_handle.FileName = p_fileInfo.BuildPath(ActiveWorkbook.path, p_fileInfo.GetTempName())
+    Set p_handle.FileStream = p_fileInfo.CreateTextFile(p_handle.FileName, True)
+    Set CreateTestFile = p_handle
 End Function
 
 ''' <summary>   Deletes the given test file. </summary>
 Public Sub DeleteTestFile()
-    Dim fso As FileSystemObject: Set fso = New FileSystemObject
-    fso.DeleteFile Me.FileName
+    
+    Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
+    p_fileInfo.DeleteFile Me.FileName
+
 End Sub
 
 ''' <summary>   Deletes the file handle test file. </summary>
 ''' <param name="fileHandle">   The <see cref="TestFileHandle"/>   to delete. </param>
 Public Sub Delete(ByVal fileHandle As TestFileHandle)
-    Dim fso
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    fso.DeleteFile fileHandle.FileName
+    
+    Dim p_fileInfo
+    Set p_fileInfo = CreateObject("Scripting.FileSystemObject")
+    p_fileInfo.DeleteFile fileHandle.FileName
+
 End Sub
 
 ''' <summary> </summary>

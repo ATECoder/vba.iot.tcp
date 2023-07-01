@@ -6,14 +6,14 @@ Option Explicit
 ''' <returns>   An instance of the <see cref="Assert"/>   class. </returns>
 Public Function TestElapsedTimeShouldExceedexpectedMs() As Assert
     
-    Dim stopper As StopWatch: Set stopper = New StopWatch
-    Dim expectedMs As Long
-    expectedMs = 100
-    stopper.Sleep expectedMs + 50
-    stopper.StopCounter
-    Dim actualMs As Long: actualMs = stopper.ElapsedMilliseconds
-    Set TestElapsedTimeShouldExceedexpectedMs = Assert.IsTrue(stopper.ElapsedMilliseconds > expectedMs, _
-        "elapsed time " & CStr(stopper.ElapsedMilliseconds) & " must exceed sleep time " & CStr(expectedMs))
+    Dim p_stopper As StopWatch: Set p_stopper = New StopWatch
+    Dim p_expectedMs As Long
+    p_expectedMs = 100
+    p_stopper.Sleep p_expectedMs + 50
+    p_stopper.StopCounter
+    Dim p_actualMs As Long: p_actualMs = p_stopper.ElapsedMilliseconds
+    Set TestElapsedTimeShouldExceedexpectedMs = Assert.IsTrue(p_stopper.ElapsedMilliseconds > p_expectedMs, _
+        "elapsed time " & CStr(p_stopper.ElapsedMilliseconds) & " must exceed sleep time " & CStr(p_expectedMs))
         
 End Function
 
@@ -21,11 +21,13 @@ End Function
 ''' exceeds the specified interval. </summary>
 ''' <returns>   An instance of the <see cref="Assert"/>   class. </returns>
 Public Function TestTimeShouldExceedexpectedMs() As Assert
-    Dim expectedMs As Long: expectedMs = 100
-    Dim stopper As StopWatch: Set stopper = New StopWatch
-    Dim actualMs As Long: actualMs = stopper.Wait(expectedMs)
-    Set TestTimeShouldExceedexpectedMs = Assert.IsTrue(actualMs >= expectedMs, _
-        "elapsed time " & CStr(actualMs) & " must exceed " & CStr(expectedMs))
+    
+    Dim p_expectedMs As Long: p_expectedMs = 100
+    Dim p_stopper As StopWatch: Set p_stopper = New StopWatch
+    Dim p_actualMs As Long: p_actualMs = p_stopper.Wait(p_expectedMs)
+    Set TestTimeShouldExceedexpectedMs = Assert.IsTrue(p_actualMs >= p_expectedMs, _
+        "elapsed time " & CStr(p_actualMs) & " must exceed " & CStr(p_expectedMs))
+
 End Function
 
 

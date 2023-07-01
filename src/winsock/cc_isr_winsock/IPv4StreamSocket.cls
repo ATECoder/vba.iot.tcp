@@ -160,8 +160,8 @@ Private Sub Class_Initialize()
     ' this is required to initialize Winsock.  It will only ran once.
     Winsock.Initialize
     
-    m_socketHost = ""
-    m_socketAddress = ""
+    m_socketHost = vbNullString
+    m_socketAddress = vbNullString
     
     On Error GoTo 0
 
@@ -170,7 +170,7 @@ Private Sub Class_Initialize()
     m_socketId = WinsockApi.CreateIPv4StreamSocket()
     If m_socketId = wsock32.ws32_INVALID_SOCKET Then
         Err.Raise UserDefinedErrors.SocketCreationError.Code, "IdentityReader.IPv4StreamSocket.Initialize", _
-                  UserDefinedErrors.SocketCreationError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketCreationError.Description & " Last error: " & CStr(Winsock.LastError)
     Else
         Winsock.Register Me
         
@@ -231,9 +231,11 @@ End Property
 ''' <param name="connectedSocketId">   The ID of a connected socket. </param>
 ''' <param name="timeoutMs">           [Optional, 500] The receive timeout interval in milliseconds. </param>
 Public Sub Initialize(ByVal connectedSocketId As Long, Optional ByVal timeoutMs As Long = 500)
+    
     m_socketId = connectedSocketId
     m_connected = True
     Me.SetReceiveTimeout timeoutMs
+
 End Sub
 
 ''' <summary>   Opens a socket connection and sets and returns the socket id. </summary>
@@ -248,29 +250,28 @@ Public Function OpenConnection(ByVal host As String, ByVal port As Long) As Bool
                   UserDefinedErrors.InvalidArgumentError.Description & " Argument: host"
     End If
     
-    If host = "localhost" Then
-        host = "127.0.0.1"
-    End If
+    If host = "localhost" Then: host = "127.0.0.1"
     
     ' Open a connection to a server
     ' can use this: https://www.allscoop.com/Tcp-listen.php to listen.
     
-    Dim address As wsock32.ws32_SocketAddress_in
+    Dim p_address As wsock32.ws32_SocketAddress_in
     
     ' set the binary address
-    address.sin_addr.s_addr = WinsockApi.ToInetAddress(host)
+    p_address.sin_addr.s_addr = WinsockApi.ToInetAddress(host)
     
-    address.sin_family = wsock32.ws32_AF_INET
+    p_address.sin_family = wsock32.ws32_AF_INET
     
     ' set the port in network byte order
-    address.sin_port = WinsockApi.ToInetByteOrder(port)
+    p_address.sin_port = WinsockApi.ToInetByteOrder(port)
     
-    Dim connectResult As Long
-    connectResult = connect_(m_socketId, address, Len(address))
-    If connectResult = wsock32.ws32_SOCKET_ERROR Then
+    Dim p_connectResult As Long
+    p_connectResult = connect_(m_socketId, p_address, Len(p_address))
+    
+    If p_connectResult = wsock32.ws32_SOCKET_ERROR Then
         m_connected = False
         Err.Raise UserDefinedErrors.SocketConnectionError.Code, "IdentityReader.IPv4StreamSocket.OpenConnection", _
-                  UserDefinedErrors.SocketConnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketConnectionError.Description & " Last error: " & CStr(Winsock.LastError)
     Else
         m_connected = True
         
@@ -290,13 +291,16 @@ End Function
 ''' <returns>   [Boolean] True if socket disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
 
-    Dim result As Long
-    result = closesocket_(m_socketId)
-    m_socketId = 0
-    If result = wsock32.ws32_SOCKET_ERROR Then
+    Dim p_result As Long
+    p_result = closesocket_(m_socketId)
+    
+    ' set the socket id to invalid to indicate that it is no longer viable.
+    m_socketId = wsock32.ws32_INVALID_SOCKET
+    
+    If p_result = wsock32.ws32_SOCKET_ERROR Then
         CloseConnection = False
         Err.Raise UserDefinedErrors.SocketDisconnectionError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                  UserDefinedErrors.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketDisconnectionError.Description & " Last error: " & CStr(Winsock.LastError)
     Else
         m_connected = False
         
@@ -314,17 +318,17 @@ End Function
 ''' <returns>   [Boolean] True if the socket is bound. </returns>
 Public Function BindTo(ByVal address As Long, ByVal port As Long) As Boolean
 
-    Dim endpoint As wsock32.ws32_SocketAddress_in
-    endpoint.sin_family = wsock32.ws32_AF_INET
-    endpoint.sin_addr.s_addr = address
-    endpoint.sin_port = WinsockApi.ToInetByteOrder(port)
+    Dim p_endpoint As wsock32.ws32_SocketAddress_in
+    p_endpoint.sin_family = wsock32.ws32_AF_INET
+    p_endpoint.sin_addr.s_addr = address
+    p_endpoint.sin_port = WinsockApi.ToInetByteOrder(port)
     
-    Dim bindResult As Long
-    bindResult = bind_(Me.SocketId, endpoint, 16)
+    Dim p_bindResult As Long
+    p_bindResult = bind_(Me.SocketId, p_endpoint, 16)
     
-    If bindResult = wsock32.ws32_SOCKET_ERROR Then
+    If p_bindResult = wsock32.ws32_SOCKET_ERROR Then
         Err.Raise UserDefinedErrors.SocketBindError.Code, "IdentityReader.IPv4StreamSocket.BindTo", _
-                  UserDefinedErrors.SocketBindError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketBindError.Description & " Last error: " & CStr(Winsock.LastError)
         m_connected = False
     Else
         m_connected = True
@@ -345,11 +349,12 @@ End Property
 ''' <returns>   [Boolean] True if the socket is Listening; otherwise, False. </returns>
 Public Function StartListening(Optional ByVal backlog As Integer = 10) As Boolean
 
-    Dim listenResult As Long
-    listenResult = listen_(Me.SocketId, backlog)
-    If listenResult = wsock32.ws32_SOCKET_ERROR Then
+    Dim p_listenResult As Long
+    p_listenResult = listen_(Me.SocketId, backlog)
+    
+    If p_listenResult = wsock32.ws32_SOCKET_ERROR Then
         Err.Raise UserDefinedErrors.SocketListenError.Code, "IdentityReader.IPv4StreamSocket.Listen", _
-                  UserDefinedErrors.SocketListenError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketListenError.Description & " Last error: " & CStr(Winsock.LastError)
         m_listening = False
     Else
         m_listening = True
@@ -371,32 +376,33 @@ Public Function AcceptTcpClient(ByVal serverSocket As IPv4StreamSocket, _
     
     ' check if we have available socket for readability
     
-    Dim readableSocketCount As Integer
-    readableSocketCount = WinsockApi.DetermineReadability(m_fdSet, timeoutMs)
+    Dim p_readableSocketCount As Integer
+    p_readableSocketCount = WinsockApi.DetermineReadability(m_fdSet, timeoutMs)
     
-    If readableSocketCount = 0 Then
+    If p_readableSocketCount = 0 Then
         Set AcceptTcpClient = Nothing
         Exit Function
     End If
     
-    Dim socket_id As Long
-    Dim SocketAddress As wsock32.ws32_SocketAddress
+    Dim p_socketId As Long
+    Dim p_socketAddress As wsock32.ws32_SocketAddress
     
     ' get a connected socket id
     
-    socket_id = accept_(serverSocket.SocketId, SocketAddress, wsock32.ws32_SocketAddressLen)
+    p_socketId = accept_(serverSocket.SocketId, p_socketAddress, wsock32.ws32_SocketAddressLen)
     
-    If socket_id = wsock32.ws32_INVALID_SOCKET Then
+    If p_socketId = wsock32.ws32_INVALID_SOCKET Then
         Err.Raise UserDefinedErrors.SocketAcceptError.Code, "IdentityReader.IPv4StreamSocket.AcceptTcpClient", _
-                  UserDefinedErrors.SocketAcceptError.Description & " Last error: " & CStr(Winsock.lastError)
+                  UserDefinedErrors.SocketAcceptError.Description & " Last error: " & CStr(Winsock.LastError)
         Exit Function
     End If
     
-    Dim clientSocket As IPv4StreamSocket
-    Set clientSocket = New IPv4StreamSocket
-    clientSocket.Initialize socket_id, timeoutMs
+    Dim p_clientSocket As IPv4StreamSocket
+    Set p_clientSocket = New IPv4StreamSocket
+    p_clientSocket.Initialize p_socketId, timeoutMs
     
-    Set AcceptTcpClient = clientSocket
+    Set AcceptTcpClient = p_clientSocket
+    
 End Function
 
 ''' <summary>   Sends a terminated message to the server. </summary>
@@ -407,23 +413,22 @@ Public Function SendMessage(ByVal message As String) As Long
     If StringExtensions.IsNullOrEmpty(message) Then
         SendMessage = 0
     Else
-        Dim messageLength As Integer
-        messageLength = Len(message)
-        Dim sentLength As Integer
-        sentLength = send_(Me.SocketId, ByVal message, Len(message), 0)
+        Dim p_messageLength As Integer: p_messageLength = Len(message)
+        Dim p_sentLength As Integer
+        p_sentLength = send_(Me.SocketId, ByVal message, Len(message), 0)
         
-        If sentLength < 0 Then
+        If p_sentLength < 0 Then
             ' if the sent length is negative, we have an API error.
             Err.Raise UserDefinedErrors.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
-                      UserDefinedErrors.SocketSendError.Description & " Last error: " & CStr(Winsock.lastError)
+                      UserDefinedErrors.SocketSendError.Description & " Last error: " & CStr(Winsock.LastError)
             SendMessage = SEND_MESSAGE_ERROR
-        ElseIf sentLength <> messageLength Then
+        ElseIf p_sentLength <> p_messageLength Then
             Err.Raise UserDefinedErrors.SocketSendError.Code, "IdentityReader.IPv4StreamSocket.CloseConnection", _
                       UserDefinedErrors.SocketSendError.Description & _
-                      " A partial message was sent: " & CStr(sentLength) & " out of " & CStr(messageLength)
+                      " A partial message was sent: " & CStr(p_sentLength) & " out of " & CStr(p_messageLength)
             SendMessage = SEND_PARTIAL_MESSAGE_ERROR
         Else
-            SendMessage = sentLength
+            SendMessage = p_sentLength
         End If
     End If
 
@@ -431,30 +436,29 @@ End Function
 
 ''' <summary>   Receives a message from the server until reaching
 ''' the specified termination. </summary>
-''' <param name="buffer">        Where the message will go. </param>
-''' <param name="maxLength">     The maximum number of bytes to read. </param>
-''' <param name="termination">   [Optional, vbLf] The character that signifies the end of the stream. </param>
-''' <returns>   If no error, the number of byte that were sent to the server.
+''' <param name="buffer">        [String] Where the message will go. </param>
+''' <param name="maxLength">     [Integer] The maximum number of bytes to read. </param>
+''' <param name="termination">   [Optional, String, vbLf] The character that signifies the end of the stream. </param>
+''' <returns>   [Integer] If no error, the number of byte that were sent to the server.
 ''' Otherwise, RECEIVE_ERROR.
 ''' </returns>
 Public Function ReceiveTerminatedMessage(ByRef buffer As String, ByVal maxLength As Integer, _
                                          Optional ByVal termination As String = vbLf) As Integer
 
     Dim c As String * 1
-    Dim Length As Integer
-    Dim count As Integer
+    Dim p_length As Integer
+    Dim p_count As Integer
     
-    buffer = ""
-    While Length < maxLength
+    buffer = vbNullString
+    While p_length < maxLength
     
         DoEvents
         
-        c = ""
-        Dim l As Long
-        l = Len(c)
-        count = recv_(Me.SocketId, c, l, 0)
+        c = vbNullString
+        Dim l As Long: l = Len(c)
+        p_count = recv_(Me.SocketId, c, l, 0)
         
-        If count < 1 Then
+        If p_count < 1 Then
             ReceiveTerminatedMessage = RECEIVE_ERROR
             buffer = Chr$(0)
             Exit Function
@@ -462,11 +466,11 @@ Public Function ReceiveTerminatedMessage(ByRef buffer As String, ByVal maxLength
         
         If c = termination Then
            buffer = buffer + Chr$(0)
-           ReceiveTerminatedMessage = Length
+           ReceiveTerminatedMessage = p_length
            Exit Function
         End If
         
-        Length = Length + count
+        p_length = p_length + p_count
         buffer = buffer + c
         
     Wend
@@ -486,33 +490,33 @@ Public Function ReceiveRaw(Optional ByVal maxLength As Long = &H7FFFF, _
                            Optional ByVal termination As String = vbLf) As String
 
     Dim c As String * 1
-    Dim count As Integer
+    Dim p_count As Integer
     
-    Dim builder As StringBuilder: Set builder = cc_isr_Core.Constructor.CreateStringBuilder()
-    Dim currentLength As Long
-    currentLength = 0
-    Do While currentLength < maxLength
+    Dim p_builder As StringBuilder: Set p_builder = cc_isr_Core.Constructor.CreateStringBuilder()
+    Dim p_currentLength As Long: p_currentLength = 0
+    
+    Do While p_currentLength < maxLength
     
         DoEvents
         
-        c = ""
-        count = recv_(Me.SocketId, c, 1, 0)
+        c = vbNullString
+        p_count = recv_(Me.SocketId, c, 1, 0)
         
-        If count < 1 Then
+        If p_count < 1 Then
             Err.Raise UserDefinedErrors.SocketReceiveError.Code, "IdentityReader.IPV4StreamSocket.receiveRaw", _
-                      UserDefinedErrors.SocketReceiveError.Description & " Last error: " & CStr(Winsock.lastError)
+                      UserDefinedErrors.SocketReceiveError.Description & " Last error: " & CStr(Winsock.LastError)
             Exit Do
         ElseIf c = termination Then
             If Not trimEnd Then
-                builder.Append c
+                p_builder.Append c
             End If
             Exit Do
         Else
-            currentLength = currentLength + count
-            builder.Append c
+            p_currentLength = p_currentLength + p_count
+            p_builder.Append c
         End If
     Loop
-    ReceiveRaw = builder.ToString
+    ReceiveRaw = p_builder.ToString
     
 End Function
 
@@ -521,16 +525,16 @@ End Function
 ''' <returns>   The received characters. </returns>
 Public Function ReceiveBytes(ByVal maxLength As Long) As String
     
-    Dim buffer As String
-    buffer = StringExtensions.Repeat(Chr(0), maxLength)
+    Dim p_buffer As String: p_buffer = StringExtensions.Repeat(Chr(0), maxLength)
     
-    Dim actualLength As Long
-    actualLength = recv_(Me.SocketId, buffer, maxLength, 0)
+    Dim p_actualLength As Long
     
-    If actualLength > 0 Then
-        ReceiveBytes = StringExtensions.Substring(buffer, 0, actualLength)
+    p_actualLength = recv_(Me.SocketId, p_buffer, maxLength, 0)
+    
+    If p_actualLength > 0 Then
+        ReceiveBytes = StringExtensions.Substring(p_buffer, 0, p_actualLength)
     Else
-        ReceiveBytes = ""
+        ReceiveBytes = vbNullString
     End If
     
 End Function
@@ -541,36 +545,34 @@ End Function
 ''' <returns>   The received characters. </returns>
 Public Function ReceiveString(Optional ByVal bufferSize As Integer = 1024) As String
     
-    Dim buffer As String
-    Dim message As String
-    message = ""
+    Dim p_buffer As String
+    Dim p_builder As cc_isr_Core.StringBuilder: p_builder = cc_isr_Core.Constructor.CreateStringBuilder
     
     Do
-        buffer = Trim(Me.ReceiveBytes(bufferSize))
-
-        If Len(buffer) > 0 Then
-            message = message & buffer
-        End If
-    Loop While Len(buffer) > 0
+        p_buffer = Trim(Me.ReceiveBytes(bufferSize))
+        If Len(p_buffer) > 0 Then p_builder.Append p_buffer
+        
+    Loop While Len(p_buffer) > 0
     
-    ReceiveString = Trim(message)
+    ReceiveString = p_builder.ToString()
+    
 End Function
 
 ''' <summary>   Sets the socket receive timeout. </summary>
 ''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
 Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
 
-    Dim result As Long
+    Dim p_result As Long
     
     ' check if the requested receive timeout is different from the
     ' timeout that was already set.
     If m_receiveTimeout <> timeoutMs Then
     
-        result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, timeoutMs, 4)
+        p_result = setsockopt_(m_socketId, wsock32.ws32_SOL_SOCKET, wsock32.ws32_SO_RCVTIMEO, timeoutMs, 4)
     
-        If result = wsock32.ws32_SOCKET_ERROR Then
+        If p_result = wsock32.ws32_SOCKET_ERROR Then
             Err.Raise UserDefinedErrors.SocketOptionSettingError.Code, "IdentityReader.IPV4StreamSocket.SetReceiveTimeout", _
-                      UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.lastError)
+                      UserDefinedErrors.SocketOptionSettingError.Description & " Last error: " & CStr(Winsock.LastError)
         Else
             m_receiveTimeout = timeoutMs
         End If
@@ -580,7 +582,9 @@ End Sub
 
 ''' <summary>   Gets the socket receive timeout in milliseconds. </summary>
 Public Property Get receiveTimeout() As Long
+    
     receiveTimeout = m_receiveTimeout
+
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -589,8 +593,10 @@ End Property
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+
 End Sub
 
 

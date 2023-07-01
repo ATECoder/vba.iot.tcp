@@ -44,92 +44,92 @@ Private m_invalidOperationError As UserDefinedError
 Private Sub Class_Initialize()
 
     Set m_errorsDix = New Dictionary
-    Dim errorCode As Long
-    Dim dummyError As UserDefinedError
-    Set dummyError = New UserDefinedError
-    errorCode = VBA.vbObjectError + dummyError.UserErrorNumberBase
+    Dim p_errorCode As Long
+    Dim p_dummyError As UserDefinedError
+    Set p_dummyError = New UserDefinedError
+    p_errorCode = VBA.vbObjectError + p_dummyError.UserErrorNumberBase
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_winsockStartingError = New UserDefinedError
-    m_winsockStartingError.InitiateProperties errorCode, "WinsockStartingError", _
+    m_winsockStartingError.InitiateProperties p_errorCode, "WinsockStartingError", _
         "Failed starting Winsock using Winsock WSAStartup()."
     AddUserDefinedError Me.WinsockStartingError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_winsockCleanupError = New UserDefinedError
-    m_winsockCleanupError.InitiateProperties errorCode, "WinsockCleanupError", _
+    m_winsockCleanupError.InitiateProperties p_errorCode, "WinsockCleanupError", _
         "Failed disposing Winsock using Winsock WSACleanup()."
     AddUserDefinedError Me.WinsockCleanupError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketCreationError = New UserDefinedError
-    m_socketCreationError.InitiateProperties errorCode, "SocketCreationError", _
+    m_socketCreationError.InitiateProperties p_errorCode, "SocketCreationError", _
         "Failed creating socket using Winsock socket()."
     AddUserDefinedError Me.SocketCreationError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketConnectionError = New UserDefinedError
-    m_socketConnectionError.InitiateProperties errorCode, "SocketConnectionError", _
+    m_socketConnectionError.InitiateProperties p_errorCode, "SocketConnectionError", _
         "Failed connecting socket using Winsock connect()."
     AddUserDefinedError Me.SocketConnectionError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketDisconnectionError = New UserDefinedError
-    m_socketDisconnectionError.InitiateProperties errorCode, "SocketDisconnectionError", _
+    m_socketDisconnectionError.InitiateProperties p_errorCode, "SocketDisconnectionError", _
         "Failed disconnecting socket using Winsock closesocket()."
     AddUserDefinedError Me.SocketDisconnectionError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketOptionSettingError = New UserDefinedError
-    m_socketOptionSettingError.InitiateProperties errorCode, "SocketOptionSettingError", _
+    m_socketOptionSettingError.InitiateProperties p_errorCode, "SocketOptionSettingError", _
         "Failed setting socket options using Winsock setsockopt()."
     AddUserDefinedError Me.SocketOptionSettingError
     
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketSendError = New UserDefinedError
-    m_socketSendError.InitiateProperties errorCode, "SocketSendError", _
+    m_socketSendError.InitiateProperties p_errorCode, "SocketSendError", _
         "Failed send a socket message using Winsock send()."
     AddUserDefinedError Me.SocketSendError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketReceiveError = New UserDefinedError
-    m_socketReceiveError.InitiateProperties errorCode, "SocketReceiveError", _
+    m_socketReceiveError.InitiateProperties p_errorCode, "SocketReceiveError", _
         "Failed receiving a socket message using Winsock recv()."
     AddUserDefinedError Me.SocketReceiveError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketBindError = New UserDefinedError
-    m_socketBindError.InitiateProperties errorCode, "SocketBindError", _
+    m_socketBindError.InitiateProperties p_errorCode, "SocketBindError", _
         "Failed binding a socket using Winsock bind()."
     AddUserDefinedError Me.SocketBindError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketListenError = New UserDefinedError
-    m_socketListenError.InitiateProperties errorCode, "SocketListenError", _
+    m_socketListenError.InitiateProperties p_errorCode, "SocketListenError", _
         "Failed stating a socket listening using Winsock listen()."
     AddUserDefinedError Me.SocketListenError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketAcceptError = New UserDefinedError
-    m_socketAcceptError.InitiateProperties errorCode, "SocketAcceptError", _
+    m_socketAcceptError.InitiateProperties p_errorCode, "SocketAcceptError", _
         "Failed permitting an incoming connection attempt on a socket using Winsock accept()."
     AddUserDefinedError Me.SocketAcceptError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_socketSetStatusError = New UserDefinedError
-    m_socketSetStatusError.InitiateProperties errorCode, "SocketSetStatusError", _
+    m_socketSetStatusError.InitiateProperties p_errorCode, "SocketSetStatusError", _
         "Failed determining the socket status using Winsock select()."
     AddUserDefinedError Me.SocketSetStatusError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_invalidArgumentError = New UserDefinedError
-    m_invalidArgumentError.InitiateProperties errorCode, "InvalidArgumentError", _
+    m_invalidArgumentError.InitiateProperties p_errorCode, "InvalidArgumentError", _
         "Invalid argument error."
     AddUserDefinedError Me.InvalidArgumentError
 
-    errorCode = errorCode + 1
+    p_errorCode = p_errorCode + 1
     Set m_invalidOperationError = New UserDefinedError
-    m_invalidOperationError.InitiateProperties errorCode, "InvalidOperationError", _
+    m_invalidOperationError.InitiateProperties p_errorCode, "InvalidOperationError", _
         "Invalid operation error."
     AddUserDefinedError Me.InvalidOperationError
 
@@ -143,131 +143,168 @@ End Sub
 ''' <summary>   Builds a an error message from the VBA <see cref="Err"/>. </summary>
 Public Function FormattedErr() As String
     
-    Dim ErrNumberDetails As String
-    ErrNumberDetails = " (" & (Err.Number - VBA.vbObjectError) & " / 0x" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")"
-    FormattedErr = "[Error Number=" & Err.Number & ErrNumberDetails & ", Source=" & Err.source & ", Description=" & Err.Description & "]"
+    Dim p_errNoDetails As String
+    p_errNoDetails = " (" & (Err.Number - VBA.vbObjectError) & " / 0x" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")"
+    FormattedErr = "[Error Number=" & Err.Number & p_errNoDetails & ", Source=" & Err.source & ", Description=" & Err.Description & "]"
 
 End Function
 
 ''' <summary>   Adds a user defined error to the error dictionary. </summary>
 ''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
 Private Sub AddUserDefinedError(ByVal userError As UserDefinedError)
+    
     m_errorsDix.Add userError.Code, userError
+
 End Sub
 
 ''' <summary>   Returns true if the specified error exists. </summary>
 ''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
 Public Function UserDefinedErrorExists(ByVal userError As UserDefinedError) As Boolean
+    
     UserDefinedErrorExists = m_errorsDix.Exists(userError.Code)
+
 End Function
 
 ''' <summary>   Returns true if the specified error exists. </summary>
 ''' <para name"userErrorCode">   The error code </param>
 Public Function UserDefinedErrorCodeExists(ByVal userErrorCode As Long) As Boolean
+    
     UserDefinedErrorCodeExists = m_errorsDix.Exists(userErrorCode)
+
 End Function
 
 ''' <summary>   Returns a user defined error. </summary>
 ''' <param name="key">   The user defined error code. </param>
 Public Function GetUserDefinedError(ByVal key As Long) As UserDefinedError
+    
     If m_errorsDix.Exists(key) Then
         Set GetUserDefinedError = m_errorsDix.item(key)
     Else
         Set GetUserDefinedError = New UserDefinedError
         GetUserDefinedError.InitiateProperties key, "UnknwonUserDefinedError", "Unknown error."
     End If
+
 End Function
 
 ''' <summary>   Get the error that occurred starting Winsock. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get WinsockStartingError() As UserDefinedError
+    
     Set WinsockStartingError = m_winsockStartingError
+
 End Property
 
 ''' <summary>   Get the error that occurred ending Winsock. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get WinsockCleanupError() As UserDefinedError
+    
     Set WinsockCleanupError = m_winsockCleanupError
+
 End Property
 
 ''' <summary>   Get the error that occurred creating a socket. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketCreationError() As UserDefinedError
+    
     Set SocketCreationError = m_socketCreationError
+
 End Property
 
 ''' <summary>   Get the error that occurred connecting a socket. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketConnectionError() As UserDefinedError
+    
     Set SocketConnectionError = m_socketConnectionError
+
 End Property
 
 ''' <summary>   Get the error that occurred disconnecting a socket. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketDisconnectionError() As UserDefinedError
+    
     Set SocketDisconnectionError = m_socketDisconnectionError
+
 End Property
 
 ''' <summary>   Get the error that occurred setting a socket option. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketOptionSettingError() As UserDefinedError
+    
     Set SocketOptionSettingError = m_socketOptionSettingError
+
 End Property
 
 ''' <summary>   Get the error that occurred sending a socket message. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketSendError() As UserDefinedError
+    
     Set SocketSendError = m_socketSendError
+
 End Property
 
 ''' <summary>   Get the error that occurred receiving a socket message. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketReceiveError() As UserDefinedError
+    
     Set SocketReceiveError = m_socketReceiveError
+
 End Property
 
 ''' <summary>   Get the error that occurred binding a socket to an address. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketBindError() As UserDefinedError
+    
     Set SocketBindError = m_socketBindError
+
 End Property
 
 ''' <summary>   Get the error that occurred starting to listen on a socket. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketListenError() As UserDefinedError
+    
     Set SocketListenError = m_socketListenError
+
 End Property
 
 ''' <summary>   Get the error that occurred accepting an incoming connection. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketAcceptError() As UserDefinedError
+    
     Set SocketAcceptError = m_socketAcceptError
+
 End Property
 
 ''' <summary>   Get the error that occurred determining the status of a socket set. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get SocketSetStatusError() As UserDefinedError
+    
     Set SocketSetStatusError = m_socketSetStatusError
+
 End Property
 
 ''' <summary>   Get the error that occurred when the method argument is invalid. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get InvalidArgumentError() As UserDefinedError
+    
     Set InvalidArgumentError = m_invalidArgumentError
+
 End Property
 
 ''' <summary>   Get the error that occurred when the method operation is invalid. </summary>
 ''' <value>   <see cref="UserDefinedError"/>. </value>
 Public Property Get InvalidOperationError() As UserDefinedError
+    
     Set InvalidOperationError = m_invalidOperationError
+
 End Property
 
 ''' <summary>   Sets the Err object source string to project.module.procedure. </summary>
-''' <param name="procedureName">   [String] Specifies the name of the procedure. </param>
-''' <param name="moduleName">      [String] Specifies the module name. </param>
-''' <param name="projectName">     [Optional, String] Specifies the project name; otherwise the project
-'''                                name of the active workbook is used. </param>
-Public Sub SetErrSource(ByVal procedureName As String, ByVal moduleName As String, Optional projectName As String = "")
+''' <param name="errProcedureName">   [String] Specifies the name of the procedure. </param>
+''' <param name="errModuleName">      [String] Specifies the module name. </param>
+''' <param name="errProjectName">     [Optional, String] Specifies the project name; otherwise the project
+'''                                   name of the active workbook is used. </param>
+Public Sub SetErrSource(ByVal errProcedureName As String, ByVal errModuleName As String, _
+        Optional errProjectName As String = vbNullString)
 
     ' this procedure must not trap errors because it must
     ' not alter the error object.
@@ -275,21 +312,21 @@ Public Sub SetErrSource(ByVal procedureName As String, ByVal moduleName As Strin
     ' thus we assume that this code is robust and will
     ' not cause errors.
     
-    If StringExtensions.IsNullOrEmpty(projectName) Then
-        projectName = ActiveWorkbook.VBProject.name
+    If StringExtensions.IsNullOrEmpty(errProjectName) Then
+        errProjectName = ActiveWorkbook.VBProject.name
     End If
     
     ' get the current source string
     
-    Dim errorSource As String: errorSource = Err.source
+    Dim p_errorSource As String: p_errorSource = Err.source
     
     ' build the error source.
     
-    errorSource = projectName & "." & moduleName & "." & procedureName
+    p_errorSource = errProjectName & "." & errModuleName & "." & errProcedureName
   
     ' Update the Err.Source
     
-    Err.source = errorSource
+    Err.source = p_errorSource
  
 End Sub
 
@@ -307,33 +344,33 @@ End Sub
 Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = False, _
                 Optional descriptionDelimiter As String = ": ") As String
 
-    Dim builder As StringBuilder: Set builder = New StringBuilder
+    Dim p_builder As StringBuilder: Set p_builder = New StringBuilder
   
     ' check if we have an error
     If Err.Number <> 0 Then
     
-        builder.Append IIf(vbWarning, "Warning ", "Error ")
-        builder.Append Format$(Err.Number)
+        p_builder.Append IIf(vbWarning, "Warning ", "Error ")
+        p_builder.Append Format$(Err.Number)
         
-        Dim lErrNumber As Long: lErrNumber = Err.Number - vbObjectError
+        Dim p_errNumber As Long: p_errNumber = Err.Number - vbObjectError
         
-        If Abs(lErrNumber) < &HFFFF& Then
-            lErrNumber = lErrNumber - &H200
-            builder.Append " (+0x"
+        If Abs(p_errNumber) < &HFFFF& Then
+            p_errNumber = p_errNumber - &H200
+            p_builder.Append " (+0x"
         Else
-            lErrNumber = Err.Number
-            builder.Append " (0x"
+            p_errNumber = Err.Number
+            p_builder.Append " (0x"
         End If
-        builder.Append Hex$(lErrNumber)
-        builder.Append ") "
-        builder.Append "occurred in "
-        builder.Append Err.source
-        builder.Append ": "
-        builder.Append Err.Description
+        p_builder.Append Hex$(p_errNumber)
+        p_builder.Append ") "
+        p_builder.Append "occurred in "
+        p_builder.Append Err.source
+        p_builder.Append ": "
+        p_builder.Append Err.Description
         
     End If
 
-    BuildStandardErrorMessage = builder.ToString
+    BuildStandardErrorMessage = p_builder.ToString
 
 End Function
 

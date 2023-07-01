@@ -64,7 +64,7 @@ Public Sub Initialize(ByVal client As TcpClient, _
                       Optional ByVal writeTerm As String = vbLf, _
                       Optional ByVal readAfterWriteDelayMs As Integer = 5)
     
-    Set m_errTraces = tracer
+    Set m_errTracer = tracer
     Set m_tcpClient = client
     m_readTermination = readTerm
     m_writeTermination = writeTerm
@@ -103,7 +103,7 @@ End Property
 ''' The GPIB-Lan controller is enabled only if the Tcp client is
 ''' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
 ''' </remarks>
-''' <param name=""value>   [Boolean] True if enabled.  </value>
+''' <param name="value">   [Boolean] True if enabled.  </value>
 Public Property Let Enabled(ByVal value As Boolean)
     m_enabled = value
 End Property
@@ -171,8 +171,8 @@ End Property
 Public Sub ReadAfterWriteEnabledSetter(ByVal enable As Boolean)
     
     If enable <> Me.ReadAfterWriteEnabled Then
-        Dim output As String: output = IIf(enable, "1", "0")
-        Me.SendToController "++auto " & output
+        Dim p_value As String: p_value = IIf(enable, "1", "0")
+        Me.SendToController "++auto " & p_value
         m_readAfterWriteEnabled = enable
     End If
 
@@ -242,7 +242,7 @@ Public Function QueryDevice(ByVal message As String, Optional ByVal appendTermin
         DoEvents
         QueryDevice = Me.ReceiveFromDevice()
     Else
-        QueryDevice = ""
+        QueryDevice = vbNullString
     End If
 End Function
 
@@ -272,13 +272,13 @@ End Function
 ''' <returns>   [String] The received message. </returns>
 Public Function ReceiveFromController(Optional trimEnd As Boolean = True) As String
 
-    Dim ReceivedMessage As String: ReceivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
+    Dim p_receivedMessage As String: p_receivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
                                                                             termination:=m_readTermination)
     
     ' messages that come from the controller have a CR + LF termination. The Receive Raw method
     ' may stop at the LF termination, in which case the CR termination needs to be trimmed.
     If trimEnd Then
-        ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(ReceivedMessage, vbCr)
+        ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(p_receivedMessage, vbCr)
     End If
     
 End Function
@@ -291,7 +291,7 @@ Public Function QueryController(ByVal message As String, Optional ByVal appendTe
         DoEvents
         QueryController = Me.ReceiveFromController()
     Else
-        QueryController = ""
+        QueryController = vbNullString
     End If
 End Function
 
@@ -347,14 +347,14 @@ End Sub
 Public Function GpibAddressGetter() As String
     
     GpibAddressGetter = "-1"
-    Dim ReceivedMessage As String: ReceivedMessage = Me.QueryController("++addr")
-    Dim addresses() As String: addresses = Split(ReceivedMessage, " ")
-    If 0 = UBound(addresses) Then
-        GpibAddressGetter = ReceivedMessage
-    ElseIf 1 = UBound(addresses) - LBound(addresses) + 1 Then
-        GpibAddressGetter = addresses(1)
-        If 1 < UBound(addresses) - LBound(addresses) + 1 Then
-            GpibAddressGetter = GpibAddressGetter & " " & addresses(2)
+    Dim p_receivedMessage As String: p_receivedMessage = Me.QueryController("++addr")
+    Dim p_addresses() As String: p_addresses = Split(p_receivedMessage, " ")
+    If 0 = UBound(p_addresses) Then
+        GpibAddressGetter = p_receivedMessage
+    ElseIf 1 = UBound(p_addresses) - LBound(p_addresses) + 1 Then
+        GpibAddressGetter = p_addresses(1)
+        If 1 < UBound(p_addresses) - LBound(p_addresses) + 1 Then
+            GpibAddressGetter = GpibAddressGetter & " " & p_addresses(2)
         End If
     End If
     
@@ -587,7 +587,7 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
     If eventArgs.Connected Then
     
         ' from experiments it seems this needs to be set first.
-        Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
+        Dim p_enabled As Boolean: p_enabled = Me.ReadAfterWriteEnabledGetter
     
         Me.ReadAfterWriteEnabledSetter True
     
@@ -602,6 +602,8 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
         UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
         m_errTracer.TraceError
     End If
+    
+    On Error GoTo 0
     
 End Sub
 
@@ -622,7 +624,7 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
         ' leave the instrument with auto read-after-write off to prevent
         ' query unterminated errors.
         
-        Dim isEnabled As Boolean: isEnabled = Me.ReadAfterWriteEnabledGetter
+        Dim p_enabled As Boolean: p_enabled = Me.ReadAfterWriteEnabledGetter
         Me.ReadAfterWriteEnabledSetter False
         
         ' send the instrument back to local.
@@ -636,6 +638,8 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
         UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
         m_errTracer.TraceError
     End If
+    
+    On Error GoTo 0
     
 End Sub
 

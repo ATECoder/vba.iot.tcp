@@ -17,18 +17,24 @@ Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChang
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpServerSocket"/>. </summary>
 Private Sub Class_Initialize()
+    
     Set m_tcpServerSocket = New IPv4StreamSocket
+
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpServerSocket"/>. </summary>
 Private Sub Class_Terminate()
+    
     Me.Dispose
+
 End Sub
 
 ''' <summary>   Gets the Tcp Server socket. </summary>
 ''' <value>   [<see cref="IPv4StreamSocket"/>]. </value>
 Public Property Get TcpServerSocket() As IPv4StreamSocket
+    
     Set TcpServerSocket = m_tcpServerSocket
+
 End Property
 
 ''' <summary>   Associates any local address with a socket and start listening. </summary>
@@ -68,11 +74,13 @@ End Function
 ''' <summary>   Returns the connection state of the client. </summary>
 ''' <returns>   [Boolean] True if the socket is connected; otherwise, False. </returns>
 Public Property Get Connected() As Boolean
+    
     If m_tcpServerSocket Is Nothing Then
         Connected = False
     Else
         Connected = Me.TcpServerSocket.Connected
     End If
+
 End Property
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
@@ -80,22 +88,25 @@ End Property
 ''' <returns>   the connected Tcp client. </returns>
 Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
 
-    Dim connectedTcpClientSocket As IPv4StreamSocket
-    Set connectedTcpClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
+    Dim p_connectedClientSocket As IPv4StreamSocket
+    Set p_connectedClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
     
-    Dim client As TcpClient
-    Set client = New TcpClient
-    client.Initialize connectedTcpClientSocket
+    Dim p_client As TcpClient
+    Set p_client = New TcpClient
+    p_client.Initialize p_connectedClientSocket
     
-    Set AcceptTcpClient = client
+    Set AcceptTcpClient = p_client
+
 End Function
 
 ''' <summary>   Closes and releases the socket. </summary>
 Public Sub Dispose()
+    
     If Me.Connected Then
         Me.TcpServerSocket.CloseConnection
     End If
     Set m_tcpServerSocket = Nothing
+
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -104,8 +115,10 @@ End Sub
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
 Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+    
     RaiseEvent ConnectionChanged( _
             cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+
 End Sub
 
 

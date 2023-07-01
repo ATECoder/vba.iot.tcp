@@ -31,18 +31,13 @@ Private Const m_identityCell As String = "H2"
 ''' IP address and port defined in the parent sheet. </summary>
 Private Sub ReadIdentityButton_Click()
 
-    Dim host As String
-    Dim port As Integer
-    Dim repeatCount As Integer
-    Dim timeout As Integer
-    
-    timeout = Range(m_receiveTimeoutCell).value
-    repeatCount = Range(m_repeatCountCell).value
-    host = Range(m_inputHostCell).value
-    port = Range(m_inputPortCell).value
+    Dim p_host As String: p_host = Range(m_inputHostCell).value
+    Dim p_port As Integer: p_port = Range(m_inputPortCell).value
+    Dim p_repeatCount As Integer: p_repeatCount = Range(m_repeatCountCell).value
+    Dim p_timeout As Integer: p_timeout = Range(m_receiveTimeoutCell).value
     
     ' read identity user session read.
-    Ieee488SessionReadIdentity host, port, repeatCount
+    Ieee488SessionReadIdentity p_host, p_port, p_repeatCount
     
 End Sub
 
@@ -55,62 +50,62 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
 
     On Error GoTo Finally
     
-    Range(m_socketAddressCell) = ""
-    Range(m_connectedSocketIdCell).value = ""
-    Range(m_connectedCell).value = ""
-    Range(m_sentMessageCell).value = ""
-    Range(m_receivedMessageLengthCell).value = ""
-    Range(m_receivedMessageCell).value = ""
-    Range(m_averageElapsedTimeCell).value = ""
-    Range(m_elapsedTimeCell).value = ""
-    Range(m_errorMessageCell).value = ""
+    Range(m_socketAddressCell) = vbNullString
+    Range(m_connectedSocketIdCell).value = vbNullString
+    Range(m_connectedCell).value = vbNullString
+    Range(m_sentMessageCell).value = vbNullString
+    Range(m_receivedMessageLengthCell).value = vbNullString
+    Range(m_receivedMessageCell).value = vbNullString
+    Range(m_averageElapsedTimeCell).value = vbNullString
+    Range(m_elapsedTimeCell).value = vbNullString
+    Range(m_errorMessageCell).value = vbNullString
 
-    Dim stopper As StopWatch: Set stopper = cc_isr_Core.Constructor.CreateStopWatch()
-    Dim totalMilliseconds As Double
+    Dim p_stopper As StopWatch: Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+    Dim p_totalMilliseconds As Double
     
-    Dim Session As New Ieee488Session
+    Dim p_session As New Ieee488Session
     
-    Session.OpenConnection host, port
+    p_session.OpenConnection host, port
     
     ' report the socket number
-    Range(m_connectedSocketIdCell).value = Session.SocketId
+    Range(m_connectedSocketIdCell).value = p_session.SocketId
    
     ' report the connection state
-    Range(m_connectedCell).value = Session.Connected
+    Range(m_connectedCell).value = p_session.Connected
     
-    If Session.Connected Then
+    If p_session.Connected Then
     
-        Range(m_socketAddressCell).value = Session.ViSession.SocketAddress
+        Range(m_socketAddressCell).value = p_session.ViSession.SocketAddress
     
-        Dim command As String
-        command = "*IDN?"
-        Range(m_sentMessageCell).value = command
+        Dim p_command As String
+        p_command = "*IDN?"
+        Range(m_sentMessageCell).value = p_command
         
-        Dim loopCount As Integer
-        Do While loopCount < repeatCount
+        Dim p_loopCount As Integer
+        Do While p_loopCount < repeatCount
             
             DoEvents
            
-            loopCount = loopCount + 1
-            stopper.Restart
+            p_loopCount = p_loopCount + 1
+            p_stopper.Restart
             
-            Dim Identity As String
+            Dim p_identity As String
             
             If Me.UseViSessionOptionButton Then
-                Identity = Session.ViSession.QueryLine(command)
+                p_identity = p_session.ViSession.QueryLine(p_command)
             Else
-                Identity = Session.QueryLine(command)
+                p_identity = p_session.QueryLine(p_command)
             End If
             
-            totalMilliseconds = totalMilliseconds + stopper.ElapsedMilliseconds
+            p_totalMilliseconds = p_totalMilliseconds + p_stopper.ElapsedMilliseconds
             
-            Range(m_receivedMessageLengthCell).value = Len(Identity)
-            Range(m_receivedMessageCell).value = Identity
+            Range(m_receivedMessageLengthCell).value = Len(p_identity)
+            Range(m_receivedMessageCell).value = p_identity
     
         Loop
   
-        Range(m_averageElapsedTimeCell).value = Format(totalMilliseconds / loopCount, m_elapsedTimeFormat) + " ms"
-        Range(m_elapsedTimeCell).value = Format(totalMilliseconds, m_elapsedTimeFormat) + " ms"
+        Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
+        Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
     Else
         Range(m_errorMessageCell).value = "connection failed without reporting an exception"
@@ -118,26 +113,27 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     
 Finally:
 
-    Dim errorMessage As String
+    Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            errorMessage = "Reading identity failed using Tcp session " & UserDefinedErrors.FormattedErr & _
+            p_errorMessage = "Reading identity failed using Tcp session " & UserDefinedErrors.FormattedErr & _
                            " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
     
     On Error Resume Next
-    If Not Session Is Nothing Then
-        If Session.Connected Then
-            Session.CloseConnection
+    
+    If Not p_session Is Nothing Then
+        If p_session.Connected Then
+            p_session.CloseConnection
         End If
     End If
     
     ' terminate the session
-    Set Session = Nothing
+    Set p_session = Nothing
     
-    If Len(errorMessage) > 0 Then
-        Range(m_errorMessageCell).value = errorMessage
+    If Len(p_errorMessage) > 0 Then
+        Range(m_errorMessageCell).value = p_errorMessage
     End If
 
     On Error GoTo 0
