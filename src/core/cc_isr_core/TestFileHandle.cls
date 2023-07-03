@@ -33,36 +33,37 @@ Public Sub DeleteTestFile()
 
 End Sub
 
-''' <summary>   Deletes the file handle test file. </summary>
-''' <param name="fileHandle">   The <see cref="TestFileHandle"/>   to delete. </param>
-Public Sub Delete(ByVal fileHandle As TestFileHandle)
+''' <summary>   Deletes the test file. </summary>
+''' <param name="a_handle">   <see cref="TestFileHandle"/> The handle to the file to be deleted. </param>
+Public Sub Delete(ByVal a_handle As TestFileHandle)
     
-    Dim p_fileInfo
-    Set p_fileInfo = CreateObject("Scripting.FileSystemObject")
-    p_fileInfo.DeleteFile fileHandle.FileName
+    Dim p_fileInfo As FileSystemObject
+    Set p_fileInfo = New Scripting.FileSystemObject
+    p_fileInfo.DeleteFile a_handle.FileName
 
 End Sub
 
-''' <summary> </summary>
+''' <summary>   Gets the file name. </summary>
 ''' <value>   [String]. </value>
 Public Property Get FileName() As String
     FileName = m_fileName
 End Property
 
-''' <summary> </summary>
-Public Property Let FileName(ByVal value As String)
-    m_fileName = value
+''' <summary>   Sets the file name. </summary>
+''' <param name="a_value">   [String] The name of the file. </param>
+Public Property Let FileName(ByVal a_value As String)
+    m_fileName = a_value
 End Property
 
-''' <summary> </summary>
+''' <summary>   Gets the file <see cref="Scripting.TextStream"/>. </summary>
 ''' <value>   [TextStream]. </value>
 Public Property Get FileStream() As TextStream
     Set FileStream = m_fileStream
 End Property
 
-''' <summary>   Sets the file stream. </summary>
-''' <param name="value">   [TextStream]. </param>
-Public Property Set FileStream(ByVal value As TextStream)
-    Set m_fileStream = value
+''' <summary>   Sets the file <see cref="Scripting.TextStream"/>. </summary>
+''' <param name="a_value">   [TextStream]. </param>
+Public Property Set FileStream(ByVal a_value As TextStream)
+    Set m_fileStream = a_value
 End Property
 

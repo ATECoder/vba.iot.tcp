@@ -37,14 +37,14 @@ Public Function CreateModuleInfo() As ModuleInfo
     Set CreateModuleInfo = New ModuleInfo
 End Function
 
-''' <summary>   Creates an instance of the <see cref="stdTimer"/> class. </summary>
-''' <param name="iMilliseconds">   [Long] Number of milliseconds to raise Tick Event between </param>
-''' <param name="callback">        [stdICallable=Nothing] Callback object. Must contain a Run() method. </param>
-''' <returns> {stdTimer} The frequency isn't guaranteed but it will be as close as humanly possible. </returns>
-''' <returns>   A new instance of the <see cref="stdTimer"/> class. </returns>
-Public Function CreateStdTimer(ByVal iMilliseconds As Long, Optional ByVal callback As Object = Nothing) As stdTimer
-  Set CreateStdTimer = New stdTimer
-  Call CreateStdTimer.protInit(iMilliseconds, callback)
+''' <summary>   Creates an instance of the <see cref="EventTimer"/> class. </summary>
+''' <param name="a_intervalMs">   [Long] Number of milliseconds to raise Tick Event between </param>
+''' <param name="a_callback">     [IRunnable=Nothing] Callback object. Must contain a Run() method. </param>
+''' <returns> [see cref=""EventTimer"/>. The frequency isn't guaranteed but it will be as close as humanly possible. </returns>
+''' <returns>   A new instance of the <see cref="EventTimer"/> class. </returns>
+Public Function CreateEventTimer(ByVal a_intervalMs As Long, Optional ByVal a_callback As IRunnable = Nothing) As EventTimer
+  Set CreateEventTimer = New EventTimer
+  Call CreateEventTimer.ProtInit(a_intervalMs, a_callback)
 End Function
 
 ''' <summary>   Creates a new instance of the <see cref="StopWatch"/> class to share

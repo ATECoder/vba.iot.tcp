@@ -1,23 +1,23 @@
 Attribute VB_Name = "WorkbookUtilitiesTests"
 Option Explicit
 
-Private Sub AddModule(ByVal col As VBA.Collection, ByVal moduleFullName As String)
+Private Sub AddModule(ByVal a_col As VBA.Collection, ByVal a_moduleFullName As String)
     
     Dim p_module As ModuleInfo
     Set p_module = Constructor.CreateModuleInfo
-    p_module.FromModuleFullName moduleFullName
-    col.Add p_module
+    p_module.FromModuleFullName a_moduleFullName
+    a_col.Add p_module
 
 End Sub
 
-Public Function ContainsModule(ByVal col As VBA.Collection, ByVal findModule As ModuleInfo) As Boolean
+Public Function ContainsModule(ByVal a_col As VBA.Collection, ByVal a_findModule As ModuleInfo) As Boolean
     
     Dim p_found As Boolean
     p_found = False
     Dim p_moduleInfo As ModuleInfo
-    For Each p_moduleInfo In col
+    For Each p_moduleInfo In a_col
         DoEvents
-        If p_moduleInfo.Equals(findModule) Then
+        If p_moduleInfo.Equals(a_findModule) Then
             p_found = True
             Exit For
         End If
@@ -26,13 +26,13 @@ Public Function ContainsModule(ByVal col As VBA.Collection, ByVal findModule As 
 
 End Function
 
-Private Function ContainsAllModules(ByVal leftCol As VBA.Collection, ByVal rightCol As VBA.Collection)
+Private Function ContainsAllModules(ByVal a_leftCol As VBA.Collection, ByVal a_rightCol As VBA.Collection)
 
     Dim p_result As Boolean: p_result = False
     Dim p_rightModuleInfo As ModuleInfo
-    For Each p_rightModuleInfo In rightCol
+    For Each p_rightModuleInfo In a_rightCol
         DoEvents
-        If Not ContainsModule(leftCol, p_rightModuleInfo) Then
+        If Not ContainsModule(a_leftCol, p_rightModuleInfo) Then
             p_result = False
             Exit Function
         End If
@@ -43,17 +43,17 @@ End Function
 
 
 ''' <summary>   Adds the test modules. </summary>
-Private Sub AddTestModules(ByVal knownTestModules As VBA.Collection)
+Private Sub AddTestModules(ByVal a_knownTestModules As VBA.Collection)
     
     Dim p_projectName As String: p_projectName = Application.ActiveWorkbook.VBProject.name
-    AddModule knownTestModules, p_projectName & ".CollectionExtensionsTests"
-    AddModule knownTestModules, p_projectName & ".MarshalTests"
-    AddModule knownTestModules, p_projectName & ".PathExtensionsTests"
-    AddModule knownTestModules, p_projectName & ".StopWatchTests"
-    AddModule knownTestModules, p_projectName & ".StringBuilderTests"
-    AddModule knownTestModules, p_projectName & ".StringExtensionsTests"
-    AddModule knownTestModules, p_projectName & ".UserDefinedErrorsTests"
-    AddModule knownTestModules, p_projectName & ".WorkbookUtilitiesTests"
+    AddModule a_knownTestModules, p_projectName & ".CollectionExtensionsTests"
+    AddModule a_knownTestModules, p_projectName & ".MarshalTests"
+    AddModule a_knownTestModules, p_projectName & ".PathExtensionsTests"
+    AddModule a_knownTestModules, p_projectName & ".StopWatchTests"
+    AddModule a_knownTestModules, p_projectName & ".StringBuilderTests"
+    AddModule a_knownTestModules, p_projectName & ".StringExtensionsTests"
+    AddModule a_knownTestModules, p_projectName & ".UserDefinedErrorsTests"
+    AddModule a_knownTestModules, p_projectName & ".WorkbookUtilitiesTests"
 
 End Sub
 

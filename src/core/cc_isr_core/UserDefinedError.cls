@@ -14,13 +14,13 @@ Private m_name As String
 Private m_description As String
 
 ''' <summary>   Initializes a user defined error. </summary>
-''' <param name="errorCode">   The error code. </param>
-''' <param name="errorName">   The error name. </param>
-''' <param name="errorDescription">   The error description. </param>
-Public Sub InitiateProperties(ByVal errorCode As Long, ByVal errorName As String, ByVal errorDescription As String)
-    m_name = errorName
-    m_code = errorCode
-    m_description = errorDescription
+''' <param name="a_errorCode">     [Long] The error code. </param>
+''' <param name="a_errorName">     [String] The error name. </param>
+''' <param name="a_eescription">   [String] The error description. </param>
+Public Sub InitiateProperties(ByVal a_errorCode As Long, ByVal a_errorName As String, ByVal a_description As String)
+    m_name = a_errorName
+    m_code = a_errorCode
+    m_description = a_description
 End Sub
 
 ''' <summary>   Gets the error code. </summary>
@@ -57,8 +57,8 @@ End Property
 ''' <summary>   Returns a string representation of the error. </summary>
 ''' <param name="additionaInfo">   [Optional, empty] additional information to append to the error message. </param>
 ''' <returns>   A String representation of the error. </returns>
-Public Function ToString(Optional ByVal additionalInfo As String = vbNullString) As String
+Public Function ToString(Optional ByVal a_additionalInfo As String = vbNullString) As String
     ToString = "User Error " & Me.name & " (0x" & VBA.LCase$(VBA.Hex$(Me.Code)) & " 0x" & VBA.LCase$(VBA.Hex$(Me.UserErrorNumber)) & "): " & _
-                Me.Description & additionalInfo
+                Me.Description & a_additionalInfo
 End Function
 

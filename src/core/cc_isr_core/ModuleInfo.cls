@@ -13,28 +13,28 @@ Private m_projectName As String
 Private m_moduleName As String
 
 ''' <summary>   Initializes this class. </summary>
-''' <param name="project">     The project name. </param>
-''' <param name="component">   The component code module name. </param>
-Public Sub Initialize(ByVal ProjectName As String, ByVal codeModuleName As String)
-    m_projectName = ProjectName
-    m_moduleName = codeModuleName
+''' <param name="a_projectName">      [String] The project name. </param>
+''' <param name="a_codeModuleName">   [String] The component code module name. </param>
+Public Sub Initialize(ByVal a_projectName As String, ByVal a_codeModuleName As String)
+    m_projectName = a_projectName
+    m_moduleName = a_codeModuleName
 End Sub
 
 ''' <summary>   Initializes this class from a module full name. </summary>
-''' <param name="moduleFullName">     the module full name. </param>
-Public Sub FromModuleFullName(ByVal moduleFullName As String)
+''' <param name="a_moduleFullName">   [String] The module full name. </param>
+Public Sub FromModuleFullName(ByVal a_moduleFullName As String)
     
-    Dim p_names() As String: p_names() = Split(moduleFullName, ".")
+    Dim p_names() As String: p_names() = Split(a_moduleFullName, ".")
     m_projectName = p_names(LBound(p_names))
     m_moduleName = p_names(LBound(p_names) + 1)
 
 End Sub
 
 ''' <summary>   Initializes this class from a macro full name. </summary>
-''' <param name="macroFullName">     the macro full name. </param>
-Public Sub FromMacroFullName(ByVal macroFullName As String)
+''' <param name="a_macroFullName">   [String] The macro full name. </param>
+Public Sub FromMacroFullName(ByVal a_macroFullName As String)
     
-    Dim p_names() As String: p_names() = Split(macroFullName, ".")
+    Dim p_names() As String: p_names() = Split(a_macroFullName, ".")
     m_projectName = p_names(LBound(p_names))
     m_moduleName = p_names(LBound(p_names) + 1)
 
@@ -65,11 +65,11 @@ End Property
 
 ''' <summary>   Checks if the two modules are equal referring to the same
 ''  component in the project. </summary>
-''' <param name="module">   The module to check for equality. </param>
-Public Function Equals(ByVal module As ModuleInfo) As Boolean
-    If IsObject(module) Then
-        Equals = (0 = StrComp(Me.ProjectName, module.ProjectName)) And _
-                 (0 = StrComp(Me.ModuleName, module.ModuleName))
+''' <param name="a_module">   [See cref="ModuleInfo"/>] The module to check for equality. </param>
+Public Function Equals(ByVal a_module As ModuleInfo) As Boolean
+    If IsObject(a_module) Then
+        Equals = (0 = StrComp(Me.ProjectName, a_module.ProjectName)) And _
+                 (0 = StrComp(Me.ModuleName, a_module.ModuleName))
     Else
         Equals = False
     End If

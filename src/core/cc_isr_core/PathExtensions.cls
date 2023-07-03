@@ -10,119 +10,119 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <summary> Trims the path from '\' and '/' suffixes. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function TrimPath(ByVal path As String) As String
+Public Function TrimPath(ByVal a_path As String) As String
 
-    path = Trim(path)
-    path = StringExtensions.TrimRight(path, "/")
-    path = StringExtensions.TrimRight(path, "\")
-    TrimPath = path
+    a_path = Trim(a_path)
+    a_path = StringExtensions.TrimRight(a_path, "/")
+    a_path = StringExtensions.TrimRight(a_path, "\")
+    TrimPath = a_path
     
 End Function
 
 ''' <summary> Returns true if the folder was deleted and not longer exists. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function DeleteFolder(ByVal path As String) As Boolean
+Public Function DeleteFolder(ByVal a_path As String) As Boolean
 
     Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-    If p_fileInfo.FolderExists(path) Then
-        p_fileInfo.DeleteFolder path
+    If p_fileInfo.FolderExists(a_path) Then
+        p_fileInfo.DeleteFolder a_path
     End If
-    DeleteFolder = Not p_fileInfo.FolderExists(path)
+    DeleteFolder = Not p_fileInfo.FolderExists(a_path)
     
 End Function
 
 ''' <summary> Returns true if the folder was deleted and not longer exists. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function DeleteFile(ByVal path As String) As Boolean
+Public Function DeleteFile(ByVal a_path As String) As Boolean
 
     Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-    If p_fileInfo.FileExists(path) Then
-        p_fileInfo.DeleteFile path
+    If p_fileInfo.FileExists(a_path) Then
+        p_fileInfo.DeleteFile a_path
     End If
-    DeleteFile = Not p_fileInfo.FileExists(path)
+    DeleteFile = Not p_fileInfo.FileExists(a_path)
     
 End Function
 
 ''' <summary> Returns true if the folder exists. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function FolderExists(ByVal path As String) As Boolean
+Public Function FolderExists(ByVal a_path As String) As Boolean
 
     Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-    FolderExists = p_fileInfo.FolderExists(path)
+    FolderExists = p_fileInfo.FolderExists(a_path)
     
 End Function
 
 ''' <summary> Returns true if the file exists. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function FileExists(ByVal path As String) As Boolean
+Public Function FileExists(ByVal a_path As String) As Boolean
 
     Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-    FileExists = p_fileInfo.FileExists(path)
+    FileExists = p_fileInfo.FileExists(a_path)
     
 End Function
 
 ''' <summary> Returns true if the test file was created. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function CreateTextFile(ByVal path As String) As Boolean
+Public Function CreateTextFile(ByVal a_path As String) As Boolean
 
     Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-    If Not p_fileInfo.FileExists(path) Then
-        p_fileInfo.CreateTextFile path
+    If Not p_fileInfo.FileExists(a_path) Then
+        p_fileInfo.CreateTextFile a_path
     End If
-    CreateTextFile = p_fileInfo.FileExists(path)
+    CreateTextFile = p_fileInfo.FileExists(a_path)
     
 End Function
 
 ''' <summary> Creates the directory if it does not exist. </summary>
-''' <param name="path">   The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function CreateFolder(ByVal path As String) As String
+Public Function CreateFolder(ByVal a_path As String) As String
 
-    If Not StringExtensions.IsNullOrEmpty(path) Then
-        path = TrimPath(path)
+    If Not StringExtensions.IsNullOrEmpty(a_path) Then
+        a_path = TrimPath(a_path)
         Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-        If Not p_fileInfo.FolderExists(path) Then
-            p_fileInfo.CreateFolder path
+        If Not p_fileInfo.FolderExists(a_path) Then
+            p_fileInfo.CreateFolder a_path
         End If
     End If
-    CreateFolder = path
+    CreateFolder = a_path
     
 End Function
 
 ''' <summary> Joins the file to the path; creates the path if it does not exist. </summary>
-''' <param name="path">       [String] The path. </param>
-''' <param name="fileName">   [String] The file name. </param>
-''' <param name="create">      [optional, Boolean, False] If true, creates the folder for the path. </param>
+''' <param name="a_path">       [String] The path. </param>
+''' <param name="a_fileName">   [String] The file name. </param>
+''' <param name="a_create">     [optional, Boolean, False] If true, creates the folder for the path. </param>
 ''' <returns>   [String]. </returns>
-Public Function JoinFile(ByVal path As String, ByVal FileName As String, _
-        Optional ByVal Create As Boolean = False) As String
+Public Function JoinFile(ByVal a_path As String, ByVal a_fileName As String, _
+        Optional ByVal a_create As Boolean = False) As String
 
-    path = TrimPath(path)
-    If Create Then path = CreateFolder(path)
-    If Not StringExtensions.IsNullOrEmpty(path) Then path = path & "\"
-    JoinFile = path & FileName
+    a_path = TrimPath(a_path)
+    If a_create Then a_path = CreateFolder(a_path)
+    If Not StringExtensions.IsNullOrEmpty(a_path) Then a_path = a_path & "\"
+    JoinFile = a_path & a_fileName
 
 End Function
 
 ''' <summary> Joins the sub folder to the path and creates the path if it does not exist. </summary>
-''' <param name="path">        [String] The path. </param>
-''' <param name="subFolder">   [String] The sub folder to join to the path. </param>
-''' <param name="create">      [optional, Boolean, False] If true, creates the folder for the path. </param>
+''' <param name="a_path">        [String] The path. </param>
+''' <param name="a_subFolder">   [String] The sub folder to join to the path. </param>
+''' <param name="a_create">      [optional, Boolean, False] If true, creates the folder for the path. </param>
 ''' <returns>   [String]. </returns>
-Public Function Join(ByVal path As String, ByVal subFolder As String, Optional ByVal Create As Boolean = False) As String
+Public Function Join(ByVal a_path As String, ByVal a_subFolder As String, Optional ByVal a_create As Boolean = False) As String
 
-    path = JoinFile(path, subFolder)
-    If Create Then
-        path = CreateFolder(path)
+    a_path = JoinFile(a_path, a_subFolder)
+    If a_create Then
+        a_path = CreateFolder(a_path)
     End If
-    Join = path
+    Join = a_path
 
 End Function
 
@@ -130,14 +130,14 @@ End Function
 ''' <param name="create">      [Boolean] If true, creates the folder for the path. </param>
 ''' <param name="pathParts">   [Variant] The path parts to be joined. </param>
 ''' <returns>   [String]. </returns>
-Public Function JoinAll(ByVal Create As Boolean, ParamArray pathParts() As Variant) As String
+Public Function JoinAll(ByVal a_create As Boolean, ParamArray a_pathParts() As Variant) As String
     
     Dim p_joinedPath As String: p_joinedPath = vbNullString
-    If Not IsEmpty(pathParts) Then
+    If Not IsEmpty(a_pathParts) Then
         Dim p_pathPart As Variant
-        For Each p_pathPart In pathParts
+        For Each p_pathPart In a_pathParts
             DoEvents
-            p_joinedPath = Join(p_joinedPath, p_pathPart, Create)
+            p_joinedPath = Join(p_joinedPath, p_pathPart, a_create)
         Next
     End If
 
@@ -146,15 +146,15 @@ Public Function JoinAll(ByVal Create As Boolean, ParamArray pathParts() As Varia
 End Function
 
 ''' <summary> Gets the parent folder path from the specified path. </summary>
-''' <param name="path">   [String] The path. </param>
+''' <param name="a_path">   [String] The path. </param>
 ''' <returns>   [String]. </returns>
-Public Function GetParentFolderName(ByVal path As String) As String
-    
-    GetParentFolderName = path
-    If Not StringExtensions.IsNullOrEmpty(path) Then
-        path = TrimPath(path)
+Public Function GetParentFolderName(ByVal a_path As String) As String
+        
+    GetParentFolderName = a_path
+    If Not StringExtensions.IsNullOrEmpty(a_path) Then
+        a_path = TrimPath(a_path)
         Dim p_fileInfo As FileSystemObject: Set p_fileInfo = New FileSystemObject
-        GetParentFolderName = p_fileInfo.GetParentFolderName(path)
+        GetParentFolderName = p_fileInfo.GetParentFolderName(a_path)
     End If
     
 End Function

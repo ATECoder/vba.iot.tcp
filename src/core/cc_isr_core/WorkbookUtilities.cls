@@ -10,10 +10,10 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <summary>   Exports all code files to the active workbook path. </summary>
-''' <para name="subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
-Public Sub ExportCodeFiles(Optional ByVal subFolder As String = "code")
+''' <para name="a_subFolder">   [Optional, 'code'] Specifies the sub-folder were the files are to be stored. </param>
+Public Sub ExportCodeFiles(Optional ByVal a_subFolder As String = "code")
 
-    Me.ExportProjectCodeFiles ActiveWorkbook.VBProject, subFolder
+    Me.ExportProjectCodeFiles ActiveWorkbook.VBProject, a_subFolder
     
 End Sub
 
@@ -24,32 +24,32 @@ End Sub
 '''                                are to be stored. </param>
 ''' <para name="mustExist">        [Optional, Boolean, True] true if the folder must exists in order to prevent
 '''                                unintended storage into the default folder. </param>
-Public Sub ExportProjectCodeFiles(ByVal project As VBProject, _
-        Optional ByVal useProjectName As Boolean = True, _
-        Optional ByVal subFolder As String = "code", _
-        Optional ByVal mustExist As Boolean = True)
+Public Sub ExportProjectCodeFiles(ByVal a_project As VBProject, _
+        Optional ByVal a_useProjectName As Boolean = True, _
+        Optional ByVal a_subFolder As String = "code", _
+        Optional ByVal a_mustExist As Boolean = True)
 
     Dim p_vbComponent As VBIDE.VBComponent
     Dim p_extension As String
     Dim p_fileCount As Integer
     
     ' set the subfolder tot he project name in lower case
-    If useProjectName Then subFolder = LCase$(project.name)
+    If a_useProjectName Then a_subFolder = LCase$(a_project.name)
     
     ' set and, optionally, create the folder.
-    Dim p_path As String: p_path = PathExtensions.GetParentFolderName(project.FileName)
+    Dim p_path As String: p_path = PathExtensions.GetParentFolderName(a_project.FileName)
     
     ' abort if the folder must exist but does not exist.
-    If mustExist And Not PathExtensions.FolderExists(PathExtensions.Join(p_path, subFolder, False)) Then
+    If a_mustExist And Not PathExtensions.FolderExists(PathExtensions.Join(p_path, a_subFolder, False)) Then
         Exit Sub
     End If
     
-    p_path = PathExtensions.Join(p_path, subFolder, True)
+    p_path = PathExtensions.Join(p_path, a_subFolder, True)
     
     Dim p_filePath As String
     Dim p_destPath As String
     
-    For Each p_vbComponent In project.VBComponents
+    For Each p_vbComponent In a_project.VBComponents
         DoEvents
         Dim p_name As String: p_name = p_vbComponent.name
         p_extension = GetFileExtension(p_vbComponent)
@@ -66,24 +66,26 @@ Public Sub ExportProjectCodeFiles(ByVal project As VBProject, _
 End Sub
 
 ''' <summary>   Gets the destination path for this component; append work book is a workbook component. <summary>
-''' <param name="component">   A reference to a VB Component. </param>
-''' <param name="path">        The top path. </param>
-''' <param name="workbookPath">   The workbook and sheets sub path. </param>
-Public Function GetWorkbookPath(ByVal component As VBComponent, ByVal path As String, ByVal subPath As String)
-    If Me.IsSheet(component) Or Me.IsWorkbook(component) Or Me.IsChart(component) Or _
-        StringExtensions.StartsWith(component.name, "This", vbTextCompare) Then
-        GetWorkbookPath = PathExtensions.Join(path, subPath, True)
+''' <param name="a_component">      [<see cref="VBComponent"/>] A VB Component. </param>
+''' <param name="a_path">           [String] The top path. </param>
+''' <param name="a_workbookPath">   [String] The workbook and sheets sub path. </param>
+Public Function GetWorkbookPath(ByVal a_component As VBComponent, ByVal a_path As String, _
+        ByVal a_subPath As String)
+    If Me.IsSheet(a_component) Or Me.IsWorkbook(a_component) Or _
+        Me.IsChart(a_component) Or _
+        StringExtensions.StartsWith(a_component.name, "This", vbTextCompare) Then
+        GetWorkbookPath = PathExtensions.Join(a_path, a_subPath, True)
     Else
-        GetWorkbookPath = path
+        GetWorkbookPath = a_path
     End If
 End Function
 
 ''' <summary>   Detects if a component is a workbook. <summary>
-''' <param name="component">   A reference to a VB Component. </param>
+''' <param name="a_component">   [<see cref="VBComponent"/>] A VB Component. </param>
 ''' <returns> True if the component is a work book. </returns>
-Public Function IsWorkbook(ByVal component As VBComponent)
+Public Function IsWorkbook(ByVal a_component As VBComponent)
     On Error Resume Next
-    Dim p_property As Property: Set p_property = component.Properties("AutoSaveOn")
+    Dim p_property As Property: Set p_property = a_component.Properties("AutoSaveOn")
     On Error GoTo 0
     IsWorkbook = Not p_property Is Nothing
 End Function
@@ -91,28 +93,28 @@ End Function
 ''' <summary>   Detects if a component is a sheet. <summary>
 ''' <param name="component">   A reference to a VB Component. </param>
 ''' <returns> True if the component is a sheet. </returns>
-Public Function IsSheet(ByVal component As VBComponent)
+Public Function IsSheet(ByVal a_component As VBComponent)
     On Error Resume Next
-    Dim p_property As Property: Set p_property = component.Properties("Cells")
+    Dim p_property As Property: Set p_property = a_component.Properties("Cells")
     On Error GoTo 0
     IsSheet = Not p_property Is Nothing
 End Function
 
 ''' <summary>   Detects if a component is a chart. <summary>
-''' <param name="component">   A reference to a VB Component. </param>
+''' <param name="a_component">   [<see cref="VBComponent"/>] A VB Component. </param>
 ''' <returns> True if the component is a chart. </returns>
-Public Function IsChart(ByVal component As VBComponent)
+Public Function IsChart(ByVal a_component As VBComponent)
     On Error Resume Next
-    Dim p_property As Property: Set p_property = component.Properties("AutoScaling")
+    Dim p_property As Property: Set p_property = a_component.Properties("AutoScaling")
     On Error GoTo 0
     IsChart = Not p_property Is Nothing
 End Function
 
 ''' <summary>   Get the extension if the component is a file </summary>
-''' <param name="component">   The <see cref="VBComponent"/>   </param>
+''' <param name="a_component">   The <see cref="VBComponent"/>   </param>
 ''' <returns>   The file extension or an empty string if not a file. </returns>
-Public Function GetFileExtension(ByVal component As VBComponent)
-    Select Case component.Type
+Public Function GetFileExtension(ByVal a_component As VBComponent)
+    Select Case a_component.Type
         Case vbext_ct_ClassModule, vbext_ct_Document
             GetFileExtension = ".cls"
         Case vbext_ct_MSForm
@@ -128,15 +130,16 @@ End Function
 ''' contain methods that start with the specified prefix. <summary>
 ''' <param name="macroNamePrefix">    [Optional, 'Test'] The macro name prefix. </param>
 ''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
-Public Function EnumerateModules(Optional ByVal macroNamePrefix As String = "Test", _
-                                 Optional ByVal moduleNameSuffix As String = "Tests") As VBA.Collection
+Public Function EnumerateModules(Optional ByVal a_macroNamePrefix As String = "Test", _
+                                 Optional ByVal a_moduleNameSuffix As String = "Tests") As VBA.Collection
 
     Dim p_modules As VBA.Collection: Set p_modules = New VBA.Collection
     Dim p_vbProject As VBProject
     For Each p_vbProject In Application.VBE.VBProjects
         DoEvents
-        CollectionExtensions.AddItems EnumerateProjectModules(p_vbProject, macroNamePrefix, moduleNameSuffix), _
-                                      p_modules
+        CollectionExtensions.AddItems EnumerateProjectModules(p_vbProject, _
+                                        a_macroNamePrefix, a_moduleNameSuffix), _
+                                        p_modules
     Next p_vbProject
     Set EnumerateModules = p_modules
 
@@ -144,12 +147,12 @@ End Function
 
 ''' <summary>   List all project modules that end with the specified suffix and
 ''' contain methods that start with the specified prefix. <summary>
-''' <param name="project">            The project which modules are to be added. </param>
-''' <param name="macroNamePrefix">    [Optional, 'Test'] The macro name prefix. </param>
-''' <param name="moduleNameSuffix">   [Optional, 'Tests'] The module name suffix </param>
-Public Function EnumerateProjectModules(ByVal project As VBProject, _
-                                        Optional ByVal macroNamePrefix As String = "Test", _
-                                        Optional ByVal moduleSuffix As String = "Tests") As VBA.Collection
+''' <param name="a_project">            [<see cref="VBProject"/> The project which modules are to be added. </param>
+''' <param name="a_macroNamePrefix">    [Optional, String, 'Test'] The macro name prefix. </param>
+''' <param name="a_moduleNameSuffix">   [Optional, String, 'Tests'] The module name suffix </param>
+Public Function EnumerateProjectModules(ByVal a_project As VBProject, _
+                                        Optional ByVal a_macroNamePrefix As String = "Test", _
+                                        Optional ByVal a_moduleSuffix As String = "Tests") As VBA.Collection
     
     On Error Resume Next
     Dim p_modules As VBA.Collection: Set p_modules = New VBA.Collection
@@ -157,14 +160,14 @@ Public Function EnumerateProjectModules(ByVal project As VBProject, _
     Dim p_newModule As ModuleInfo: Set p_newModule = New ModuleInfo
     
     Dim p_vbComponent As VBComponent
-    For Each p_vbComponent In project.VBComponents
+    For Each p_vbComponent In a_project.VBComponents
         DoEvents
         If IsObject(p_vbComponent) Then
-            p_newModule.Initialize project.name, p_vbComponent.CodeModule
+            p_newModule.Initialize a_project.name, p_vbComponent.CodeModule
             If Not p_newModule.Equals(p_currentModule) Then
                 Set p_currentModule = p_newModule.Clone
-                If StringExtensions.EndsWith(p_currentModule.ModuleName, "Tests") Then
-                    If HasMacros(p_vbComponent) Then
+                If StringExtensions.EndsWith(p_currentModule.ModuleName, a_moduleSuffix) Then
+                    If HasMacros(p_vbComponent, a_macroNamePrefix) Then
                         p_modules.Add p_currentModule
                     End If
                 End If
@@ -175,9 +178,9 @@ Public Function EnumerateProjectModules(ByVal project As VBProject, _
 End Function
 
 ''' <summary>   Checks if the Lists all macros in the specified module. <summary>
-''' <param name="component">   The component to check for macro methods. </param>
-''' <param name="prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
-Function HasMacros(ByVal component As VBComponent, Optional ByVal prefix As String = "Test") As Boolean
+''' <param name="a_component">   [<see cref="VBComponenet"/>] The component to check for macro methods. </param>
+''' <param name="a_prefix">      [Optional, 'Test'] The prefix of the macro method name. </param>
+Function HasMacros(ByVal a_component As VBComponent, Optional ByVal a_prefix As String = "Test") As Boolean
 
     Dim p_currentName As String, p_newName As String
     HasMacros = False
@@ -185,13 +188,13 @@ Function HasMacros(ByVal component As VBComponent, Optional ByVal prefix As Stri
     On Error Resume Next
     p_currentName = vbNullString
     
-    If Not component Is Nothing Then
+    If Not a_component Is Nothing Then
         Dim p_lineNo As Integer
-        For p_lineNo = 1 To component.CodeModule.CountOfLines
-            p_newName = component.CodeModule.ProcOfLine(Line:=p_lineNo, prockind:=vbext_pk_Proc)
+        For p_lineNo = 1 To a_component.CodeModule.CountOfLines
+            p_newName = a_component.CodeModule.ProcOfLine(Line:=p_lineNo, prockind:=vbext_pk_Proc)
             If p_currentName <> p_newName Then
                 p_currentName = p_newName
-                If StringExtensions.StartsWith(p_currentName, prefix) Then
+                If StringExtensions.StartsWith(p_currentName, a_prefix) Then
                    HasMacros = True
                    Exit For
                 End If
@@ -202,14 +205,14 @@ Function HasMacros(ByVal component As VBComponent, Optional ByVal prefix As Stri
 End Function
 
 ''' <summary>   Finds a project. <summary>
-''' <param name="projectName">   The projectName. </param>
+''' <param name="a_projectName">   [String] The projectName. </param>
 ''' <returns>   A reference to the found project or nothing. </returns>
-Public Function FindProjectByName(ByVal ProjectName As String) As VBProject
+Public Function FindProjectByName(ByVal a_projectName As String) As VBProject
     
     Dim p_vbProject As VBProject
     For Each p_vbProject In Application.VBE.VBProjects
         DoEvents
-        If 0 = StrComp(p_vbProject.name, ProjectName, vbTextCompare) Then
+        If 0 = StrComp(p_vbProject.name, a_projectName, vbTextCompare) Then
             Set FindProjectByName = p_vbProject
             Exit For
         End If
@@ -218,16 +221,16 @@ Public Function FindProjectByName(ByVal ProjectName As String) As VBProject
 End Function
 
 ''' <summary>   Finds a code module by name. <summary>
-''' <param name="project">      The project. </param>
-''' <param name="moduleName">   The component (e.g., module) name. </param>
+''' <param name="a_project">      [<see cref="VBProject"/> The project. </param>
+''' <param name="a_moduleName">   [String] The component (e.g., module) name. </param>
 ''' <returns>   A reference to the component of found code module or nothing. </returns>
-Public Function FindCodeModuleByName(ByVal project As VBProject, ByVal ModuleName As String) As VBComponent
+Public Function FindCodeModuleByName(ByVal a_project As VBProject, ByVal a_moduleName As String) As VBComponent
     
-    If Not project Is Nothing Then
+    If Not a_project Is Nothing Then
         Dim p_vbComponent As VBComponent
-        For Each p_vbComponent In project.VBComponents
+        For Each p_vbComponent In a_project.VBComponents
             DoEvents
-            If 0 = StrComp(p_vbComponent.CodeModule, ModuleName, vbTextCompare) Then
+            If 0 = StrComp(p_vbComponent.CodeModule, a_moduleName, vbTextCompare) Then
                 Set FindCodeModuleByName = p_vbComponent
                 Exit For
             End If
@@ -241,23 +244,24 @@ End Function
 ''' <remarks>
 ''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
 ''' <remarks>
-''' <param name="module">   The module info of the module containing the macros. </param>
-''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
+''' <param name="a_module">   [<see cref="ModuleInfo"/>] ]The module info of the module containing the macros. </param>
+''' <param name="a_prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
 ''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateMacros(ByVal module As ModuleInfo, Optional ByVal prefix As String = "Test") As VBA.Collection
+Public Function EnumerateMacros(ByVal a_module As ModuleInfo, Optional ByVal a_prefix As String = "Test") As VBA.Collection
 
     Dim p_macros As Collection: Set p_macros = New Collection
-    If Not module Is Nothing Then
+    If Not a_module Is Nothing Then
     
-        Dim p_vbProject As VBProject: Set p_vbProject = FindProjectByName(module.ProjectName)
+        Dim p_vbProject As VBProject: Set p_vbProject = FindProjectByName(a_module.ProjectName)
         
         If Not p_vbProject Is Nothing Then
         
-            Dim p_vbComponent As VBComponent: Set p_vbComponent = FindCodeModuleByName(p_vbProject, module.ModuleName)
+            Dim p_vbComponent As VBComponent
+            Set p_vbComponent = FindCodeModuleByName(p_vbProject, a_module.ModuleName)
             
             If Not p_vbComponent Is Nothing Then
             
-                Set p_macros = EnumerateComponentMacros(module, p_vbComponent, prefix)
+                Set p_macros = EnumerateComponentMacros(a_module, p_vbComponent, a_prefix)
             
             End If
         
@@ -272,23 +276,24 @@ End Function
 ''' <remarks>
 ''' <see href="https://stackoverflow.com/questions/28132276/get-a-list-of-the-macros-of-a-module-in-excel-and-then-call-all-those-macros"/>
 ''' <remarks>
-''' <param name="module">   [<see cref="ModuleInfo"/> The module info of the module containing the macros. </param>
-''' <param name="prefix">   [Optional, 'Test'] The prefix of the macro name. </param>
+''' <param name="a_module">      [<see cref="ModuleInfo"/> The module info of the module containing the macros. </param>
+''' <param name="a_prefix">      [Optional, String, 'Test'] The prefix of the macro name. </param>
+''' <param name="a_component">   [<see cref="VBComponenet"/>] The component to check for macro methods. </param>
 ''' <returns>   A Collection of macro names. </returns>
-Public Function EnumerateComponentMacros(ByVal module As ModuleInfo, _
-        ByVal component As VBComponent, Optional ByVal prefix As String = "Test") As VBA.Collection
+Public Function EnumerateComponentMacros(ByVal a_module As ModuleInfo, _
+        ByVal a_component As VBComponent, Optional ByVal a_prefix As String = "Test") As VBA.Collection
 
     Dim p_macros As VBA.Collection: Set p_macros = New VBA.Collection
     Dim p_currentName As String: p_currentName = vbNullString
     Dim p_newName As String
     Dim p_lineNo As Integer
-    For p_lineNo = 1 To component.CodeModule.CountOfLines
-        p_newName = component.CodeModule.ProcOfLine(Line:=p_lineNo, prockind:=vbext_pk_Proc)
+    For p_lineNo = 1 To a_component.CodeModule.CountOfLines
+        p_newName = a_component.CodeModule.ProcOfLine(Line:=p_lineNo, prockind:=vbext_pk_Proc)
         If p_currentName <> p_newName Then
             p_currentName = p_newName
-            If StringExtensions.StartsWith(p_currentName, prefix) Then
+            If StringExtensions.StartsWith(p_currentName, a_prefix) Then
                 Dim p_macroInfo As MacroInfo: Set p_macroInfo = Constructor.CreateMacroInfo()
-                p_macroInfo.InitializeModuelMacro module, p_currentName
+                p_macroInfo.InitializeModuelMacro a_module, p_currentName
                 p_macros.Add p_macroInfo
             End If
         End If
@@ -298,16 +303,16 @@ Public Function EnumerateComponentMacros(ByVal module As ModuleInfo, _
 End Function
 
 ''' <summary>   Removes the specified reference. <summary>
-''' <param name="project">         A reference to the VBProject. </param>
-''' <param name="referenceName">   The nae of the reference. </param>
+''' <param name="a_project">         [<see cref="VBProject"/>] A VBProject. </param>
+''' <param name="a_referenceName">   [Striing] The nae of the reference. </param>
 ''' <returns>   True if the reference was removed. </returns>
-Public Function RemoveReference(ByVal project As VBProject, ByVal referenceName As String) As Boolean
+Public Function RemoveReference(ByVal a_project As VBProject, ByVal a_referenceName As String) As Boolean
     
     RemoveReference = False
     Dim p_reference As Reference
-    For Each p_reference In project.References
-        If 0 = StrComp(p_reference.name, referenceName, vbTextCompare) Then
-            project.References.Remove p_reference
+    For Each p_reference In a_project.References
+        If 0 = StrComp(p_reference.name, a_referenceName, vbTextCompare) Then
+            a_project.References.Remove p_reference
             RemoveReference = True
             Exit For
         End If

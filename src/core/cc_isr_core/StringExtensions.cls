@@ -10,158 +10,160 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <remarks>   Trims the given character from the given text starting from the left. </remarks>
-''' <param name="text">   The text to trim. </param>
-''' <param name="c">   The character to trim. </param>
+''' <param name="a_text">   [String] The text to trim. </param>
+''' <param name="a_c">      [String] The character to trim. </param>
 ''' <returns>   A string. <returns>
-Public Function TrimLeft(ByVal text As String, ByVal c As String) As String
+Public Function TrimLeft(ByVal a_text As String, ByVal a_c As String) As String
     
     Dim p_textLength As Long
-    p_textLength = Len(text)
+    p_textLength = Len(a_text)
     
     Dim p_firstCharacter As String
     
     Do While p_textLength > 0
-        p_firstCharacter = Left(text, 1)
+        p_firstCharacter = Left(a_text, 1)
         
-        If p_firstCharacter <> c Then
+        If p_firstCharacter <> a_c Then
             Exit Do
         End If
         
-        text = Right(text, p_textLength - 1)
-        p_textLength = Len(text)
+        a_text = Right(a_text, p_textLength - 1)
+        p_textLength = Len(a_text)
     Loop
     
-    TrimLeft = text
+    TrimLeft = a_text
 End Function
 
 ''' <summary>   Trims the given character from the given text starting from the right. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">   The text to trim. </param>
-''' <param name="c">   The character to trim. </param>
+''' <param name="a_text">   [String] The text to trim. </param>
+''' <param name="a_c">      [String] The character to trim. </param>
 ''' <returns>   A string. <returns>
-Public Function TrimRight(ByVal text As String, ByVal c As String) As String
+Public Function TrimRight(ByVal a_text As String, ByVal a_c As String) As String
     
-    Dim p_textLength As Long: p_textLength = Len(text)
+    Dim p_textLength As Long: p_textLength = Len(a_text)
     
     Dim p_lastCharacter As String
         
     Do While p_textLength > 0
-        p_lastCharacter = Right(text, 1)
+        p_lastCharacter = Right(a_text, 1)
         
-        If p_lastCharacter <> c Then
+        If p_lastCharacter <> a_c Then
             Exit Do
         End If
         
-        text = Left(text, p_textLength - 1)
-        p_textLength = Len(text)
+        a_text = Left(a_text, p_textLength - 1)
+        p_textLength = Len(a_text)
     Loop
     
-    TrimRight = text
+    TrimRight = a_text
 End Function
 
 ''' <summary>   Gets the substring from the given text. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">         The text to get the substring from. </param>
-''' <param name="startIndex">   The index of the first character of the substring. </param>
-''' <param name="length">       [Optional, null] The number of characters to take from the original string. </param>
+''' <param name="a_text">         [String] The text to get the substring from. </param>
+''' <param name="a_startIndex">   [Integer] The index of the first character of the substring. </param>
+''' <param name="a_length">       [Optional, null] The number of characters to take from the original string. </param>
 ''' <returns>   A string. <returns>
-Public Function Substring(ByVal text As String, ByVal startIndex As Integer, _
-        Optional ByVal Length As Variant) As String
+Public Function Substring(ByVal a_text As String, ByVal a_startIndex As Integer, _
+        Optional ByVal a_length As Variant) As String
     
-    If startIndex > Len(text) Then
-        startIndex = Len(text)
+    If a_startIndex > Len(a_text) Then
+        a_startIndex = Len(a_text)
     End If
 
-    If IsMissing(Length) Then
-        Length = Len(text) - startIndex
+    If IsMissing(a_length) Then
+        a_length = Len(a_text) - a_startIndex
     End If
     
-    If Length > Len(text) Then
-        Length = Len(text) - startIndex
+    If a_length > Len(a_text) Then
+        a_length = Len(a_text) - a_startIndex
     End If
 
-    Substring = Left(Right(text, Len(text) - startIndex), Length)
+    Substring = Left(Right(a_text, Len(a_text) - a_startIndex), a_length)
     
 End Function
 
 ''' <summary>   Checks whether the given text starts with the given sequence. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">            The text to check for the sequence. </param>
-''' <param name="startText">       The text to be located at the start. </param>
-''' <param name="compareMethod">   [Optional, vbBinaryCompare] The compare method. </param>
+''' <param name="a_text">            [String] The text to check for the sequence. </param>
+''' <param name="a_startText">       [String] The text to be located at the start. </param>
+''' <param name="a_compareMethod">   [Optional, VbCompareMethod, vbBinaryCompare] The compare method. </param>
 ''' <returns>   A Boolean <returns>
-Public Function StartsWith(ByVal text As String, ByVal startText As String, _
-                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+Public Function StartsWith(ByVal a_text As String, ByVal a_startText As String, _
+                           Optional ByVal a_compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
     
-    StartsWith = 1 = InStr(1, text, startText, compareMethod)
+    StartsWith = 1 = InStr(1, a_text, a_startText, a_compareMethod)
 
 End Function
 
 ''' <summary>   Checks whether the given text ends with the given sequence. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">   The text to check for the sequence. </param>
-''' <param name="endText">   The text to be located at the end. </param>
+''' <param name="a_text">            [String] The text to check for the sequence. </param>
+''' <param name="a_endText">         [String] The text to be located at the end. </param>
+''' <param name="a_compareMethod">   [Optional, VbCompareMethod, vbBinaryCompare] The compare method. </param>
 ''' <returns>   A Boolean. <returns>
-Public Function EndsWith(ByVal text As String, ByVal endText As String, _
-                           Optional compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
+Public Function EndsWith(ByVal a_text As String, ByVal a_endText As String, _
+                           Optional ByVal a_compareMethod As VbCompareMethod = VbCompareMethod.vbBinaryCompare) As Boolean
     
-    EndsWith = 0 = StrComp(Right(text, Len(endText)), endText, compareMethod)
+    EndsWith = 0 = StrComp(Right(a_text, Len(a_endText)), a_endText, a_compareMethod)
 
 End Function
 
 ''' <summary>   Gets the character at the given index from the given string. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">   The text to get the character from. </param>
-''' <param name="index">   The index of the character to get. </param>
+''' <param name="a_text">    [String] The text to get the character from. </param>
+''' <param name="a_index">   [Integer] The index of the character to get. </param>
 ''' <returns>   A string. <returns>
-Public Function CharAt(ByVal text As String, ByVal index As Integer) As String
+Public Function CharAt(ByVal a_text As String, ByVal a_index As Integer) As String
     
-    CharAt = Mid(text, index, 1)
+    CharAt = Mid(a_text, a_index, 1)
 
 End Function
 
 ''' <summary>   Repeats the given string the given amount of times. </summary>
 ''' <remarks>   </remarks>
-''' <param name="text">   The text to repeat. </param>
-''' <param name="count">   The amount of times to repeat the given string. </param>
+''' <param name="a_text">    [String] The text to repeat. </param>
+''' <param name="a_count">   [Integer] The amount of times to repeat the given string. </param>
 ''' <returns>   A string. <returns>
-Public Function Repeat(ByVal text As String, ByVal count As Long) As String
+Public Function Repeat(ByVal a_text As String, ByVal a_count As Long) As String
     
     Repeat = vbNullString
     Dim i As Long
-    For i = 1 To count
-        Repeat = Repeat & text
+    For i = 1 To a_count
+        Repeat = Repeat & a_text
     Next
 
 End Function
 
 ''' <summary>   Converts a regular string to a Unicode string,
 ''' e.g., "foo" to a L"foo" string.. </summary>
-''' <param name="text">   The string to convert. </param>
+''' <param name="a_text">   [String] The string to convert. </param>
 ''' <returns>   A string. <returns>
-Public Function StringToWideString(ByVal text As String) As String
+Public Function StringToWideString(ByVal a_text As String) As String
     
-    StringToWideString = StrConv(text, vbUnicode)
+    StringToWideString = StrConv(a_text, vbUnicode)
 
 End Function
 
 ''' <summary>   Returns true if the value is null or empty. </summary>
+''' <param name="a_text">   [String] The string to check. </param>
 ''' <returns>   true if the value is null or empty. </returns>
-Public Function IsNullOrEmpty(ByVal text As String) As Boolean
-    IsNullOrEmpty = (text = vbNullString)
+Public Function IsNullOrEmpty(ByVal a_text As String) As Boolean
+    IsNullOrEmpty = (a_text = vbNullString)
 End Function
 
 ''' <summary>   Replaces braced numerical value with tokens similar to VB.NET String.Format
 ''' by without formatting suffixes. </summary>
-''' <param name="mask">     The mask such as 'A{0} b{1}'. </param>
-''' <param name="tokens">   The parameter list matching the mask. </param>
-Public Function StringFormat(ByVal mask As String, ParamArray tokens() As Variant) As String
+''' <param name="a_mask">     [String] The mask such as 'A{0} b{1}'. </param>
+''' <param name="a_tokens">   [ParamArray, Variant] The parameter list matching the mask. </param>
+Public Function StringFormat(ByVal a_mask As String, ParamArray a_tokens() As Variant) As String
     
     Dim i As Long
-    For i = 0 To UBound(tokens)
-        mask = Replace$(mask, "{" & i & "}", tokens(i))
+    For i = 0 To UBound(a_tokens)
+        a_mask = Replace$(a_mask, "{" & i & "}", a_tokens(i))
     Next
-    StringFormat = mask
+    StringFormat = a_mask
 
 End Function
 
@@ -169,35 +171,33 @@ End Function
 ''' <remarks>
 ''' Use this function to extract a substring from a string up to but not including the delimiter.
 ''' </remarks>
-''' <param name="delimitedString">   A string expression that includes a series of tokens and
-'''                                  where a remainder string is returned. </param>
-''' <param name="delimiter">         A String expression that specifies the delimiter to use
-'''                                  for returning the token.. </param>
-''' <returns> A string. The first sub string ending but not including the the delimiter or the
+''' <param name="a_delimitedString">   [String] A series of tokens where a remainder string is returned. </param>
+''' <param name="a_delimiter">         [String] Specifies the delimiter to use for returning the token. </param>
+''' <returns>   [String]. The first sub string ending but not including the the delimiter or the
 ''' original string if the delimiter was not located. </returns>
-Public Function Pop(ByRef delimitedString As String, ByVal delimiter As String) As String
+Public Function Pop(ByRef a_delimitedString As String, ByVal a_delimiter As String) As String
 
   ' find the delimiter in the string
   
-  Dim p_position As Long: p_position = InStr(1, delimitedString, delimiter, vbTextCompare)
+  Dim p_position As Long: p_position = InStr(1, a_delimitedString, a_delimiter, vbTextCompare)
   
   ' check if we have a delimiter in the string
   If p_position > 0 Then
   
     ' if we have a delimiter, return the string all the
     ' way up to but not including the delimiter
-    Pop = Left$(delimitedString, p_position - 1)
+    Pop = Left$(a_delimitedString, p_position - 1)
     
     ' return the string past the delimiter
-    delimitedString = Mid$(delimitedString, p_position + Len(delimiter))
+    a_delimitedString = Mid$(a_delimitedString, p_position + Len(a_delimiter))
     
   Else
     ' if the string does not include the delimiter, we
     ' must return the original string
-    Pop = delimitedString
+    Pop = a_delimitedString
     
     ' and empty the returned string
-    delimitedString = Empty
+    a_delimitedString = Empty
     
   End If
   

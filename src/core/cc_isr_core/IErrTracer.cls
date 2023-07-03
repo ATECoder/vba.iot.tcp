@@ -10,6 +10,5 @@ Attribute VB_Exposed = True
 Option Explicit
 
 ''' <summary>   Traces the current <see cref="Err"/> object.  </summary>
-Public Sub TraceError()
-End Sub
+Public Sub TraceError(): End Sub
 

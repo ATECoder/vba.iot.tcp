@@ -12,30 +12,32 @@ Option Explicit
 ''' <summary>   Retrieves the current value of the performance counter, which is a high resolution (<1us) time
 ''' stamp that can be used for time-interval measurements. </summary>
 ''' <remarks>   </remarks>
-''' <param name="counts">   A pointer to a variable that receives the current performance-counter value, in counts. </param>
-''' <returns>   If the function succeeds, the return value is nonzero.
+''' <param name="a_counts">   [Currency] A pointer to a variable that receives the current performance-counter
+'''                           value, in counts. </param>
+''' <returns>   [Byte] If the function succeeds, the return value is nonzero.
 ''' If the function fails, the return value is zero. To get extended error information, call
 ''' GetLastError. On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
 ''' <returns>
-Private Declare PtrSafe Function QueryPerformanceCounter Lib "kernel32" (ByRef counts As Currency) As Byte
+Private Declare PtrSafe Function QueryPerformanceCounter Lib "kernel32" (ByRef a_counts As Currency) As Byte
 
 ''' <summary>   Retrieves the frequency of the performance counter. The frequency of the performance counter
 '' is fixed at system boot and is consistent across all processors. Therefore, the frequency need only be queried
 ''' upon application initialization, and the result can be cached.</summary>
 ''' <remarks>   </remarks>
-''' <param name="frequency">   A pointer to a variable that receives the current performance-counter frequency, in
-''' counts per second. If the installed hardware doesn't support a high-resolution performance counter,
-''' this parameter can be zero (this will not occur on systems that run Windows XP or later). </param>
+''' <param name="a_frequency">   [Currency] A pointer to a variable that receives the current performance-counter
+'''                              frequency, in counts per second. If the installed hardware doesn't support
+'''                              a high-resolution performance counter, this parameter can be zero (this will not
+'''                              occur on systems that run Windows XP or later). </param>
+''' <returns>   [Byte] If the installed hardware supports a high-resolution performance counter, the return
+''' value is nonzero. If the function fails, the return value is zero. To get extended error information,
+''' call GetLastError. On systems that run Windows XP or later, the function will always succeed and will
+''' thus never return zero.
 ''' <returns>
-''' If the installed hardware supports a high-resolution performance counter, the return value is nonzero.
-''' If the function fails, the return value is zero. To get extended error information, call GetLastError.
-''' On systems that run Windows XP or later, the function will always succeed and will thus never return zero.
-''' <returns>
-Private Declare PtrSafe Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequency As Currency) As Byte
+Private Declare PtrSafe Function QueryPerformanceFrequency Lib "kernel32" (ByRef a_frequency As Currency) As Byte
    
 ''' <summary>   Suspends the thread for the specified duration in milliseconds. </summary>
-''' <param name="dwMilliseconds">   Sleep time in milliseconds. </param>
-Private Declare PtrSafe Sub SleepMilliseconds Lib "kernel32" Alias "Sleep" (ByVal dwMilliseconds As Long)
+''' <param name="a_sleepTimeMs">   Sleep time in milliseconds. </param>
+Private Declare PtrSafe Sub SleepMilliseconds Lib "kernel32" Alias "Sleep" (ByVal a_sleepTimeMs As Long)
    
 Private m_overheadCounts As Currency
 Private m_counting As Boolean
@@ -90,16 +92,16 @@ Property Get ElapsedMilliseconds() As Double
 End Property
 
 ''' <summary>   Suspends the thread for the specified duration in milliseconds. </summary>
-''' <param name="duration">   Sleep time in milliseconds. </param>
-Public Sub Sleep(ByVal duration As Long)
-    SleepMilliseconds duration
+''' <param name="a_duration">   Sleep time in milliseconds. </param>
+Public Sub Sleep(ByVal a_duration As Long)
+    SleepMilliseconds a_duration
 End Sub
 
 ''' <summary>   Loop around <see cref="DoEvents"> for the specified duration. </summary>
-''' <param name="duration">   [Long] Wait time in milliseconds. </param>
-Public Function Wait(ByVal duration As Long) As Long
+''' <param name="a_duration">   [Long] Wait time in milliseconds. </param>
+Public Function Wait(ByVal a_duration As Long) As Long
     Me.Restart
-    While Me.ElapsedMilliseconds < duration
+    While Me.ElapsedMilliseconds < a_duration
         DoEvents
     Wend
     Wait = Me.ElapsedMilliseconds

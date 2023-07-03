@@ -14,29 +14,29 @@ Private m_moduleName As String
 Private m_macroName As String
 
 ''' <summary>   Initializes this class. </summary>
-''' <param name="project">     The project name. </param>
-''' <param name="component">   The component code module name. </param>
-''' <param name="macroName">   The name of the macro. </param>
-Public Sub Initialize(ByVal ProjectName As String, ByVal codeModuleName As String, ByVal MacroName As String)
-    m_projectName = ProjectName
-    m_moduleName = codeModuleName
-    m_macroName = MacroName
+''' <param name="a_projectName">      [String] The project name. </param>
+''' <param name="a_codeModuleName">   [String] The component code module name. </param>
+''' <param name="a_macroName">        [String] The name of the macro. </param>
+Public Sub Initialize(ByVal a_projectName As String, ByVal a_codeModuleName As String, ByVal a_macroName As String)
+    m_projectName = a_projectName
+    m_moduleName = a_codeModuleName
+    m_macroName = a_macroName
 End Sub
 
 ''' <summary>   Initializes this class. </summary>
-''' <param name="project">     A reference to the module info. </param>
-''' <param name="macroName">   The name of the macro. </param>
-Public Sub InitializeModuelMacro(ByVal module As ModuleInfo, ByVal MacroName As String)
-    m_projectName = module.ProjectName
-    m_moduleName = module.ModuleName
-    m_macroName = MacroName
+''' <param name="a_module">      [<see cref="ModuleInfo"/>] The module info. </param>
+''' <param name="a_macroName">   [String] The name of the macro. </param>
+Public Sub InitializeModuelMacro(ByVal a_module As ModuleInfo, ByVal a_macroName As String)
+    m_projectName = a_module.ProjectName
+    m_moduleName = a_module.ModuleName
+    m_macroName = a_macroName
 End Sub
 
 ''' <summary>   Initializes this class from a macro full name. </summary>
-''' <param name="macroFullName">     the macro full name. </param>
-Public Sub FromMacroFullName(ByVal macroFullName As String)
+''' <param name="a_macroFullName">     [String] the macro full name. </param>
+Public Sub FromMacroFullName(ByVal a_macroFullName As String)
     
-    Dim p_names() As String: p_names() = Split(macroFullName, ".")
+    Dim p_names() As String: p_names() = Split(a_macroFullName, ".")
     m_projectName = p_names(LBound(p_names))
     m_moduleName = p_names(LBound(p_names) + 1)
     m_macroName = p_names(LBound(p_names) + 2)
@@ -83,13 +83,13 @@ End Property
 
 ''' <summary>   Checks if the two macros are equal referring to the same
 ''  macro in the project. </summary>
-''' <param name="macro">   The macro to check for equality. </param>
-Public Function Equals(ByVal macro As MacroInfo) As Boolean
+''' <param name="a_macro">   [<see cref=MacroInfo"/>] The macro to check for equality. </param>
+Public Function Equals(ByVal a_macro As MacroInfo) As Boolean
     
-    If IsObject(macro) Then
-        Equals = (0 = StrComp(Me.ProjectName, macro.ProjectName)) And _
-                 (0 = StrComp(Me.ModuleName, macro.ModuleName)) And _
-                 (0 = StrComp(Me.MacroName, macro.MacroName))
+    If IsObject(a_macro) Then
+        Equals = (0 = StrComp(Me.ProjectName, a_macro.ProjectName)) And _
+                 (0 = StrComp(Me.ModuleName, a_macro.ModuleName)) And _
+                 (0 = StrComp(Me.MacroName, a_macro.MacroName))
     Else
         Equals = False
     End If

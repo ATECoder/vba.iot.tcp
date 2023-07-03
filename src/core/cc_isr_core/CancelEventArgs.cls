@@ -22,8 +22,8 @@ Public Property Get CancelRequested() As Boolean
 End Property
 
 ''' <summary>   Gets the cancel requested value. </summary>
-''' <param name="value">   [Boolean] true to request the cancelation of the event. </param>
-Public Property Let CancelRequested(ByVal value As Boolean)
-    m_cancelRequested = value
+''' <param name="a_value">   [Boolean] true to request the cancelation of the event. </param>
+Public Property Let CancelRequested(ByVal a_value As Boolean)
+    m_cancelRequested = a_value
 End Property
 

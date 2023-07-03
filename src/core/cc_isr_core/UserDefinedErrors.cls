@@ -150,38 +150,38 @@ Public Function FormattedErr() As String
 End Function
 
 ''' <summary>   Adds a user defined error to the error dictionary. </summary>
-''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
-Private Sub AddUserDefinedError(ByVal userError As UserDefinedError)
+''' <para name"a_userError">   The error of type <see cref="UserDefinedError"/>   </param>
+Private Sub AddUserDefinedError(ByVal a_userError As UserDefinedError)
     
-    m_errorsDix.Add userError.Code, userError
+    m_errorsDix.Add a_userError.Code, a_userError
 
 End Sub
 
 ''' <summary>   Returns true if the specified error exists. </summary>
-''' <para name"userError">   The error of type <see cref="UserDefinedError"/>   </param>
-Public Function UserDefinedErrorExists(ByVal userError As UserDefinedError) As Boolean
+''' <para name"a_userError">   The error of type <see cref="UserDefinedError"/>   </param>
+Public Function UserDefinedErrorExists(ByVal a_userError As UserDefinedError) As Boolean
     
-    UserDefinedErrorExists = m_errorsDix.Exists(userError.Code)
+    UserDefinedErrorExists = m_errorsDix.Exists(a_userError.Code)
 
 End Function
 
 ''' <summary>   Returns true if the specified error exists. </summary>
-''' <para name"userErrorCode">   The error code </param>
-Public Function UserDefinedErrorCodeExists(ByVal userErrorCode As Long) As Boolean
+''' <para name"a_userErrorCode">   [Long] The error code </param>
+Public Function UserDefinedErrorCodeExists(ByVal a_userErrorCode As Long) As Boolean
     
-    UserDefinedErrorCodeExists = m_errorsDix.Exists(userErrorCode)
+    UserDefinedErrorCodeExists = m_errorsDix.Exists(a_userErrorCode)
 
 End Function
 
 ''' <summary>   Returns a user defined error. </summary>
-''' <param name="key">   The user defined error code. </param>
-Public Function GetUserDefinedError(ByVal key As Long) As UserDefinedError
+''' <param name="a_key">   The user defined error code. </param>
+Public Function GetUserDefinedError(ByVal a_key As Long) As UserDefinedError
     
-    If m_errorsDix.Exists(key) Then
-        Set GetUserDefinedError = m_errorsDix.item(key)
+    If m_errorsDix.Exists(a_key) Then
+        Set GetUserDefinedError = m_errorsDix.item(a_key)
     Else
         Set GetUserDefinedError = New UserDefinedError
-        GetUserDefinedError.InitiateProperties key, "UnknwonUserDefinedError", "Unknown error."
+        GetUserDefinedError.InitiateProperties a_key, "UnknwonUserDefinedError", "Unknown error."
     End If
 
 End Function
@@ -299,12 +299,12 @@ Public Property Get InvalidOperationError() As UserDefinedError
 End Property
 
 ''' <summary>   Sets the Err object source string to project.module.procedure. </summary>
-''' <param name="errProcedureName">   [String] Specifies the name of the procedure. </param>
-''' <param name="errModuleName">      [String] Specifies the module name. </param>
-''' <param name="errProjectName">     [Optional, String] Specifies the project name; otherwise the project
-'''                                   name of the active workbook is used. </param>
-Public Sub SetErrSource(ByVal errProcedureName As String, ByVal errModuleName As String, _
-        Optional errProjectName As String = vbNullString)
+''' <param name="a_errProcedureName">   [String] Specifies the name of the procedure. </param>
+''' <param name="a_errModuleName">      [String] Specifies the module name. </param>
+''' <param name="a_errProjectName">     [Optional, String] Specifies the project name; otherwise the project
+'''                                     name of the active workbook is used. </param>
+Public Sub SetErrSource(ByVal a_errProcedureName As String, ByVal a_errModuleName As String, _
+        Optional ByVal a_errProjectName As String = vbNullString)
 
     ' this procedure must not trap errors because it must
     ' not alter the error object.
@@ -312,8 +312,8 @@ Public Sub SetErrSource(ByVal errProcedureName As String, ByVal errModuleName As
     ' thus we assume that this code is robust and will
     ' not cause errors.
     
-    If StringExtensions.IsNullOrEmpty(errProjectName) Then
-        errProjectName = ActiveWorkbook.VBProject.name
+    If StringExtensions.IsNullOrEmpty(a_errProjectName) Then
+        a_errProjectName = ActiveWorkbook.VBProject.name
     End If
     
     ' get the current source string
@@ -322,7 +322,7 @@ Public Sub SetErrSource(ByVal errProcedureName As String, ByVal errModuleName As
     
     ' build the error source.
     
-    p_errorSource = errProjectName & "." & errModuleName & "." & errProcedureName
+    p_errorSource = a_errProjectName & "." & a_errModuleName & "." & a_errProcedureName
   
     ' Update the Err.Source
     
@@ -331,25 +331,25 @@ Public Sub SetErrSource(ByVal errProcedureName As String, ByVal errModuleName As
 End Sub
 
 ''' <summary>   Builds a standard error message. </summary>
-''' <param name="vbWarning">              [Optional,Boolea, false] True
-'''                                       to display a warning rather than
-'''                                       an error message. </param>
-''' <param name="descriptionDelimiter">   [Optional, String, ': '] Specify
-'''                                       the delimiter preceding the description. </param>
+''' <param name="a_displayWarning">         [Optional, Boolean, false] True
+'''                                         to display a warning rather than
+'''                                         an error message. </param>
+''' <param name="a_descriptionDelimiter">   [Optional, String, ': '] Specify
+'''                                         the delimiter preceding the description. </param>
 ''' <returns>   A Standard error message string in the form: <para>
 ''' Error # (0x#) occurred in <c>Source</c>: Description </para><para>
 ''' or  </para><para>
 ''' Warning # (0x#) occurred in <c>Source</c>: Description  </para>
 ''' </returns>
-Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = False, _
-                Optional descriptionDelimiter As String = ": ") As String
+Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boolean = False, _
+                Optional a_descriptionDelimiter As String = ": ") As String
 
     Dim p_builder As StringBuilder: Set p_builder = New StringBuilder
   
     ' check if we have an error
     If Err.Number <> 0 Then
     
-        p_builder.Append IIf(vbWarning, "Warning ", "Error ")
+        p_builder.Append IIf(a_displayWarning, "Warning ", "Error ")
         p_builder.Append Format$(Err.Number)
         
         Dim p_errNumber As Long: p_errNumber = Err.Number - vbObjectError
@@ -365,7 +365,7 @@ Public Function BuildStandardErrorMessage(Optional ByVal vbWarning As Boolean = 
         p_builder.Append ") "
         p_builder.Append "occurred in "
         p_builder.Append Err.source
-        p_builder.Append ": "
+        p_builder.Append a_descriptionDelimiter
         p_builder.Append Err.Description
         
     End If

@@ -26,9 +26,9 @@ Private Sub Class_Initialize()
 
 End Sub
 
-''' < summary>   Appends the given Text to this StringBuilder. </summary>
-''' <param name="text">   the text to append. </param>
-Public Sub Append(ByVal text As String)
+''' < summary>   Appends the given text to this StringBuilder. </summary>
+''' <param name="a_text">   [String] the text to append. </param>
+Public Sub Append(ByVal a_text As String)
 
     m_currentIndex = m_currentIndex + 1
 
@@ -36,7 +36,7 @@ Public Sub Append(ByVal text As String)
         m_maxIndex = 2 * m_maxIndex
         ReDim Preserve m_buffer(1 To m_maxIndex)
     End If
-    m_buffer(m_currentIndex) = text
+    m_buffer(m_currentIndex) = a_text
 
 End Sub
 
@@ -47,13 +47,14 @@ Public Property Get Length() As Long
 End Property
 
 ''' <summary>   Returns the text in this StringBuilder. </summary>
-''' <param name="separator">   [Optional, Null string] The separator to use in joining components. </param>
-Public Function ToString(Optional ByVal separator As String = vbNullString) As String
+''' <param name="a_separator">   [Optional, String, Null string] The separator to use in
+'''                              joining components. </param>
+Public Function ToString(Optional ByVal a_separator As String = vbNullString) As String
 
     If m_currentIndex > 0 Then
         ReDim Preserve m_buffer(1 To m_currentIndex)
         m_maxIndex = m_currentIndex
-        ToString = Join(m_buffer, separator)
+        ToString = Join(m_buffer, a_separator)
     End If
 
 End Function

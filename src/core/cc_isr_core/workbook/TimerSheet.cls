@@ -7,8 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-Private WithEvents eventTimer As cc_isr_Core.stdTimer
-Attribute eventTimer.VB_VarHelpID = -1
+Private WithEvents m_eventTimer As cc_isr_Core.EventTimer
+Attribute m_eventTimer.VB_VarHelpID = -1
 Private pauseRequested As Boolean
 
 Sub ResetClock()
@@ -17,11 +17,11 @@ End Sub
 
 Sub StartTimer()
   pauseRequested = False
-  If eventTimer Is Nothing Then
-    Set eventTimer = cc_isr_Core.Constructor.CreateStdTimer(100)
-    eventTimer.StartTimer
+  If m_eventTimer Is Nothing Then
+    Set m_eventTimer = cc_isr_Core.Constructor.CreateEventTimer(100)
+    m_eventTimer.StartTimer
   Else
-    eventTimer.ResumeTimer
+    m_eventTimer.ResumeTimer
   End If
 End Sub
 
@@ -31,13 +31,13 @@ End Sub
 
 Sub AbortTimer()
   ' we need to figure out how to recreate the timer
-  eventTimer.StopTimer
+  m_eventTimer.StopTimer
 End Sub
 
-Private Sub eventTimer_Tick()
+Private Sub m_eventTimer_Tick()
     On Error Resume Next
     If Range("B4").value <= 0 Or pauseRequested Then
-        eventTimer.PauseTimer
+        m_eventTimer.PauseTimer
     Else
         Range("B4") = Range("B4") - TimeValue("00:00:01")
     End If
