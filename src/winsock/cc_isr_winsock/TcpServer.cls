@@ -12,8 +12,8 @@ Option Explicit
 Private m_tcpServerSocket As IPv4StreamSocket
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
-''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpServerSocket"/>. </summary>
 Private Sub Class_Initialize()
@@ -38,24 +38,24 @@ Public Property Get TcpServerSocket() As IPv4StreamSocket
 End Property
 
 ''' <summary>   Associates any local address with a socket and start listening. </summary>
-''' <param name="port">   The port that the server is listening on. </param>
-''' <param name="backlog">   [Optional, 10] The maximum length of the queue of pending connections. </para>
+''' <param name="a_port">      [Long] The port that the server is listening on. </param>
+''' <param name="a_backlog">   [Optional, Integer, 10] The maximum length of the queue of pending connections. </para>
 ''' <returns>   [Boolean] True if the socket is bound. </returns>
-Public Function BindTo(ByVal port As Long, Optional ByVal backlog As Integer = 10) As Boolean
+Public Function BindTo(ByVal a_port As Long, Optional ByVal a_backlog As Integer = 10) As Boolean
 
     On Error GoTo ErrHandler
     
     ' bind the socket to the specified port for listening on any address
     ' an exception is raised on failure.
     
-    Me.TcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, port
+    Me.TcpServerSocket.BindTo wsock32.ws32_INADDR_ANY, a_port
     
     OnConnectionChanged Me.Connected
     
     ' get the socket to start listening
     ' an exception is raised on failure.
     
-    BindTo = Me.TcpServerSocket.StartListening(backlog)
+    BindTo = Me.TcpServerSocket.StartListening(a_backlog)
     
 ExitHandler:
 
@@ -84,12 +84,12 @@ Public Property Get Connected() As Boolean
 End Property
 
 ''' <summary>   Permits an incoming connection attempt on a socket. </summary>
-''' <param name="timeoutMs">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
+''' <param name="a_timeoutMs">   [Optional, 500] The maximum milliseconds time for select to wait. </param>
 ''' <returns>   the connected Tcp client. </returns>
-Public Function AcceptTcpClient(Optional ByVal timeoutMs As Long = 500) As TcpClient
+Public Function AcceptTcpClient(Optional ByVal a_timeoutMs As Long = 500) As TcpClient
 
     Dim p_connectedClientSocket As IPv4StreamSocket
-    Set p_connectedClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, timeoutMs)
+    Set p_connectedClientSocket = Me.TcpServerSocket.AcceptTcpClient(Me, a_timeoutMs)
     
     Dim p_client As TcpClient
     Set p_client = New TcpClient
@@ -113,11 +113,11 @@ End Sub
 ' Connection Changed
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
-''' <para name="isConnected">   [Boolean] The connection state. </param>
-Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+''' <para name="a_isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal a_isConnected As Boolean)
     
     RaiseEvent ConnectionChanged( _
-            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(a_isConnected))
 
 End Sub
 

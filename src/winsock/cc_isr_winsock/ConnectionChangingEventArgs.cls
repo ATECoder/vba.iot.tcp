@@ -13,8 +13,8 @@ Private m_cancel As Boolean
 
 ''' <summary>   Initializes the event arguments. </summary>
 ''' <para name="isConnected">   [Boolean] The connection state. </param>
-Public Sub Initialize(ByVal isConnected As Boolean)
-    m_connected = isConnected
+Public Sub Initialize(ByVal a_isConnected As Boolean)
+    m_connected = a_isConnected
     m_cancel = False
 End Sub
 
@@ -31,9 +31,9 @@ Public Property Get Cancel() As Boolean
 End Property
 
 ''' <summary>   Sets the cancel request. </summary>
-''' <param name="value">   [Boolean] True to cancel the event. </param>
-Public Property Let Cancel(ByVal value As Boolean)
-    Cancel = m_cancel
+''' <param name="a_value">   [Boolean] True to cancel the event. </param>
+Public Property Let Cancel(ByVal a_value As Boolean)
+    m_cancel = a_value
 End Property
 
 

@@ -18,9 +18,9 @@ Public Property Get ExportCodeAfterSave() As Boolean
 End Property
 
 ''' <summary>   Enables or disables exporting code files after save. </summary>
-''' <para name="value">   True to enable exporting code files after save. </param>
-Public Property Let ExportCodeAfterSave(ByVal value As Boolean)
-    m_exportCodeAfterSave = value
+''' <para name="a_value">   [Boolean] True to enable exporting code files after save. </param>
+Public Property Let ExportCodeAfterSave(ByVal a_value As Boolean)
+    m_exportCodeAfterSave = a_value
 End Property
 
 ''' <summary>   Handles the Workbook activate event. </summary>
@@ -33,11 +33,12 @@ Private Sub Workbook_Activate()
 End Sub
 
 ''' <summary>   Handles the workbook after save event. </summary>
+''' <para name="a_success">   [Boolean] True if the save succeeded. </param>
 ''' <remarks>   Exports source code files. </remarks>
-Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
 
     On Error Resume Next
-    If Me.ExportCodeAfterSave Then
+    If a_success And Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
 

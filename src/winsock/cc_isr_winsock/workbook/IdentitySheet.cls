@@ -55,10 +55,12 @@ Private Sub ReadIdentityButton_Click()
 End Sub
 
 ''' <summary>   Sends the identity query and reads back the identity from the instrument. </summary>
-''' <param name="host">   The host IPv4 dotted address. </param>
-''' <param name="port">   the host port number. </param>
-''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
+''' <param name="a_host">        [String] The host IPv4 dotted address. </param>
+''' <param name="a_port">        [Long] the host port number. </param>
+''' <param name="repeatCount">   [Integer] The number of time to repeat the query. </param>
+''' <param name="a_timeout">     [Long] receive timeout in milliseconds. </param>
+Private Sub ReadIdentity(ByVal a_host As String, ByVal a_port As Long, ByVal a_repeatCount As Integer, _
+        ByVal a_timeout As Long)
 
     On Error GoTo Finally
     
@@ -81,18 +83,18 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
     ' report the socket number
     Range(m_connectedSocketIdCell).value = p_socket.SocketId
     
-    p_socket.OpenConnection host, port
+    p_socket.OpenConnection a_host, a_port
     
     ' report the connection state
     Range(m_connectedCell).value = p_socket.Connected
     
-    If repeatCount > 0 And p_socket.Connected Then
+    If a_repeatCount > 0 And p_socket.Connected Then
     
         Range(m_socketAddressCell).value = p_socket.SocketAddress
     
         Dim p_command As String
     
-        If port = PROLOGIX_PORT_NO Then
+        If a_port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
             ' Prologix GPIB-ETHERNET controller can be configured to automatically address
@@ -123,7 +125,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         Range(m_sentMessageCell).value = p_command
        
         Dim p_loopCount As Integer
-        Do While p_loopCount < repeatCount
+        Do While p_loopCount < a_repeatCount
             
             DoEvents
             
@@ -148,7 +150,7 @@ Private Sub ReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatC
         Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
-    ElseIf repeatCount <= 0 Then
+    ElseIf a_repeatCount <= 0 Then
     
         Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
         
@@ -201,10 +203,12 @@ Finally:
 End Sub
 
 ''' <summary>   Sends the identity query and reads back the identity from the instrument. </summary>
-''' <param name="host">   The host IPv4 dotted address. </param>
-''' <param name="port">   the host port number. </param>
-''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
+''' <param name="a_host">        [String] The host IPv4 dotted address. </param>
+''' <param name="a_port">        [Long] the host port number. </param>
+''' <param name="repeatCount">   [Integer] The number of time to repeat the query. </param>
+''' <param name="a_timeout">     [Long] receive timeout in milliseconds. </param>
+Private Sub ReadIdentityUsingBuffer(ByVal a_host As String, ByVal a_port As Long, ByVal a_repeatCount As Integer, _
+        ByVal a_timeout As Integer)
 
     On Error GoTo Finally
     
@@ -230,19 +234,19 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
     ' report the socket number
     Range(m_connectedSocketIdCell).value = p_socket.SocketId
     
-    p_socket.OpenConnection host, port
+    p_socket.OpenConnection a_host, a_port
     
     ' report the connection state
     Range(m_connectedCell).value = p_socket.Connected
     
-    If repeatCount > 0 And p_socket.Connected Then
+    If a_repeatCount > 0 And p_socket.Connected Then
     
         ' display the socket address
         Range(m_socketAddressCell).value = p_socket.SocketAddress
         
         Dim p_command As String
     
-        If port = PROLOGIX_PORT_NO Then
+        If a_port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
             ' Prologix GPIB-ETHERNET controller can be configured to automatically address
@@ -275,7 +279,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         Range(m_sentMessageCell).value = p_command
         
         Dim p_loopCount As Integer
-        Do While p_loopCount < repeatCount
+        Do While p_loopCount < a_repeatCount
             
             DoEvents
             
@@ -298,7 +302,7 @@ Private Sub ReadIdentityUsingBuffer(ByVal host As String, ByVal port As Long, By
         Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
-    ElseIf repeatCount <= 0 Then
+    ElseIf a_repeatCount <= 0 Then
     
         Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
         
@@ -351,10 +355,12 @@ End Sub
 
 ''' <summary>   Uses the Tcp Client to send the identity query and reads back the identity
 ''' from the instrument. </summary>
-''' <param name="host">   The host IPv4 dotted address. </param>
-''' <param name="port">   the host port number. </param>
-''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer, ByVal timeout As Integer)
+''' <param name="a_host">        [String] The host IPv4 dotted address. </param>
+''' <param name="a_port">        [Long] the host port number. </param>
+''' <param name="repeatCount">   [Integer] The number of time to repeat the query. </param>
+''' <param name="a_timeout">     [Long] receive timeout in milliseconds. </param>
+Private Sub TcpClientReadIdentity(ByVal a_host As String, ByVal a_port As Long, ByVal a_repeatCount As Integer, _
+        ByVal a_timeout As Integer)
 
     On Error GoTo Finally
     
@@ -374,7 +380,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     Dim p_client As TcpClient
     Set p_client = New TcpClient
     
-    p_client.OpenConnection host, port
+    p_client.OpenConnection a_host, a_port
     
     ' report the socket number
     Range(m_connectedSocketIdCell).value = p_client.TcpClientSocket.SocketId
@@ -382,14 +388,14 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
     ' report the connection state
     Range(m_connectedCell).value = p_client.Connected
     
-    If repeatCount > 0 And p_client.Connected Then
+    If a_repeatCount > 0 And p_client.Connected Then
     
         ' display the socket address.
         Range(m_socketAddressCell).value = p_client.TcpClientSocket.SocketAddress
         
         Dim p_command As String
     
-        If port = PROLOGIX_PORT_NO Then
+        If a_port = PROLOGIX_PORT_NO Then
         
             ' set auto read after write
             ' Prologix GPIB-ETHERNET controller can be configured to automatically address
@@ -424,7 +430,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         Range(m_sentMessageCell).value = p_command
         
         Dim p_loopCount As Integer
-        Do While p_loopCount < repeatCount
+        Do While p_loopCount < a_repeatCount
             
             DoEvents
             
@@ -449,7 +455,7 @@ Private Sub TcpClientReadIdentity(ByVal host As String, ByVal port As Long, ByVa
         Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
     
-    ElseIf repeatCount <= 0 Then
+    ElseIf a_repeatCount <= 0 Then
     
         Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
         

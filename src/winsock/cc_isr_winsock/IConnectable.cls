@@ -14,13 +14,12 @@ Public Sub Dispose()
 End Sub
 
 ''' <summary>   Opens a socket connection and sets and returns true if connected. </summary>
-''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        [Long] The port that the server is listening on. </param>
-''' <param name="port">        [Long] The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="a_port">        [Long] The port that the server is listening on. </param>
+''' <param name="a_timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   [Boolean] True if the socket is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
-        Optional ByVal timeoutMs As Long = 500) As Boolean
+Public Function OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
+        Optional ByVal a_timeoutMs As Long = 500) As Boolean
 End Function
 
 ''' <summary>   Closes the connection and returns true if not connected. </summary>
@@ -39,13 +38,13 @@ Public Property Get CanConnect() As Boolean
 End Property
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
-''' <para name="eventArgs">   [<<see cref="ConnectionChangedEventArgs"/>]. </param>
-Public Sub OnConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <para name="a_eventArgs">   [<see cref="ConnectionChangedEventArgs"/>]. </param>
+Public Sub OnConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 End Sub
 
 ''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
-''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
-Public Sub OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <para name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
+Public Sub OnConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 End Sub
 
 

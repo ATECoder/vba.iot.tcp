@@ -19,14 +19,15 @@ Private m_disposed As Boolean
 Private m_socketCount As Integer
 
 ''' <summary>   Initiates use of the Winsock DLL by a process. </summary>
-''' <param name="was">   A pointer to the ws32_WSADATA data structure that is to receive
-''' details of the Windows Sockets implementation. </param>
+''' <param name="a_version">   [Long] Specifies the Winsock version. </param>
+''' <param name="a_wsa">       [ws32_WSADATA] A pointer to the ws32_WSADATA data structure that is to receive
+'''                            details of the Windows Sockets implementation. </param>
 ''' <returns>   If successful, the WSAStartup function returns zero. Otherwise, it returns one of
 ''' the error codes listed below. The WSAStartup function directly returns the extended error code
 ''' in the return value for this function. A call to the WSAGetLastError function is not needed and should not be used.
 ''' </returns>
 Private Declare PtrSafe Function WSAStartup Lib "wsock32.dll" ( _
-        ByVal versionRequired As Long, ByRef wsa As wsock32.ws32_WSADATA) As Long
+        ByVal a_version As Long, ByRef a_wsa As wsock32.ws32_WSADATA) As Long
 
 ''' <summary>   Returns the error status for the last Windows Sockets operation that failed. </summary>
 ''' <remarks>   WSAGetLastError should be called immediately. This is necessary because some functions may reset
@@ -92,39 +93,49 @@ End Function
 ''' <summary>   Registers this socket with the Winsock class. </summary>
 ''' <remarks>   Call this method to register the socket with Winsock thus managing when
 ''' Winsock can be disposed.</remarks>
-''' <param name="activeSocket">   The socket that is registering. </param>
-Public Sub Register(ByVal activeSocket As IPv4StreamSocket)
-    If IsObject(activeSocket) Then
+''' <param name="a_activeSocket">   The socket that is registering. </param>
+Public Sub Register(ByVal a_activeSocket As IPv4StreamSocket)
+    
+    If IsObject(a_activeSocket) Then
         m_socketCount = m_socketCount + 1
     End If
+
 End Sub
 
 ''' <summary>   Un-Registers this socket from the Winsock class. </summary>
 ''' <remarks>   Call this method to remove the socket from the class so it can be disposed when having
 ''' no registered sockets.</remarks>
 ''' <param name="activeSocket">   The socket that is unregistering. </param>
-Public Sub UnRegister(ByVal activeSocket As IPv4StreamSocket)
-    If IsObject(activeSocket) And (Me.SocketCount > 0) Then
+Public Sub UnRegister(ByVal a_activeSocket As IPv4StreamSocket)
+    
+    If IsObject(a_activeSocket) And (Me.SocketCount > 0) Then
         m_socketCount = m_socketCount - 1
         If Me.SocketCount = 0 Then
             Me.Dispose
         End If
     End If
+
 End Sub
 
 ''' <summary>   Returns true if Winsock was initiated. </summary>
 Public Property Get Initiated() As Boolean
+    
     Initiated = m_initiated
+
 End Property
 
 ''' <summary>   Returns true if Winsock was Disposed. </summary>
 Public Property Get Disposed() As Boolean
+    
     Disposed = m_disposed
+
 End Property
 
 ''' <summary>   returns the last Winsock 32 error . </summary>
 Public Property Get LastError() As Long
+    
     LastError = WSAGetLastError()
+
 End Property
 
 ''' <summary>   Terminates use of the Winsock dll. </summary>

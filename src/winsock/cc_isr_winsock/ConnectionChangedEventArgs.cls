@@ -11,9 +11,9 @@ Option Explicit
 Private m_connected As Boolean
 
 ''' <summary>   Initializes the event arguments. </summary>
-''' <para name="isConnected">   [Boolean] The connection state. </param>
-Public Sub Initialize(ByVal isConnected As Boolean)
-    m_connected = isConnected
+''' <para name="a_isConnected">   [Boolean] The connection state. </param>
+Public Sub Initialize(ByVal a_isConnected As Boolean)
+    m_connected = a_isConnected
 End Sub
 
 ''' <summary>   Gets the connection state. </summary>
