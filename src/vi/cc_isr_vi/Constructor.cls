@@ -28,12 +28,12 @@ Public Property Get K2700() As K2700
 End Property
 
 ''' <summary>   Gets an instance of the <see cref="ResistanceNumberEventArgs"/> class. </summary>
-''' <para name="resistanceNo">   [integer] The resistance number. </param>
-''' <para name="resistance">     [double] The resistance. </param>
+''' <para name="a_resistanceNo">   [integer] The resistance number. </param>
+''' <para name="a_resistance">     [double] The resistance. </param>
 ''' <value>   An instance of the <see cref="ResistanceNumberEventArgs"/> class. </returns>
-Public Property Get CreateResistanceNumberEventArgs(ByVal resistanceNo As Integer, ByVal resistanceValue As Double) As ResistanceNumberEventArgs
+Public Property Get CreateResistanceNumberEventArgs(ByVal a_resistanceNo As Integer, ByVal a_resistance As Double) As ResistanceNumberEventArgs
     Set CreateResistanceNumberEventArgs = New ResistanceNumberEventArgs
-    CreateResistanceNumberEventArgs.Initialize resistanceNo, resistanceValue
+    CreateResistanceNumberEventArgs.Initialize a_resistanceNo, a_resistance
 End Property
 
 

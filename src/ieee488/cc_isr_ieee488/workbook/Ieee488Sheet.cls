@@ -75,8 +75,8 @@ Public Sub Dispose()
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Public Sub Initialize(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Const p_procedureName = "PopulateCommandsComboBox"
 
@@ -85,7 +85,7 @@ Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventAr
     
     On Error Resume Next
     
-    Dim p_connected As Boolean: p_connected = eventArgs.Connected
+    Dim p_connected As Boolean: p_connected = a_eventArgs.Connected
     
     Me.ConnectToggleButton.value = p_connected
     
@@ -188,8 +188,8 @@ Friend Sub ReadStopWatch()
 End Sub
 
 ''' <summary>   Write line handling an error messages. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Friend Sub WriteLine(ByVal message As String)
+''' <param name="a_message">   [String] to send to the instrument. </param>
+Friend Sub WriteLine(ByVal a_message As String)
 
     Const p_procedureName = "WriteLine"
     
@@ -198,7 +198,7 @@ Friend Sub WriteLine(ByVal message As String)
     
     Me.RestartStopWatch
     
-    Me.Session.WriteLine message
+    Me.Session.WriteLine a_message
     
     Me.ReadStopWatch
     
@@ -229,8 +229,8 @@ err_Handler:
 End Sub
 
 ''' <summary>   Query a message from the instrument handling any errors. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Friend Function QueryLine(ByVal message As String) As String
+''' <param name="a_message">   [String] to send to the instrument. </param>
+Friend Function QueryLine(ByVal a_message As String) As String
 
     Const p_procedureName = "QueryLine"
     
@@ -239,7 +239,7 @@ Friend Function QueryLine(ByVal message As String) As String
     
     Me.RestartStopWatch
     
-    QueryLine = Me.Session.QueryLine(message)
+    QueryLine = Me.Session.QueryLine(a_message)
     
     Me.ReadStopWatch
 
@@ -679,9 +679,9 @@ Friend Property Get ReceivedMessage() As String
 End Property
 
 ''' <summary>   Sets the received message. </summary>
-Friend Property Let ReceivedMessage(ByVal value As String)
-    Range(m_receivedMessageCell).value = value
-    Range(m_receivedMessageLengthCell).value = Len(value)
+Friend Property Let ReceivedMessage(ByVal a_value As String)
+    Range(m_receivedMessageCell).value = a_value
+    Range(m_receivedMessageLengthCell).value = Len(a_value)
 End Property
 
 ''' <summary>   Gets the sent message. </summary>
@@ -690,8 +690,8 @@ Friend Property Get SentMessage() As String
 End Property
 
 ''' <summary>   Sets the sent message. </summary>
-Friend Property Let SentMessage(ByVal value As String)
-    Range(m_sentMessageCell).value = value
+Friend Property Let SentMessage(ByVal a_value As String)
+    Range(m_sentMessageCell).value = a_value
 End Property
 
 ''' <summary>   Gets the Last Error Message. </summary>
@@ -700,8 +700,8 @@ Friend Property Get LastErrorMessage() As String
 End Property
 
 ''' <summary>   Sets the Last Error Message. </summary>
-Friend Property Let LastErrorMessage(ByVal value As String)
-    Range(m_lastErrorMessageCell).value = value
+Friend Property Let LastErrorMessage(ByVal a_value As String)
+    Range(m_lastErrorMessageCell).value = a_value
 End Property
 
 ''' <summary>   Gets the status byte. </summary>
@@ -710,8 +710,8 @@ Friend Property Get StatusByte() As Integer
 End Property
 
 ''' <summary>   Sets the status byte. </summary>
-Friend Property Let StatusByte(ByVal value As Integer)
-    Range(m_statusByteCell).value = value
+Friend Property Let StatusByte(ByVal a_value As Integer)
+    Range(m_statusByteCell).value = a_value
 End Property
 
 ''' <summary>   Gets the Read After Write Enabled. </summary>
@@ -720,8 +720,8 @@ Friend Property Get ReadAfterWriteEnabled() As Boolean
 End Property
 
 ''' <summary>   Sets the Read After Write Enabled. </summary>
-Friend Property Let ReadAfterWriteEnabled(ByVal value As Boolean)
-    Range(m_readAfterWriteEnabledCell).value = value
+Friend Property Let ReadAfterWriteEnabled(ByVal a_value As Boolean)
+    Range(m_readAfterWriteEnabledCell).value = a_value
 End Property
 
 ''' <summary>   Gets the Standard byte. </summary>
@@ -730,8 +730,8 @@ Friend Property Get StandardByte() As Integer
 End Property
 
 ''' <summary>   Sets the Standard byte. </summary>
-Friend Property Let StandardByte(ByVal value As Integer)
-    Range(m_StandardByteCell).value = value
+Friend Property Let StandardByte(ByVal a_value As Integer)
+    Range(m_StandardByteCell).value = a_value
 End Property
 
 ' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
@@ -740,18 +740,18 @@ End Property
 '
 ' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
-Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
-    Me.SDCButton.Enabled = usingGpibLanController
-    Me.GoToLocalButton.Enabled = usingGpibLanController
-    Me.ReadAfterWriteGetButton.Enabled = usingGpibLanController
-    Me.ReadAfterWriteSetButton.Enabled = usingGpibLanController
-    Me.LocalLockoutButton.Enabled = usingGpibLanController
-    Me.SerialPollButton.Enabled = usingGpibLanController
-    Me.SRQButton.Enabled = usingGpibLanController
-    Me.GpibAddressGetButton.Enabled = usingGpibLanController
-    Me.GpibAddressSetButton.Enabled = usingGpibLanController
-    Me.ReadTimeoutGetButton.Enabled = usingGpibLanController
-    Me.ReadTimeoutSetButton.Enabled = usingGpibLanController
+Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
+    Me.SDCButton.Enabled = a_usingGpibLanController
+    Me.GoToLocalButton.Enabled = a_usingGpibLanController
+    Me.ReadAfterWriteGetButton.Enabled = a_usingGpibLanController
+    Me.ReadAfterWriteSetButton.Enabled = a_usingGpibLanController
+    Me.LocalLockoutButton.Enabled = a_usingGpibLanController
+    Me.SerialPollButton.Enabled = a_usingGpibLanController
+    Me.SRQButton.Enabled = a_usingGpibLanController
+    Me.GpibAddressGetButton.Enabled = a_usingGpibLanController
+    Me.GpibAddressSetButton.Enabled = a_usingGpibLanController
+    Me.ReadTimeoutGetButton.Enabled = a_usingGpibLanController
+    Me.ReadTimeoutSetButton.Enabled = a_usingGpibLanController
 End Sub
 
 Private Sub GoToLocalButton_Click()
@@ -1119,12 +1119,12 @@ End Sub
 ' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_session_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Me.Initialize eventArgs
+    Me.Initialize a_eventArgs
 
-    If eventArgs.Connected Then
+    If a_eventArgs.Connected Then
     
         ' report the socket number
         Range(m_socketAddressCell).value = Me.Session.ViSession.SocketAddress
@@ -1146,9 +1146,8 @@ Private Sub m_session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connec
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanging"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
-Private Sub m_session_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
-
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_session_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 End Sub
 
 

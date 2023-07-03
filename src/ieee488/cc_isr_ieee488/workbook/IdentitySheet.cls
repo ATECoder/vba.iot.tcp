@@ -43,10 +43,10 @@ End Sub
 
 ''' <summary>   Uses the IEEE 4888 session to send the identity query and reads back the identity
 ''' from the instrument. </summary>
-''' <param name="host">   The host IPv4 dotted address. </param>
-''' <param name="port">   the host port number. </param>
-''' <param name="repeatCount">   The number of time to repeat the query. </param>
-Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long, ByVal repeatCount As Integer)
+''' <param name="a_host">   The host IPv4 dotted address. </param>
+''' <param name="a_port">   the host port number. </param>
+''' <param name="a_repeatCount">   The number of time to repeat the query. </param>
+Private Sub Ieee488SessionReadIdentity(ByVal a_host As String, ByVal a_port As Long, ByVal a_repeatCount As Integer)
 
     On Error GoTo Finally
     
@@ -65,7 +65,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     
     Dim p_session As New Ieee488Session
     
-    p_session.OpenConnection host, port
+    p_session.OpenConnection a_host, a_port
     
     ' report the socket number
     Range(m_connectedSocketIdCell).value = p_session.SocketId
@@ -73,7 +73,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
     ' report the connection state
     Range(m_connectedCell).value = p_session.Connected
     
-    If p_session.Connected Then
+    If a_repeatCount > 0 And p_session.Connected Then
     
         Range(m_socketAddressCell).value = p_session.ViSession.SocketAddress
     
@@ -82,7 +82,7 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
         Range(m_sentMessageCell).value = p_command
         
         Dim p_loopCount As Integer
-        Do While p_loopCount < repeatCount
+        Do While p_loopCount < a_repeatCount
             
             DoEvents
            
@@ -106,6 +106,10 @@ Private Sub Ieee488SessionReadIdentity(ByVal host As String, ByVal port As Long,
   
         Range(m_averageElapsedTimeCell).value = Format(p_totalMilliseconds / p_loopCount, m_elapsedTimeFormat) + " ms"
         Range(m_elapsedTimeCell).value = Format(p_totalMilliseconds, m_elapsedTimeFormat) + " ms"
+    
+    ElseIf a_repeatCount <= 0 Then
+    
+        Range(m_receivedMessageCell).value = "testing connect and disconnect; disconnected."
     
     Else
         Range(m_errorMessageCell).value = "connection failed without reporting an exception"

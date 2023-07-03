@@ -53,22 +53,22 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Initializes the <see cref="TcpClient"/> for the GpibLan I/O. </summary>
-''' <param name="client">                  <see cref="TcpClient"/> object. </param>
-''' <param name="tracer">                  <see cref="IErrTracer"/> implementation. </param>
-''' <param name="readTerm">                [Optiona, String, VbLf] the read termination. </param>
-''' <param name="writeTerm">               [Optiona, String, VbLf] the write termination. </param>
-''' <param name="readAfterWriteDelayMs">   [Optional, Integer, 5] The read after write delay. </param>
-Public Sub Initialize(ByVal client As TcpClient, _
-                      ByVal tracer As IErrTracer, _
-                      Optional ByVal readTerm As String = vbLf, _
-                      Optional ByVal writeTerm As String = vbLf, _
-                      Optional ByVal readAfterWriteDelayMs As Integer = 5)
+''' <param name="a_client">                  <see cref="TcpClient"/> object. </param>
+''' <param name="a_tracer">                  <see cref="IErrTracer"/> implementation. </param>
+''' <param name="a_readTerm">                [Optiona, String, VbLf] the read termination. </param>
+''' <param name="a_writeTerm">               [Optiona, String, VbLf] the write termination. </param>
+''' <param name="a_readAfterWriteDelayMs">   [Optional, Integer, 5] The read after write delay. </param>
+Public Sub Initialize(ByVal a_client As TcpClient, _
+                      ByVal a_tracer As IErrTracer, _
+                      Optional ByVal a_readTerm As String = vbLf, _
+                      Optional ByVal a_writeTerm As String = vbLf, _
+                      Optional ByVal a_readAfterWriteDelayMs As Integer = 5)
     
-    Set m_errTracer = tracer
-    Set m_tcpClient = client
-    m_readTermination = readTerm
-    m_writeTermination = writeTerm
-    Me.ReadAfterWriteDelay = readAfterWriteDelayMs
+    Set m_errTracer = a_tracer
+    Set m_tcpClient = a_client
+    m_readTermination = a_readTerm
+    m_writeTermination = a_writeTerm
+    Me.ReadAfterWriteDelay = a_readAfterWriteDelayMs
     
     ' this needs to be turned on if using the Keithley 2700 with
     ' enabled read-after-write
@@ -103,9 +103,9 @@ End Property
 ''' The GPIB-Lan controller is enabled only if the Tcp client is
 ''' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
 ''' </remarks>
-''' <param name="value">   [Boolean] True if enabled.  </value>
-Public Property Let Enabled(ByVal value As Boolean)
-    m_enabled = value
+''' <param name="a_value">   [Boolean] True if enabled.  </value>
+Public Property Let Enabled(ByVal a_value As Boolean)
+    m_enabled = a_value
 End Property
 
 ''' <summary>   Gets the Read After Write Delay. </summary>
@@ -115,8 +115,8 @@ Public Property Get ReadAfterWriteDelay() As Integer
 End Property
 
 ''' <summary>   Sets the Read After Write Delay. </summary>
-Public Property Let ReadAfterWriteDelay(ByVal value As Integer)
-    m_readAfterWriteDelay = value
+Public Property Let ReadAfterWriteDelay(ByVal a_value As Integer)
+    m_readAfterWriteDelay = a_value
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -168,12 +168,12 @@ End Property
 ''' </code>
 ''' <param name="enable">   True to enable read-after-write. </param>
 ''' </remarks>
-Public Sub ReadAfterWriteEnabledSetter(ByVal enable As Boolean)
+Public Sub ReadAfterWriteEnabledSetter(ByVal a_enable As Boolean)
     
-    If enable <> Me.ReadAfterWriteEnabled Then
-        Dim p_value As String: p_value = IIf(enable, "1", "0")
+    If a_enable <> Me.ReadAfterWriteEnabled Then
+        Dim p_value As String: p_value = IIf(a_enable, "1", "0")
         Me.SendToController "++auto " & p_value
-        m_readAfterWriteEnabled = enable
+        m_readAfterWriteEnabled = a_enable
     End If
 
 End Sub
@@ -191,10 +191,10 @@ End Function
 ''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
 ''' <param name="message">   The message. </param>
 ''' <returns>   [Long] The number of sent characters. </returns>
-Public Function SendToDevice(ByVal message As String, _
-        Optional ByVal appendTermination As Boolean = True) As Long
+Public Function SendToDevice(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True) As Long
     
-    If appendTermination Then message = message & m_writeTermination
+    If a_appendTermination Then a_message = a_message & m_writeTermination
     
     ' if auto read after write and write control of read after write is enabled,
     ' turn on listen to prevent Query Unterminated error on the 2700.
@@ -203,7 +203,7 @@ Public Function SendToDevice(ByVal message As String, _
     
     ' send the message to the device.
     
-    SendToDevice = m_tcpClient.SendMessage(message)
+    SendToDevice = m_tcpClient.SendMessage(a_message)
     
     ' a read after write delay is necessary for proper operations.
     
@@ -216,11 +216,11 @@ End Function
 ''' <remarks>   If <see cref="ReadAfterWriteEnabled"/> is not enabled then
 ''' this method uses the <c>++read</c> command to first read the data
 ''' from the device to the controller. </remarks>
-''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
+''' <param name="a_maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">       [Optional, Boolean, True] True to return the string without the termination. </param>
 ''' <returns>   [String] The received message. </returns>
-Public Function ReceiveFromDevice(Optional ByVal maxLength As Long = &H7FFF, _
-                                  Optional ByVal trimEnd As Boolean = True) As String
+Public Function ReceiveFromDevice(Optional ByVal a_maxLength As Long = &H7FFF, _
+                                  Optional ByVal a_trimEnd As Boolean = True) As String
     
     If Not Me.ReadAfterWriteEnabled Then
         ' if auto read after write is disabled, we can either turn on ' read after write,
@@ -230,15 +230,18 @@ Public Function ReceiveFromDevice(Optional ByVal maxLength As Long = &H7FFF, _
     
     End If
     
-    ReceiveFromDevice = m_tcpClient.ReceiveRaw(maxLength, trimEnd, m_readTermination)
+    ReceiveFromDevice = m_tcpClient.ReceiveRaw(a_maxLength, a_trimEnd, m_readTermination)
 
 End Function
     
 ''' <summary>   Sends a message to the device and receives a reply. </summary>
-''' <param name="message">   The message. </param>
+''' <param name="a_message">             [String] The message. </param>
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append the
+'''                                      <see cref="WriteTermination"/> to the message. </param>
 ''' <returns>   [String] The received message. </returns>
-Public Function QueryDevice(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    If Me.SendToDevice(message, appendTermination) > 0 Then
+Public Function QueryDevice(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True)
+    If Me.SendToDevice(a_message, a_appendTermination) > 0 Then
         DoEvents
         QueryDevice = Me.ReceiveFromDevice()
     Else
@@ -254,15 +257,15 @@ End Function
 
 ''' <summary>   Sends a message to the controller. </summary>
 ''' <remarks>   This method does not alter the auto Read-After-Write condition. </remarks>
-''' <param name="message">             [String] The message. </param>
-''' <param name="appendTermination">   [Optional, Boolean, True] True to append the
-'''                                    <see cref="WriteTermination"/> to the message. </param>
+''' <param name="a_message">             [String] The message. </param>
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append the
+'''                                      <see cref="WriteTermination"/> to the message. </param>
 ''' <returns>   [Long] The number of sent characters. </returns>
-Public Function SendToController(ByVal message As String, _
-        Optional ByVal appendTermination As Boolean = True) As Long
+Public Function SendToController(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True) As Long
     
-    If appendTermination Then message = message & m_writeTermination
-    SendToController = m_tcpClient.SendMessage(message)
+    If a_appendTermination Then a_message = a_message & m_writeTermination
+    SendToController = m_tcpClient.SendMessage(a_message)
     m_stopper.Wait Me.ReadAfterWriteDelay
 
 End Function
@@ -270,24 +273,28 @@ End Function
 ''' <summary>   Receives a message from the controller. </summary>
 ''' <param name="trimEnd">   [Optional, Boolean, True] True to trim the end termination. </param>
 ''' <returns>   [String] The received message. </returns>
-Public Function ReceiveFromController(Optional trimEnd As Boolean = True) As String
+Public Function ReceiveFromController(Optional a_trimEnd As Boolean = True) As String
 
-    Dim p_receivedMessage As String: p_receivedMessage = m_tcpClient.ReceiveRaw(trimEnd:=trimEnd, _
-                                                                            termination:=m_readTermination)
+    Dim p_receivedMessage As String
+    p_receivedMessage = m_tcpClient.ReceiveRaw(a_trimEnd:=a_trimEnd, _
+                                               a_termination:=m_readTermination)
     
     ' messages that come from the controller have a CR + LF termination. The Receive Raw method
     ' may stop at the LF termination, in which case the CR termination needs to be trimmed.
-    If trimEnd Then
+    If a_trimEnd Then
         ReceiveFromController = cc_isr_Core.StringExtensions.TrimRight(p_receivedMessage, vbCr)
     End If
     
 End Function
 
 ''' <summary>   Sends a message to the controller and read back the reply. </summary>
-''' <param name="message">   The message. </param>
+''' <param name="a_message">             [String] The message. </param>
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append the
+'''                                      <see cref="WriteTermination"/> to the message. </param>
 ''' <returns>   The received message. </returns>
-Public Function QueryController(ByVal message As String, Optional ByVal appendTermination As Boolean = True)
-    If Me.SendToController(message, appendTermination) > 0 Then
+Public Function QueryController(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True)
+    If Me.SendToController(a_message, a_appendTermination) > 0 Then
         DoEvents
         QueryController = Me.ReceiveFromController()
     Else
@@ -371,25 +378,25 @@ End Function
 ''' Internally, the secondary address, which is offset by 96, must be separated from the primary
 ''' address by a space character. Specifying secondary address has no effect in DEVICE mode.
 ''' </remarks>
-''' <para name="primaryAddress">     [Integer] Specifies the primary GPIB address
-'''                                   between 0 and 30. </param>
-''' <para name="secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
-'''                                  between 0 and 30. </param>
+''' <para name="a_primaryAddress">     [Integer] Specifies the primary GPIB address
+'''                                     between 0 and 30. </param>
+''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
+'''                                    between 0 and 30. </param>
 ''' <returns>   The status byte. </returns>
-Public Sub GpibAddressSetter(ByVal primaryAddress As Integer, _
-                             Optional ByVal secondaryAddress As Integer = -1)
+Public Sub GpibAddressSetter(ByVal a_primaryAddress As Integer, _
+                             Optional ByVal a_secondaryAddress As Integer = -1)
     
-    If primaryAddress >= 0 And secondaryAddress < 0 Then
+    If a_primaryAddress >= 0 And a_secondaryAddress < 0 Then
     
-        primaryAddress = Me.DelimitInteger(primaryAddress, 0, 30)
-        Me.SendToController "++addr " & CStr(primaryAddress)
+        a_primaryAddress = Me.DelimitInteger(a_primaryAddress, 0, 30)
+        Me.SendToController "++addr " & CStr(a_primaryAddress)
         
-    ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
+    ElseIf a_primaryAddress >= 0 And a_secondaryAddress >= 0 Then
         
-        primaryAddress = Me.DelimitInteger(primaryAddress, 0, 30)
-        secondaryAddress = Me.DelimitInteger(secondaryAddress, 0, 30)
-        Me.SendToController "++addr " & CStr(primaryAddress) & _
-            " " & CStr(secondaryAddress + 96)
+        a_primaryAddress = Me.DelimitInteger(a_primaryAddress, 0, 30)
+        a_secondaryAddress = Me.DelimitInteger(a_secondaryAddress, 0, 30)
+        Me.SendToController "++addr " & CStr(a_primaryAddress) & _
+            " " & CStr(a_secondaryAddress + 96)
     End If
     
 End Sub
@@ -412,15 +419,15 @@ End Property
 '''  controller read and spoll commands. Timeout may be set to any value between 1 and 3000
 ''' milliseconds.
 ''' </summary>
-''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub ReadTimeoutSetter(ByVal timeoutMs As Integer)
+''' <param name="a_timeoutMs">   [Integer] The timeout interval in milliseconds. </param>
+Public Sub ReadTimeoutSetter(ByVal a_timeoutMs As Integer)
     
-    timeoutMs = Me.DelimitInteger(timeoutMs, 1, 3000)
+    a_timeoutMs = Me.DelimitInteger(a_timeoutMs, 1, 3000)
     
-    If timeoutMs <> m_readTimeout Then
-        Me.SendToController "++read_tmo_ms " & CStr(timeoutMs)
+    If a_timeoutMs <> m_readTimeout Then
+        Me.SendToController "++read_tmo_ms " & CStr(a_timeoutMs)
     End If
-    m_readTimeout = timeoutMs
+    m_readTimeout = a_timeoutMs
     
 End Sub
 
@@ -462,21 +469,27 @@ End Sub
 ''' Talker/Listener state. Once a device requesting service is serial polled, it usually unasserts the SRQ
 ''' line.
 ''' </remarks>
-''' <para name="primaryAddress">     [Optional, Integer] Specifies the primary GPIB address
-'''                                   between 0 and 30. </param>
-''' <para name="secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
-'''                                  between 0 and 30. </param>
+''' <para name="a_primaryAddress">     [Optional, Integer] Specifies the primary GPIB address
+'''                                     between 0 and 30. </param>
+''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
+'''                                    between 0 and 30. </param>
 ''' <returns>   The status byte. </returns>
-Public Function SerialPoll(Optional ByVal primaryAddress As Integer = -1, _
-                           Optional ByVal secondaryAddress As Integer = -1) As Integer
+Public Function SerialPoll(Optional ByVal a_primaryAddress As Integer = -1, _
+                           Optional ByVal a_secondaryAddress As Integer = -1) As Integer
     
-    If primaryAddress >= 0 And secondaryAddress < 0 Then
-        SerialPoll = CInt(Me.QueryController("++spoll " & CStr(primaryAddress)))
-    ElseIf primaryAddress >= 0 And secondaryAddress >= 0 Then
-        SerialPoll = CInt(Me.QueryController("++spoll " & CStr(primaryAddress) & _
-                     " " & CStr(secondaryAddress + 96)))
+    If a_primaryAddress >= 0 And a_secondaryAddress < 0 Then
+        
+        SerialPoll = CInt(Me.QueryController("++spoll " & CStr(a_primaryAddress)))
+    
+    ElseIf a_primaryAddress >= 0 And a_secondaryAddress >= 0 Then
+        
+        SerialPoll = CInt(Me.QueryController("++spoll " & CStr(a_primaryAddress) & _
+                     " " & CStr(a_secondaryAddress + 96)))
+    
     Else
+        
         SerialPoll = CInt(Me.QueryController("++spoll"))
+    
     End If
     
 End Function
@@ -527,17 +540,22 @@ End Property
 '''             command will assert SRQ.
 ''' ++status Query current serial poll status byte.
 ''' </remarks>
-''' <param name="value">   The status byte mask. </param>
-Public Sub StatusByteSetter(ByVal value As Integer)
+''' <param name="a_value">   The status byte mask. </param>
+Public Sub StatusByteSetter(ByVal a_value As Integer)
     
     If Not Me.ControllerMode Then
-        value = Me.DelimitInteger(value, 0, 255)
         
-        If value <> m_statusByte Then
-            Me.SendToController "++status " & CStr(value)
+        a_value = Me.DelimitInteger(a_value, 0, 255)
+        
+        If a_value <> m_statusByte Then
+            
+            Me.SendToController "++status " & CStr(a_value)
+        
         End If
+    
     End If
-    m_statusByte = value
+    
+    m_statusByte = a_value
     
 End Sub
 
@@ -552,13 +570,14 @@ Public Function StatusByteGetter() As Integer
 End Function
 
 ''' <summary>   Returns the delimited integer value. </summary>
-''' <param name="value">   [Integer] the value to delimit.</param>
-''' <param name="minValue">   [Integer] the minimum. </param>
-''' <param name="maxValue">   [Integer] the maximum. </param>
-Public Function DelimitInteger(ByVal value As Integer, ByVal minValue As Integer, ByVal maxValue As Integer) As Integer
-    If value < minValue Then value = minValue
-    If value > maxValue Then value = maxValue
-    DelimitInteger = value
+''' <param name="a_value">      [Integer] the value to delimit.</param>
+''' <param name="a_minValue">   [Integer] the minimum. </param>
+''' <param name="a_maxValue">   [Integer] the maximum. </param>
+Public Function DelimitInteger(ByVal a_value As Integer, _
+        ByVal a_minValue As Integer, ByVal a_maxValue As Integer) As Integer
+    If a_value < a_minValue Then a_value = a_minValue
+    If a_value > a_maxValue Then a_value = a_maxValue
+    DelimitInteger = a_value
 End Function
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -568,8 +587,8 @@ End Function
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Const p_procedureName As String = "m_tcpClient_ConnectionChanging"
 
@@ -584,7 +603,7 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
     ' Where Read-After-Write is disabled, upon read, the controller is commanded to read from
     ' the instrument using the <c>++read</c> command.
     
-    If eventArgs.Connected Then
+    If a_eventArgs.Connected Then
     
         ' from experiments it seems this needs to be set first.
         Dim p_enabled As Boolean: p_enabled = Me.ReadAfterWriteEnabledGetter
@@ -608,8 +627,8 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Conn
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanging"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
-Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
     Const p_procedureName As String = "m_tcpClient_ConnectionChanging"
     
@@ -619,7 +638,7 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.Con
     ' connected to a GPIB-Lan controller such as the Prologix GPIB-Lan controller.
     If Not Me.Enabled Then Return
     
-    If eventArgs.Connected Then
+    If a_eventArgs.Connected Then
     
         ' leave the instrument with auto read-after-write off to prevent
         ' query unterminated errors.
@@ -645,10 +664,10 @@ End Sub
 
 ''' <summary>   Experiments with options for setting read-after-write. </summary>
 ''' <remarks>   good options: 1, 2 ?, 5; bad options: 4, 3. </remarks>
-''' <para name="opt">   [Integer] selects an configuration option. </param>
-Private Sub InitReadAfterWrite(ByVal opt As Integer)
+''' <para name="a_opt">   [Integer] selects an configuration option. </param>
+Private Sub InitReadAfterWrite(ByVal a_opt As Integer)
 
-    If opt = 1 Then
+    If a_opt = 1 Then
     
         ' Identity query time:         40-50 ms
         ' Query Unterminated on write: YES
@@ -658,7 +677,7 @@ Private Sub InitReadAfterWrite(ByVal opt As Integer)
         
         Me.ReadAfterWriteEnabledSetter True
     
-    ElseIf opt = 2 Then
+    ElseIf a_opt = 2 Then
     
         ' Identity query time:         40-50 ms
         ' Query Unterminated on write: YES
@@ -666,7 +685,7 @@ Private Sub InitReadAfterWrite(ByVal opt As Integer)
         m_readAfterWriteEnabled = False
         Me.ReadAfterWriteEnabledSetter True
     
-    ElseIf opt = 3 Then
+    ElseIf a_opt = 3 Then
         
         ' Identity query time:         74 ms
         ' Query Unterminated on write: no
@@ -681,7 +700,7 @@ Private Sub InitReadAfterWrite(ByVal opt As Integer)
         ' this takes it to 24 ms! go figure!!!
         ' Crash on power toggle/Local: YES
     
-    ElseIf opt = 4 Then
+    ElseIf a_opt = 4 Then
     
         ' Identity query time:         22 ms
         ' Query Unterminated on write: no
@@ -692,7 +711,7 @@ Private Sub InitReadAfterWrite(ByVal opt As Integer)
         m_readAfterWriteEnabled = True
         Me.ReadAfterWriteEnabledSetter False
     
-    ElseIf opt = 5 Then
+    ElseIf a_opt = 5 Then
     
         ' Identity query time:         48 ms
         ' Query Unterminated on write: no

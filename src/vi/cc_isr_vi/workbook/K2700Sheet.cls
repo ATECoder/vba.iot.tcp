@@ -48,7 +48,7 @@ Private Const m_resistanceCol As String = "N"
 Private Const m_resistanceFormat As String = "0.00"
 
 ' defines the standard event timer.
-Private WithEvents m_eventTimer As cc_isr_Core.stdTimer
+Private WithEvents m_eventTimer As cc_isr_Core.EventTimer
 Attribute m_eventTimer.VB_VarHelpID = -1
 
 ' true if a pause is requested so that the timer event is not handled
@@ -102,10 +102,10 @@ Public Sub Dispose()
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Public Sub Initialize(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Dim p_connected As Boolean: p_connected = eventArgs.Connected
+    Dim p_connected As Boolean: p_connected = a_eventArgs.Connected
     
     Me.ConnectToggleButton.value = p_connected
     
@@ -211,8 +211,8 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Write line handling an error messages. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Friend Sub WriteLine(ByVal message As String)
+''' <param name="a_message">   [String] to send to the instrument. </param>
+Friend Sub WriteLine(ByVal a_message As String)
 
     Const p_procedureName = "WriteLine"
     
@@ -221,7 +221,7 @@ Friend Sub WriteLine(ByVal message As String)
     
     Me.RestartStopWatch
     
-    Me.Session.WriteLine message
+    Me.Session.WriteLine a_message
     
     Me.ReadStopWatch
     
@@ -247,8 +247,8 @@ err_Handler:
 End Sub
 
 ''' <summary>   Query a message from the instrument handling any errors. </summary>
-''' <param name="message">   [String] to send to the instrument. </param>
-Friend Function QueryLine(ByVal message As String) As String
+''' <param name="a_message">   [String] to send to the instrument. </param>
+Friend Function QueryLine(ByVal a_message As String) As String
 
     Const p_procedureName = "QueryLine"
     
@@ -257,7 +257,7 @@ Friend Function QueryLine(ByVal message As String) As String
     
     Me.RestartStopWatch
     
-    QueryLine = Me.Session.QueryLine(message)
+    QueryLine = Me.Session.QueryLine(a_message)
     
     Me.ReadStopWatch
 
@@ -709,8 +709,8 @@ Friend Property Get receivedMessage() As String
 End Property
 
 ''' <summary>   Sets the received message. </summary>
-Friend Property Let receivedMessage(ByVal value As String)
-    Range(m_receivedMessageCell).value = value
+Friend Property Let receivedMessage(ByVal a_value As String)
+    Range(m_receivedMessageCell).value = a_value
     Range(m_receivedMessageLengthCell).value = Len(value)
 End Property
 
@@ -720,8 +720,8 @@ Friend Property Get ReadAfterWriteEnabled() As Boolean
 End Property
 
 ''' <summary>   Sets the Read After Write Enabled. </summary>
-Friend Property Let ReadAfterWriteEnabled(ByVal value As Boolean)
-    Range(m_readAfterWriteEnabledCell).value = value
+Friend Property Let ReadAfterWriteEnabled(ByVal a_value As Boolean)
+    Range(m_readAfterWriteEnabledCell).value = a_value
 End Property
 
 ''' <summary>   Gets the sent message. </summary>
@@ -730,8 +730,8 @@ Friend Property Get SentMessage() As String
 End Property
 
 ''' <summary>   Sets the sent message. </summary>
-Friend Property Let SentMessage(ByVal value As String)
-    Range(m_sentMessageCell).value = value
+Friend Property Let SentMessage(ByVal a_value As String)
+    Range(m_sentMessageCell).value = a_value
 End Property
 
 ''' <summary>   Gets the status byte. </summary>
@@ -740,8 +740,8 @@ Friend Property Get StatusByte() As Integer
 End Property
 
 ''' <summary>   Sets the status byte. </summary>
-Friend Property Let StatusByte(ByVal value As Integer)
-    Range(m_statusByteCell).value = value
+Friend Property Let StatusByte(ByVal a_value As Integer)
+    Range(m_statusByteCell).value = a_value
 End Property
 
 ''' <summary>   Gets the Standard byte. </summary>
@@ -750,8 +750,8 @@ Friend Property Get StandardByte() As Integer
 End Property
 
 ''' <summary>   Sets the Standard byte. </summary>
-Friend Property Let StandardByte(ByVal value As Integer)
-    Range(m_standardByteCell).value = value
+Friend Property Let StandardByte(ByVal a_value As Integer)
+    Range(m_standardByteCell).value = a_value
 End Property
 
 ''' <summary>   Gets the Last Error Message. </summary>
@@ -760,8 +760,8 @@ Friend Property Get LastErrorMessage() As String
 End Property
 
 ''' <summary>   Sets the Last Error Message. </summary>
-Friend Property Let LastErrorMessage(ByVal value As String)
-    Me.LastErrorMessage = value
+Friend Property Let LastErrorMessage(ByVal a_value As String)
+    Me.LastErrorMessage = a_value
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -771,18 +771,18 @@ End Property
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 
-Friend Sub EnableGpibLan(ByVal usingGpibLanController As Boolean)
-    Me.SDCButton.Enabled = usingGpibLanController
-    Me.GoToLocalButton.Enabled = usingGpibLanController
-    Me.LocalLockoutButton.Enabled = usingGpibLanController
-    Me.ReadAfterWriteSetButton.Enabled = usingGpibLanController
-    Me.ReadAfterWriteGetButton.Enabled = usingGpibLanController
-    Me.SerialPollButton.Enabled = usingGpibLanController
-    Me.SRQButton.Enabled = usingGpibLanController
-    Me.GetGpibAddressButton.Enabled = usingGpibLanController
-    Me.SetGpibAddressButton.Enabled = usingGpibLanController
-    Me.ReadTimeoutGetButton.Enabled = usingGpibLanController
-    Me.ReadTimeoutSetButton.Enabled = usingGpibLanController
+Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
+    Me.SDCButton.Enabled = a_usingGpibLanController
+    Me.GoToLocalButton.Enabled = a_usingGpibLanController
+    Me.LocalLockoutButton.Enabled = a_usingGpibLanController
+    Me.ReadAfterWriteSetButton.Enabled = a_usingGpibLanController
+    Me.ReadAfterWriteGetButton.Enabled = a_usingGpibLanController
+    Me.SerialPollButton.Enabled = a_usingGpibLanController
+    Me.SRQButton.Enabled = a_usingGpibLanController
+    Me.GetGpibAddressButton.Enabled = a_usingGpibLanController
+    Me.SetGpibAddressButton.Enabled = a_usingGpibLanController
+    Me.ReadTimeoutGetButton.Enabled = a_usingGpibLanController
+    Me.ReadTimeoutSetButton.Enabled = a_usingGpibLanController
 End Sub
 
 Private Sub GoToLocalButton_Click()
@@ -1157,8 +1157,8 @@ Friend Property Get ExternalTrigEnabled() As Boolean
 End Property
 
 ''' <summary>   Enables or disables external triggering. </summary>
-Friend Property Let ExternalTrigEnabled(ByVal value As Boolean)
-    Me.ExtTrigToggleButton.value = value
+Friend Property Let ExternalTrigEnabled(ByVal a_value As Boolean)
+    Me.ExtTrigToggleButton.value = a_value
 End Property
 
 ''' <summary>   Gets the auto increment resistance number status. </summary>
@@ -1179,14 +1179,14 @@ End Property
 ''' <summary>   Sets the resistance display. </summary>
 ''' <param name="resistanceNo">      [single] the resistance number. </param>
 ''' <param name="resistanceValue">   [double] the resistance. </param>
-Private Sub SetResistance(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
+Private Sub SetResistance(ByVal a_resistanceNo As Integer, ByVal a_resistance As Double)
 
-    Range(m_resistanceNoCell).value = resistanceNo
-    Range(m_resistanceCell).value = resistanceValue
+    Range(m_resistanceNoCell).value = a_resistanceNo
+    Range(m_resistanceCell).value = a_resistance
     
     Dim p_rowNo As Integer: p_rowNo = m_resistanceNoTopRow + resistanceNo - 1
-    Range(m_resistanceNoCol & CStr(p_rowNo)).value = "R" & CStr(resistanceNo)
-    Range(m_resistanceCol & CStr(p_rowNo)).value = Format(resistanceValue, m_resistanceFormat)
+    Range(m_resistanceNoCol & CStr(p_rowNo)).value = "R" & CStr(a_resistanceNo)
+    Range(m_resistanceCol & CStr(p_rowNo)).value = Format(a_resistance, m_resistanceFormat)
     
 End Sub
 
@@ -1288,7 +1288,7 @@ Private Sub ReadResistanceButton_Click()
     
     ' reinitialize if device not defined
     If Not Me.K2700.Connected Then
-        Me.K2700.Initialize Me.host, Me.port, Me.ReceiveTimeout
+        ' Me.K2700.InitializeLegacy Me.host, Me.port, Me.ReceiveTimeout
     End If
     
     If Me.FrontReadRequired And Not Me.K2700.IsFrontInputs Then
@@ -1404,18 +1404,18 @@ End Sub
 
 ''' <summary>   clears the data acquisition readings. </summary>
 ''' <param name="offsetResistance">    The offset resistance value to use for clearing the readings. </param>
-Public Sub ClearReadings(ByVal offsetResistance As Single)
+Public Sub ClearReadings(ByVal a_offsetResistance As Single)
 
     Dim p_resistanceNumber As Integer
     For p_resistanceNumber = 1 To Me.ResistanceCount
-        SetResistance p_resistanceNumber, offsetResistance
+        SetResistance p_resistanceNumber, a_offsetResistance
     Next p_resistanceNumber
   
 End Sub
 
 ''' <summary> Sets the instrument and program to get data using external trigger. </summary>
 ''' <param name="timerInterval"> The polling timer interval. </param>
-Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100)
+Private Sub SetExternalTriggerMode(Optional ByVal a_timerInterval As Integer = 100)
 
     Const p_procedureName = "SetExternalTriggerMode"
     
@@ -1423,14 +1423,14 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
     On Error GoTo err_Handler
     
     ' check if doing an external trigger reading with or without auto increment
-    If ExternalTrigEnabled Then
+    If Me.ExternalTrigEnabled Then
   
         ' clear the triggered flag
         m_extTrigInitiated = False
         
         ' reinitialize if device not defined
         If Not Me.K2700.Connected Then
-            Me.K2700.Initialize Me.host, Me.port, Me.ReceiveTimeout
+            ' Me.K2700.InitializeLegacy Me.host, Me.port, Me.ReceiveTimeout
         End If
         
         ' make sure that the instrument is ready to accept
@@ -1468,7 +1468,7 @@ Private Sub SetExternalTriggerMode(Optional ByVal timerInterval As Integer = 100
         End If
        
         ' start the timer
-        Me.StartTimer timerInterval
+        Me.StartTimer a_timerInterval
         
     Else
   
@@ -1647,8 +1647,8 @@ err_Handler:
 End Sub
 
 ''' <summary>   Starts the event timer. </summary>
-''' <param name="timerInterval">   Specifies the timer interval in milliseconds. </param>
-Friend Sub StartTimer(Optional ByVal timerInterval As Long = 100)
+''' <param name="a_timerInterval">   [Long] Specifies the timer interval in milliseconds. </param>
+Friend Sub StartTimer(Optional ByVal a_timerInterval As Long = 100)
     
     m_handlingTimerEvent = False
     m_pauseRequested = False
@@ -1696,8 +1696,8 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ResistanceNumberMeasured"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_VI.ResistanceNumberEventArgs"/> event arguments. </param>
-Private Sub m_k2700_ResistanceNumberMeasured(ByVal eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_VI.ResistanceNumberEventArgs"/> event arguments. </param>
+Private Sub m_k2700_ResistanceNumberMeasured(ByVal a_eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
 
     SetResistance eventArgs.ResistanceNumber, eventArgs.Resistance
     
@@ -1715,8 +1715,8 @@ Private Sub m_k2700_ResistanceNumberMeasured(ByVal eventArgs As cc_isr_VI.Resist
 End Sub
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.K2700.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_k2700_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_k2700_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
     Me.Initialize eventArgs
 
@@ -1744,8 +1744,8 @@ Private Sub m_k2700_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.Connecti
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_VI.K2700.ConnectionChanging"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
-Private Sub m_k2700_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_k2700_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
 End Sub
 

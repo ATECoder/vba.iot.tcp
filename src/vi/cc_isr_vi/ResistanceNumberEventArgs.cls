@@ -12,11 +12,11 @@ Private m_resistanceNumber As Integer
 Private m_resistance As Double
 
 ''' <summary>   Initializes the event arguments. </summary>
-''' <para name="resistanceNo">   [integer] The resistance number. </param>
-''' <para name="resistance">     [double] The resistance. </param>
-Public Sub Initialize(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
-    m_resistanceNumber = resistanceNo
-    m_resistance = Resistance
+''' <para name="a_resistanceNo">   [integer] The resistance number. </param>
+''' <para name="a_resistance">     [double] The resistance. </param>
+Public Sub Initialize(ByVal a_resistanceNo As Integer, ByVal a_resistance As Double)
+    m_resistanceNumber = a_resistanceNo
+    m_resistance = a_resistance
 End Sub
 
 ''' <summary>   Gets the resistance number. </summary>

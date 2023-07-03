@@ -34,12 +34,12 @@ Private m_usingGpibLan As Boolean
 Private m_writeTermination As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
-''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   The event that is raised before change of connection. </summary>
-''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
-Public Event ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
+Public Event ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
 ''' <summary>   Handles the Class Initialize event; constructs the <see cref="TcpClient"/>. </summary>
 Private Sub Class_Initialize()
@@ -61,10 +61,10 @@ Private Sub Class_Terminate()
 End Sub
 
 ''' <summary>   Initializes the <see cref="IErrTracer"/> for the <see cref="ViSession"/>. </summary>
-''' <param name="tracer">   <see cref="IErrTracer"/> implementation. </param>
-Public Sub Initialize(ByVal tracer As IErrTracer)
+''' <param name="a_tracer">   <see cref="IErrTracer"/> implementation. </param>
+Public Sub Initialize(ByVal a_tracer As IErrTracer)
     
-    m_gpibLan.Initialize m_tcpClient, tracer, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
+    m_gpibLan.Initialize m_tcpClient, a_tracer, m_readTermination, m_writeTermination, READ_AFTER_WRITE_DELAY_DEFAULT
    
 End Sub
 
@@ -126,8 +126,8 @@ Friend Property Get ReadAfterWriteDelay() As Integer
 End Property
 
 ''' <summary>   Sets the Read After Write Delay. </summary>
-Friend Property Let ReadAfterWriteDelay(ByVal value As Integer)
-    m_readAfterWriteDelay = value
+Friend Property Let ReadAfterWriteDelay(ByVal a_value As Integer)
+    m_readAfterWriteDelay = a_value
 End Property
 
 ''' <summary>   Gets the receive timeout in Milliseconds. </summary>
@@ -138,13 +138,13 @@ End Property
 
 ''' <summary>   Sets the socket receive timeout. </summary>
 ''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub SetReceiveTimeout(ByVal timeoutMs As Long)
+Public Sub SetReceiveTimeout(ByVal a_timeoutMs As Long)
     If Me.Connected Then
-        If timeoutMs <> m_tcpClient.TcpClientSocket.ReceiveTimeout Then
-            m_tcpClient.TcpClientSocket.SetReceiveTimeout timeoutMs
+        If a_timeoutMs <> m_tcpClient.TcpClientSocket.ReceiveTimeout Then
+            m_tcpClient.TcpClientSocket.SetReceiveTimeout a_timeoutMs
         End If
     End If
-    m_receiveTimeout = timeoutMs
+    m_receiveTimeout = a_timeoutMs
     
 End Sub
 
@@ -160,18 +160,18 @@ End Property
 ''' method first sets the Prologix to auto off (++auto 0) to prevent it from
 ''' setting the device to talk prematurely which might cause the device
 ''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
-''' <param name="message">             [String] The message to send to the instrument. </param>
-''' <param name="appendTermination">   [Option, Boolean, True] True to append termination to
-'''                                    the message. </param>
+''' <param name="a_message">             [String] The message to send to the instrument. </param>
+''' <param name="a_appendTermination">   [Option, Boolean, True] True to append termination to
+'''                                      the message. </param>
 ''' <returns>   [Long] The number of sent characters. </returns>
-Public Function WriteLine(ByVal message As String, _
-        Optional ByVal appendTermination As Boolean = True) As Long
+Public Function WriteLine(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True) As Long
     
     If Me.UsingGpibLan Then
-        WriteLine = Me.GpibLan.SendToDevice(message, appendTermination)
+        WriteLine = Me.GpibLan.SendToDevice(a_message, a_appendTermination)
     Else
-        If appendTermination Then message = message & Me.WriteTermination
-        WriteLine = m_tcpClient.SendMessage(message)
+        If a_appendTermination Then a_message = a_message & Me.WriteTermination
+        WriteLine = m_tcpClient.SendMessage(a_message)
         m_stopper.Wait Me.ReadAfterWriteDelay
     End If
 
@@ -182,33 +182,33 @@ End Function
 ''' <remarks>   If using the Prologix device at port 1234, this
 ''' method first sets the Prologix to auto on (++auto 1) assuming auto was turned off on
 ''' the previous read on <see cref="WriteLine"/>. </remarks>
-''' <param name="maxLength">     [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">       [Optional, True] True to return the string without the termination. </param>
+''' <param name="a_maxLength">     [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">       [Optional, Boolean, True] True to return the string without the termination. </param>
 ''' <returns>   [String] The received string. </returns>
-Public Function Read(Optional ByVal maxLength As Long = &H7FFF, _
-                     Optional ByVal trimEnd As Boolean = True) As String
+Public Function Read(Optional ByVal a_maxLength As Long = &H7FFF, _
+                     Optional ByVal a_trimEnd As Boolean = True) As String
     If Me.UsingGpibLan Then
-        Read = Me.GpibLan.ReceiveFromDevice(maxLength, trimEnd)
+        Read = Me.GpibLan.ReceiveFromDevice(a_maxLength, a_trimEnd)
     Else
-        Read = m_tcpClient.ReceiveRaw(maxLength, trimEnd, Me.ReadTermination)
+        Read = m_tcpClient.ReceiveRaw(a_maxLength, a_trimEnd, Me.ReadTermination)
     End If
 
 End Function
     
 ''' <summary>   Sends a message and receives a reply. </summary>
-''' <param name="message">             [String] The message to send to the instrument. </param>
-''' <param name="appendTermination">   [Option, Boolean, True] True to append termination to
-'''                                    the message. </param>
-''' <param name="maxLength">           [Optional, 32767] The maximum number of bytes to read. </param>
-''' <param name="trimEnd">             [Optional, True] True to return the string without the termination. </param>
+''' <param name="a_message">             [String] The message to send to the instrument. </param>
+''' <param name="a_appendTermination">   [Option, Boolean, True] True to append termination to
+'''                                      the message. </param>
+''' <param name="a_maxLength">           [Optional, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">             [Optional, Boolean, True] True to return the string without the termination. </param>
 ''' <returns>   [String] The received string. </returns>
-Public Function QueryLine(ByVal message As String, _
-        Optional ByVal appendTermination As Boolean = True, _
-        Optional ByVal maxLength As Long = &H7FFF, _
-        Optional ByVal trimEnd As Boolean = True) As String
-    If Me.WriteLine(message, appendTermination) > 0 Then
+Public Function QueryLine(ByVal a_message As String, _
+        Optional ByVal a_appendTermination As Boolean = True, _
+        Optional ByVal a_maxLength As Long = &H7FFF, _
+        Optional ByVal a_trimEnd As Boolean = True) As String
+    If Me.WriteLine(a_message, a_appendTermination) > 0 Then
         DoEvents
-        QueryLine = Me.Read(maxLength, trimEnd)
+        QueryLine = Me.Read(a_maxLength, a_trimEnd)
     Else
         QueryLine = vbNullString
     End If
@@ -300,26 +300,26 @@ End Sub
 
 ''' <summary>   Opens a TCP Client connection to the specified host at the specified port
 ''' as sets the connection timeout. </summary>
-''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        [Long] The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="a_port">        [Long] The port that the server is listening on. </param>
+''' <param name="a_timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, Optional ByVal timeoutMs As Long = 500) As Boolean
+Public Function OpenConnection(ByVal a_host As String, ByVal a_port As Long, Optional ByVal a_timeoutMs As Long = 500) As Boolean
     
-    IConnectable_OpenConnection host, port, timeoutMs
+    IConnectable_OpenConnection a_host, a_port, a_timeoutMs
 
 End Function
 
 ''' <summary>   Opens a TCP Client connection to the specified host at the specified port
 ''' as sets the connection timeout. </summary>
-''' <param name="host">        [String] An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        [Long] The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="a_port">        [Long] The port that the server is listening on. </param>
+''' <param name="a_timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Private Function IConnectable_OpenConnection(ByVal host As String, ByVal port As Long, _
-        Optional ByVal timeoutMs As Long = 500&) As Boolean
+Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
+        Optional ByVal a_timeoutMs As Long = 500&) As Boolean
 
-    m_usingGpibLan = port = GPIB_LAN_PORT_NO
+    m_usingGpibLan = a_port = GPIB_LAN_PORT_NO
     
     Dim p_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs
     Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
@@ -332,7 +332,7 @@ Private Function IConnectable_OpenConnection(ByVal host As String, ByVal port As
         
         m_gpibLan.Enabled = Me.UsingGpibLan
         
-        Connectable.OpenConnection host, port, timeoutMs
+        Connectable.OpenConnection a_host, a_port, a_timeoutMs
         
         OnConnectionChanged Connectable.Connected
         
@@ -371,21 +371,27 @@ Private Function IConnectable_CloseConnection() As Boolean
 End Function
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
-''' <para name="isConnected">   [Boolean] The connection state. </param>
-Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
-    IConnectable_OnConnectionChanged cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected)
+''' <para name="a_isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal a_isConnected As Boolean)
+    
+    IConnectable_OnConnectionChanged cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(a_isConnected)
+
 End Sub
 
 ''' <summary>   Raises the <see cref="Connectionchanged"/> event. </summary>
-''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
-Private Sub IConnectable_OnConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
-    RaiseEvent ConnectionChanged(eventArgs)
+''' <para name="a_eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
+Private Sub IConnectable_OnConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+    
+    RaiseEvent ConnectionChanged(a_eventArgs)
+
 End Sub
 
 ''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
-''' <para name="eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
-Private Sub IConnectable_OnConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
-    RaiseEvent ConnectionChanging(eventArgs)
+''' <para name="a_eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
+Private Sub IConnectable_OnConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+    
+    RaiseEvent ConnectionChanging(a_eventArgs)
+
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -395,12 +401,12 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_tcpClient_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Winsock.TcpClient.ConnectionChanging"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
-Private Sub m_tcpClient_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_tcpClient_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 End Sub
 

@@ -34,9 +34,9 @@ Public Property Get Session() As Ieee488Session
 End Property
 
 ''' <summary>   Returns a reference to the IEEE488 Session. </summary>
-''' <param name="session">    A references to a connected <see cref="Ieee488Session"/> </param>
-Public Sub Initialize(ByVal connectedSession As Ieee488Session)
-    Set m_session = connectedSession
+''' <param name="a_session">    [<see cref="<see cref="Ieee488Session"/>"/>] A connected session. </param>
+Public Sub Initialize(ByVal a_session As Ieee488Session)
+    Set m_session = a_session
 End Sub
 
 ''' <summary>   Issues a beep. </summary>

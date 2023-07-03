@@ -33,16 +33,16 @@ Private m_card2ScanList As String
 Private m_extTrigInitiated As Boolean
 
 ''' <summary>   The event that is raised upon completion of a a resistance measurement. </summary>
-''' <param name="eventArgs">   An <see cref="ResistanceNumberEventArgs"/> event args. </param>
-Public Event ResistanceNumberMeasured(ByVal eventArgs As ResistanceNumberEventArgs)
+''' <param name="a_eventArgs">   An <see cref="ResistanceNumberEventArgs"/> event args. </param>
+Public Event ResistanceNumberMeasured(ByVal a_eventArgs As ResistanceNumberEventArgs)
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
-''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
-Public Event ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event args. </param>
+Public Event ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 ''' <summary>   The event that is raised before change of connection. </summary>
-''' <param name="eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
-Public Event ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   An <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event args. </param>
+Public Event ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
 ''' <summary>   Initializes the k2700 . </summary>
 Private Sub Class_Initialize()
@@ -53,8 +53,8 @@ Private Sub Class_Initialize()
 End Sub
 
 ''' <summary>   Initializes the <see cref="IErrTracer"/> for the <see cref="Ieee488Session"/>. </summary>
-''' <param name="tracer">   <see cref="IErrTracer"/> implementation. </param>
-Public Sub Initialize(ByVal tracer As IErrTracer)
+''' <param name="a_tracer">   <see cref="IErrTracer"/> implementation. </param>
+Public Sub Initialize(ByVal a_tracer As IErrTracer)
    
     m_ieee488Session.Initialize tracer
    
@@ -96,16 +96,16 @@ End Property
 
 ''' <summary>   Opens a TCP Client connection to the specified host at the specified port
 ''' as sets the connection timeout. </summary>
-''' <param name="host">        An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="a_port">        [Long] The port that the server is listening on. </param>
+''' <param name="a_timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the TCP Client is connected. </returns>
-Public Function OpenConnection(ByVal host As String, ByVal port As Long, _
-        Optional ByVal timeoutMs As Long = 500) As Boolean
+Public Function OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
+        Optional ByVal a_timeoutMs As Long = 500) As Boolean
        
     ' open the connection
     
-    OpenConnection = m_ieee488Session.OpenConnection(host, port, timeoutMs)
+    OpenConnection = m_ieee488Session.OpenConnection(a_host, a_port, a_timeoutMs)
     
     ' raise the connection changed event.
     
@@ -126,14 +126,14 @@ Public Function CloseConnection() As Boolean
 End Function
 
 ''' <summary>   Initializes the k2700 legacy mode. </summary>
-''' <param name="host">        An IPv4 dotted-decimal host address. </param>
-''' <param name="port">        The port that the server is listening on. </param>
-''' <param name="timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
+''' <param name="a_port">        [Long] The port that the server is listening on. </param>
+''' <param name="a_timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
 ''' <returns>   True if the device was initialized. </returns>
-Public Function InitializeLegacy(ByVal host As String, ByVal port As Long, _
-        Optional ByVal timeoutMs As Long = 500) As Boolean
+Public Function InitializeLegacy(ByVal a_host As String, ByVal a_port As Long, _
+        Optional ByVal a_timeoutMs As Long = 500) As Boolean
 
-    Me.OpenConnection host, port, timeoutMs
+    Me.OpenConnection a_host, a_port, a_timeoutMs
 
     ' reset clear the device.
     If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
@@ -151,7 +151,7 @@ Public Function InitializeLegacy(ByVal host As String, ByVal port As Long, _
     ' turn on continuous resistance auto range
     Me.ContinuousResistanceAutoRange
     
-    Initialize = True
+    InitializeLegacy = True
     
 End Function
 
@@ -225,12 +225,12 @@ Public Property Get Card1() As String
 End Property
 
 ''' <summary>   Sets the top card. </summary>
-''' <param name="value">   The name of the top card. </param>
+''' <param name="a_value">   [String] The name of the top card. </param>
 ''' <value> A String. </value>
-Public Property Let Card1(ByVal value As String)
-    m_card1 = value
-    m_hasMux20A = 0 < InStr(1, Mux20Cards, value, vbTextCompare)
-    m_hasMux40A = 0 < InStr(1, Mux40Cards, value, vbTextCompare)
+Public Property Let Card1(ByVal a_value As String)
+    m_card1 = a_value
+    m_hasMux20A = 0 < InStr(1, Mux20Cards, a_value, vbTextCompare)
+    m_hasMux40A = 0 < InStr(1, Mux40Cards, a_value, vbTextCompare)
 End Property
 
 ''' <summary>   Gets the top card scan list. </summary>
@@ -250,12 +250,12 @@ Public Property Get Card2() As String
 End Property
 
 ''' <summary>   Sets the bottom card. </summary>
-''' <param name="value">   The name of the bottom card. </param>
+''' <param name="a_value">   [String] The name of the bottom card. </param>
 ''' <value> A String. </value>
-Public Property Let Card2(ByVal value As String)
-    m_card2 = value
-    m_hasMux40B = 0 < InStr(1, Mux40Cards, value, vbTextCompare)
-    m_hasMux20B = 0 < InStr(1, Mux20Cards, value, vbTextCompare)
+Public Property Let Card2(ByVal a_value As String)
+    m_card2 = a_value
+    m_hasMux40B = 0 < InStr(1, Mux40Cards, a_value, vbTextCompare)
+    m_hasMux20B = 0 < InStr(1, Mux20Cards, a_value, vbTextCompare)
 End Property
 
 ''' <summary>   Gets the bottom card scan list. </summary>
@@ -304,14 +304,14 @@ End Property
 
 
 ''' <summary>   Returns the channel list. </summary>
-''' <param name="resistanceNumber">   The resistance number. </param>
+''' <param name="a_resistanceNumber">   [Integer] The resistance number. </param>
 ''' <returns>  The channel list to close. </returns>
-Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
+Public Function BuildChannelList(ByVal a_resistanceNumber As Integer) As String
 
     Dim p_routeCommand As String
     
     ' Check if we need to close the bottom or top channel.
-    If ResistanceNumber <= 20 Then
+    If a_resistanceNumber <= 20 Then
     
         If Me.HasMux40A Then
           
@@ -323,7 +323,7 @@ Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
         
         End If
     
-    ElseIf ResistanceNumber <= 40 Then
+    ElseIf a_resistanceNumber <= 40 Then
       
         If Me.HasMux40A Then
         
@@ -337,7 +337,7 @@ Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
         
         End If
       
-    ElseIf ResistanceNumber > 40 Then
+    ElseIf a_resistanceNumber > 40 Then
     
         If Me.HasMux40B Then
             p_routeCommand = ":ROUT:MULT:CLOS (@244,245)"
@@ -351,45 +351,45 @@ Public Function BuildChannelList(ByVal ResistanceNumber As Integer) As String
 End Function
 
 ''' <summary>   Returns the scan list for a specific resistance. </summary>
-''' <param name="resistanceNo">   The resistance number. </param>
+''' <param name="a_resistanceNo">   [Integer] The resistance number. </param>
 ''' <returns>  The scan list. </returns>
-Public Function BuildScanList(ByVal resistanceNo As Integer) As String
+Public Function BuildScanList(ByVal a_resistanceNo As Integer) As String
 
     Dim p_scanList As String
     Dim p_resistaceChannel As String
     
     ' Check if we need to close the bottom or top channel.
-    If resistanceNo <= 20 Then
+    If a_resistanceNo <= 20 Then
     
         ' Get channel string
         If Me.HasMux40A Or Me.HasMux20A Then
         
-            p_resistaceChannel = "1" & Right$("0" & Format$(resistanceNo), 2)
+            p_resistaceChannel = "1" & Right$("0" & Format$(a_resistanceNo), 2)
             p_scanList = "(@" & p_resistaceChannel & ")"
         
         End If
       
-    ElseIf resistanceNo <= 40 Then
+    ElseIf a_resistanceNo <= 40 Then
       
         If Me.HasMux40A Then
         
             ' Get channel string
-            p_resistaceChannel = "1" & Right$("0" & Format$(resistanceNo), 2)
+            p_resistaceChannel = "1" & Right$("0" & Format$(a_resistanceNo), 2)
             p_scanList = "(@" & p_resistaceChannel & ")"
         
         ElseIf Me.HasMux20B Then
           
             ' Get channel string
-            p_resistaceChannel = "2" & Right$("0" & Format$(resistanceNo - 20), 2)
+            p_resistaceChannel = "2" & Right$("0" & Format$(a_resistanceNo - 20), 2)
             
             p_scanList = "(@" & p_resistaceChannel & ")"
         
         End If
       
-    ElseIf resistanceNo > 40 Then
+    ElseIf a_resistanceNo > 40 Then
     
         ' Get channel string
-        p_resistaceChannel = "2" & Right$("0" & Format$(resistanceNo - 40), 2)
+        p_resistaceChannel = "2" & Right$("0" & Format$(a_resistanceNo - 40), 2)
         
         If Me.HasMux40B Then
             p_scanList = "(@" & p_resistaceChannel & ")"
@@ -424,7 +424,9 @@ Public Function ConfigureSingleResistanceReading()
 End Function
 
 ''' <summary>   Performs a single read from the front panel. </summary>
-Public Function ReadFrontResistance(Optional resistanceNo As Integer = 0) As Double
+''' <param name="a_resistanceNo">   [Integer] The resistance number. </param>
+''' <returns>   [Double] the measured resistance. </returns>
+Public Function ReadFrontResistance(Optional a_resistanceNo As Integer = 0) As Double
 
     Me.Session.WriteLine ":INIT"
     Me.Session.WriteLine ":READ?"
@@ -434,7 +436,7 @@ Public Function ReadFrontResistance(Optional resistanceNo As Integer = 0) As Dou
     ' convert the measured resistance to double
     Dim p_value As Double: p_value = CDbl(p_reading)
     
-    OnResistanceNumberMeasured resistanceNo, p_value
+    OnResistanceNumberMeasured a_resistanceNo, p_value
 
     ReadFrontResistance = p_value
 
@@ -444,10 +446,10 @@ End Function
 ''' <remarks>
 ''' Use this method to get a single value from the instrument using the back panel switches
 ''' </remarks>
-''' <param name="resistanceNo">   The resistance number. </param>
+''' <param name="a_resistanceNo">   The resistance number. </param>
 ''' <returns>    The measured resistance of -1 if the resistance number is out
 ''' of range for this device. </returns>
-Public Function ReadRearResistance(ByVal resistanceNo As Integer) As Double
+Public Function ReadRearResistance(ByVal a_resistanceNo As Integer) As Double
 
     ' get the channels to close
     Dim p_resistanceScanList As String: p_resistanceScanList = Me.BuildScanList(resistanceNo)
@@ -464,7 +466,7 @@ Public Function ReadRearResistance(ByVal resistanceNo As Integer) As Double
         ' convert the measured resistance to double
         Dim p_value As Double: p_value = CDbl(p_reading)
         
-        OnResistanceNumberMeasured resistanceNo, p_value
+        OnResistanceNumberMeasured a_resistanceNo, p_value
     
         ReadRearResistance = p_value
     
@@ -513,14 +515,15 @@ End Sub
 
 ''' <summary>   Monitors an external trigger reading resistances from the front panel. </summary>
 ''' <remarks>   Call this method from a timer event. </remarks>
-''' <param name="resistanceNo">   The resistance number. </param>
-Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As Boolean)
+''' <param name="a_resistanceNo">   [Integer] The resistance number. </param>
+''' <param name="a_isDone">   [Boolean] True if done. </param>
+Public Sub MonitorExternalTrigger(ByVal a_resistanceNo As Integer, ByVal a_isDone As Boolean)
 
     ' allow other events to occur
     DoEvents
     
     ' check if the option button is on
-    If isDone Then
+    If a_isDone Then
     
         ' if we are done,
         
@@ -570,7 +573,7 @@ Public Sub MonitorExternalTrigger(ByVal resistanceNo As Integer, ByVal isDone As
                 Dim p_resistance As Double: p_resistance = CDbl(Me.Session.Read)
     
                 ' raise the resistance measured event.
-                OnResistanceNumberMeasured resistanceNo, p_resistance
+                OnResistanceNumberMeasured a_resistanceNo, p_resistance
               
             End If
         
@@ -611,11 +614,11 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Raises the <see cref="ResistanceNumberMeasured"/> event. </summary>
-''' <para name="resistanceNo">      [integer] The resistance number. </param>
-''' <para name="resistanceValue">   [double] The resistance. </param>
-Private Sub OnResistanceNumberMeasured(ByVal resistanceNo As Integer, ByVal resistanceValue As Double)
+''' <para name="a_resistanceNo">   [integer] The resistance number. </param>
+''' <para name="a_resistance">     [double] The resistance. </param>
+Private Sub OnResistanceNumberMeasured(ByVal a_resistanceNo As Integer, ByVal a_resistance As Double)
     RaiseEvent ResistanceNumberMeasured( _
-            cc_isr_VI.Constructor.CreateResistanceNumberEventArgs(resistanceNo, resistanceValue))
+            cc_isr_VI.Constructor.CreateResistanceNumberEventArgs(a_resistanceNo, a_resistance))
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -625,10 +628,10 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
-''' <para name="isConnected">   [Boolean] The connection state. </param>
-Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
+''' <para name="a_isConnected">   [Boolean] The connection state. </param>
+Private Sub OnConnectionChanged(ByVal a_isConnected As Boolean)
 
-    If isConnected Then
+    If a_isConnected Then
     
         Set m_scpiSystem = New ScpiSystem
         m_scpiSystem.Initialize Me.Session
@@ -640,7 +643,7 @@ Private Sub OnConnectionChanged(ByVal isConnected As Boolean)
     End If
 
     RaiseEvent ConnectionChanged( _
-            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(isConnected))
+            cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs(a_isConnected))
 End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -650,14 +653,14 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanged"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Private Sub m_ieee488Session_ConnectionChanged(ByVal eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+Private Sub m_ieee488Session_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanging"/> event. </summary>
-''' <param name="eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
-Private Sub m_ieee488Session_ConnectionChanging(ByVal eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
+''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+Private Sub m_ieee488Session_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
 
 End Sub
 
