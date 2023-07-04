@@ -87,7 +87,9 @@ Commands issued after an error will be sent to the instrument after clearing the
 Follow this procedure to exercise the IEEE 488.2 command:
 
 * Connect the instrument as described above;
-* Click the ___RST___ and then the ___CLS___ button to reset the instrument to its know state clearing any existing errors;
+* Click the ___RST___ to reset the instrument to its known state. Notice that the reset takes over a second. 
+	* Some query commands take a bit longer to execute. The extended time is handled by awaiting for the result for a timeout specified by the session timeout interval, which is different from the socket receive timeout and the GPIB-Lan timeout. 
+* Click the ___CLS___ button to clear the instrument to its know state clearing any existing errors;
 * Select a command from the ___Command___ drop down list;
 	* If a query command, ending with a _?_ is selected, click ___Write___ and then ___Read___ or ___Query___, otherwise click _Read_.
 * For example, select the _*IDN?_ command and click ___Query___. The instrument identity should display under the _Received_ heading. 

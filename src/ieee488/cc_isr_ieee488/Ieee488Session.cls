@@ -95,38 +95,126 @@ End Function
 '''                                          check for errors before reading, which
 '''                                          requires <see cref="UsingGpibLan"/> or VXI support. </param>
 ''' <param name="a_maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
-''' <param name="a_trimEnd">                 [Optional, Boolean True] True to return the string without
+''' <param name="a_trimEnd">                 [Optional, Boolean, True] True to return the string without
 '''                                          the termination. </param>
 ''' <returns>   [String] The received message. </returns>
 Public Function Read(Optional ByVal a_queryStatusBeforeRead As Boolean = True, _
         Optional ByVal a_maxLength As Long = &H7FFF, _
         Optional ByVal a_trimEnd As Boolean = True) As String
     
+    Dim p_statusByte As Integer
+    
     If Me.ViSession.UsingGpibLan And a_queryStatusBeforeRead Then
         
         ' check if we have data to read.
     
         ' read the status byte and check for errors.
-        Dim p_statusByte As Integer: p_statusByte = Me.ViSession.GpibLan.SerialPoll()
+        If Me.ViSession.SessionReadTimeout > 0 Then
+            p_statusByte = Me.AwaitMessageAvailable(Me.ViSession.SessionReadTimeout, _
+                                                    ServiceRequests.MessageAvailable)
+        Else
+            p_statusByte = Me.ViSession.GpibLan.SerialPoll()
+        End If
+        
+    End If
+    
+    If Me.ViSession.SessionReadTimeout > 0 Then
+        Read = AwaitReading(Me.ViSession.SessionReadTimeout)
+    Else
+        On Error Resume Next
+        Read = Me.ViSession.Read(a_maxLength, a_trimEnd)
+        On Error GoTo 0
+    End If
+        
+    ' report an error on failure to read.
+    If 0 = Len(Read) Then
     
         ' check if message available.
         If 0 = (p_statusByte And ServiceRequests.MessageAvailable) Then
         
-            ' raise the write error adding some information
-            Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
-                      UserDefinedErrors.InvalidOperationError.Description & _
+            ' raise the read error adding some information
+            Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
+                      UserDefinedErrors.TimeoutError.Description & _
                       " SRQ=0x" & Hex(p_statusByte) & _
                       ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
-                      ") trying reading the instrument at " & Me.ViSession.SocketAddress & "."
+                      ") reading the instrument at " & Me.ViSession.SocketAddress & _
+                      " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
+                      
+        Else
+        
+            ' raise the read error adding some information
+            Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
+                      UserDefinedErrors.TimeoutError.Description & _
+                      " SRQ=0x" & Hex(p_statusByte) & _
+                      ". Data not received after message available (0x" & Hex(ServiceRequests.MessageAvailable) & _
+                      ") reading the instrument at " & Me.ViSession.SocketAddress & _
+                      " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
         
         End If
-    
+   
     End If
+
+End Function
+
+''' <summary>   Wait for the specified masked bits on the status byte or timeout. </summary>
+''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
+''' <param name="a_bitMask">    [Integer] the bitmask to match for determining the message
+'''                             availabel status. </param>
+''' <returns>   [Integer] The service request status. </returns>
+Public Function AwaitMessageAvailable(ByVal a_timeout As Integer, _
+        Optional ByVal a_bitMask As Integer = ServiceRequests.MessageAvailable) As Integer
+
+    Dim p_statusByte As Integer
     
-    Read = Me.ViSession.Read(a_maxLength, a_trimEnd)
+    ' wait for data to read or timeout
+    Dim p_stopper As cc_isr_Core.StopWatch
+    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+    p_stopper.Restart
+    
+    Do Until (a_bitMask = (p_statusByte And a_bitMask)) Or _
+             (p_stopper.ElapsedMilliseconds > a_timeout)
+    
+        DoEvents
+        
+        ' read the status byte and check for errors.
+        p_statusByte = Me.ViSession.GpibLan.SerialPoll()
+        
+    Loop
+        
+    AwaitMessageAvailable = p_statusByte
 
 End Function
     
+''' <summary>   Wait for a reading or timeout. </summary>
+''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
+''' <returns>   [String] The reading. </returns>
+Public Function AwaitReading(ByVal a_timeout As Integer) As String
+
+    On Error Resume Next
+    
+    Dim p_reading As String
+    Dim p_stopper As cc_isr_Core.StopWatch
+    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+    p_stopper.Restart
+    
+    ' wait for data or timeout
+    Do Until (Len(p_reading) > 0) Or _
+             (p_stopper.ElapsedMilliseconds > a_timeout)
+    
+        DoEvents
+        
+        ' take a reading
+        p_reading = Me.ViSession.Read()
+        
+    Loop
+        
+    AwaitReading = p_reading
+
+    On Error GoTo 0
+    
+End Function
+  
+   
 ''' <summary>   Sends a message and receives a reply. </summary>
 ''' <param name="a_message">                 [String] The message to send to the instrument. </param>
 ''' <param name="a_queryStatusAfterWrite">   [Option, Boolean, True] True to read the status byte and
@@ -140,6 +228,8 @@ End Function
 ''' <param name="a_maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
 ''' <param name="a_trimEnd">                 [Optional, Boolean True] True to return the string without
 '''                                          the termination. </param>
+''' <param name="a_timeout">                 [Optional, Integer, 0] positive value indicates
+'''                                          the timeout to wait for a reading and message available status. </param>
 ''' <returns>   [String] The received message. </returns>
 Public Function QueryLine(ByVal a_message As String, _
         Optional ByVal a_queryStatusAfterWrite As Boolean = True, _
@@ -171,7 +261,7 @@ Public Sub ClearExecutionState(Optional ByVal a_awaitOpc As Boolean = True)
     Dim p_command As String: p_command = Ieee488Syntax.ClearExecutionStateCommand
     If a_awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
-        Me.QueryLine p_command, False, False
+        Me.QueryLine p_command, False, True
     Else
         Me.WriteLine p_command, False
     End If
@@ -257,7 +347,7 @@ Public Sub Wait(Optional ByVal a_awaitOpc As Boolean = True)
     Dim p_command As String: p_command = Ieee488Syntax.WaitCommand
     If a_awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
-        Me.QueryLine p_command, False, False
+        Me.QueryLine p_command, False, True
     Else
         Me.WriteLine p_command
     End If
@@ -276,7 +366,7 @@ Public Sub EnableStandardEvents(ByVal a_bitMask As Integer, _
     p_command = StringExtensions.StringFormat(Ieee488Syntax.StandardEventEnableCommand, a_bitMask)
     If a_awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
-        Me.QueryLine p_command, False, False
+        Me.QueryLine p_command, False, True
     Else
         Me.WriteLine p_command
     End If
@@ -316,7 +406,7 @@ Public Sub EnableServiceRequest(ByVal a_bitMask As Integer, _
     p_command = StringExtensions.StringFormat(Ieee488Syntax.ServiceRequestEnableCommand, a_bitMask)
     If a_awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
-        Me.QueryLine p_command, False, False
+        Me.QueryLine p_command, False, True
     Else
         Me.WriteLine p_command
     End If
@@ -344,14 +434,14 @@ Public Function QueryServiceRequestStatus() As Integer
 End Function
 
 ''' <summary>   Reset to known state (*RST) command. </summary>
-''' <param name="awaitOpc">   [Optional, Boolean, True] True to wait for operation completion
-'''                           after issuing the <c>*SRE</c> command by querying <c>*SRE; *OPC?</c></param>
+''' <param name="awaitOpc">    [Optional, Boolean, True] True to wait for operation completion
+'''                            after issuing the <c>*SRE</c> command by querying <c>*SRE; *OPC?</c></param>
 Public Sub ResetKnownState(Optional ByVal a_awaitOpc As Boolean = True)
     
     Dim p_command As String: p_command = Ieee488Syntax.ResetKnownStateCommand
     If a_awaitOpc Then
         p_command = p_command & ";" & Ieee488Syntax.OperationCompletedQueryCommand
-        Me.QueryLine p_command, False, False
+        Me.QueryLine p_command, False, True
     Else
         Me.WriteLine p_command, False
     End If
@@ -420,10 +510,12 @@ End Sub
 ''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
 Private Sub IConnectable_Dispose()
 
-    If Me.Connectable.Connected Then
-        Me.Connectable.CloseConnection
+    If Not Me.Connectable Is Nothing Then
+        If Me.Connectable.Connected Then
+            Me.Connectable.CloseConnection
+        End If
     End If
-    
+
     If Not Me.Connectable Is Nothing Then
         Me.Connectable.Dispose
     End If

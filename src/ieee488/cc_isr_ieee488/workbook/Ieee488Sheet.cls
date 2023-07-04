@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-Private Const m_receiveTimeoutCell As String = "B1"
+Private Const m_sessionReadTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
 Private Const m_socketAddressCell As String = "C2"
@@ -27,7 +27,7 @@ Private Const m_statusByteCell As String = "G12"
 Private Const m_StandardByteCell As String = "I12"
 Private Const m_srqCell As String = "C10"
 Private Const m_gpibAddressCell As String = "C12"
-Private Const m_readTimeoutCell As String = "C15"
+Private Const m_gpibLanReadTimeoutCell  As String = "C15"
 Private Const m_readAfterWriteEnabledCell As String = "C18"
 
 Private WithEvents m_session As cc_isr_Ieee488.Ieee488Session
@@ -97,6 +97,7 @@ Public Sub Initialize(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEvent
     Me.QueryButton.Enabled = p_connected
     Me.ReadButton.Enabled = p_connected
     Me.ReadStatusByteButton.Enabled = p_connected
+    Me.ReadStandardEventStatusButton.Enabled = p_connected
     Me.WriteButton.Enabled = p_connected
     
     If p_connected Then
@@ -311,7 +312,7 @@ Friend Sub ConnectToggleButton_Click()
 
     Dim p_host As String: p_host = Me.host
     Dim p_port As Long: p_port = Me.port
-    Dim p_timeout As Long: p_timeout = Me.ReceiveTimeout
+    Dim p_sessionReadTimeout As Long: p_sessionReadTimeout = Me.SessionReadTimeout
     
     If Not ConnectToggleButton.value And Me.Session.Connected Then
         
@@ -319,7 +320,11 @@ Friend Sub ConnectToggleButton_Click()
         
     ElseIf ConnectToggleButton.value And Not Me.Session.Connected Then
     
-        Me.Session.OpenConnection p_host, p_port, p_timeout
+        ' the socket read timeout default is used here.
+        
+        Me.Session.OpenConnection p_host, p_port
+        
+        Me.Session.ViSession.SessionReadTimeout = p_sessionReadTimeout
     
     End If
     
@@ -668,10 +673,21 @@ Friend Property Get port() As Integer
     port = CInt(Range(m_inputPortCell).value)
 End Property
 
-''' <summary>   Get the receive timeout. </summary>
-Friend Property Get ReceiveTimeout() As Integer
-    ReceiveTimeout = CInt(Range(m_receiveTimeoutCell).value)
+''' <summary>   Get the session read timeout. </summary>
+Friend Property Get SessionReadTimeout() As Integer
+    SessionReadTimeout = CInt(Range(m_sessionReadTimeoutCell).value)
 End Property
+
+''' <summary>   Get the GPIB-Lan Read timeout. </summary>
+Friend Property Get GpibLanReadTimeout() As Integer
+    GpibLanReadTimeout = CInt(Range(m_gpibLanReadTimeoutCell).value)
+End Property
+
+''' <summary>   Set the GPIB-Lan Read timeout. </summary>
+Friend Property Let GpibLanReadTimeout(ByVal a_value As Integer)
+    Range(m_gpibLanReadTimeoutCell).value = a_value
+End Property
+
 
 ''' <summary>   Gets the received message. </summary>
 Friend Property Get ReceivedMessage() As String
@@ -1050,7 +1066,7 @@ Private Sub ReadTimeoutGetButton_Click()
     
     Me.RestartStopWatch
     
-    Range(m_readTimeoutCell).value = Me.Session.ViSession.GpibLan.ReadTimeoutGetter
+    Range(m_gpibLanReadTimeoutCell).value = Me.Session.ViSession.GpibLan.ReadTimeoutGetter
 
     Me.ReadStopWatch
     
@@ -1085,7 +1101,7 @@ Private Sub ReadTimeoutSetButton_Click()
     
     Me.RestartStopWatch
     
-    Me.Session.ViSession.GpibLan.ReadTimeoutSetter (CInt(Range(m_readTimeoutCell).value))
+    Me.Session.ViSession.GpibLan.ReadTimeoutSetter (CInt(Range(m_gpibLanReadTimeoutCell).value))
     
     Me.ReadStopWatch
     

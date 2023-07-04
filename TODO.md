@@ -1,9 +1,11 @@
 ### TODO
 
 #### Tests
-* ieee488: test the IEEE test sheet.
+* ieee488: finish testing the IEEE test sheet.
 
 #### Fixes
+* core: add timeout user defined error.
+* use timeout error on socket not getting data. also on ieee session read error,
 * vI: handle error on toggle connection. 
 	* implement connectable
 

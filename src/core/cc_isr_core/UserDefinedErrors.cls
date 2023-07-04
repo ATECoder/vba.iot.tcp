@@ -39,6 +39,8 @@ Private m_invalidArgumentError As UserDefinedError
 
 Private m_invalidOperationError As UserDefinedError
 
+Private m_timeoutError As UserDefinedError
+
 
 ''' <summary>   Initializes the user defined errors. </summary>
 Private Sub Class_Initialize()
@@ -132,6 +134,13 @@ Private Sub Class_Initialize()
     m_invalidOperationError.InitiateProperties p_errorCode, "InvalidOperationError", _
         "Invalid operation error."
     AddUserDefinedError Me.InvalidOperationError
+    
+    p_errorCode = p_errorCode + 1
+    Set m_timeoutError = New UserDefinedError
+    m_timeoutError.InitiateProperties p_errorCode, "TimeoutError", _
+        "Timeout error."
+    AddUserDefinedError Me.TimeoutError
+
 
 End Sub
 
@@ -295,6 +304,14 @@ End Property
 Public Property Get InvalidOperationError() As UserDefinedError
     
     Set InvalidOperationError = m_invalidOperationError
+
+End Property
+
+''' <summary>   Get the error that occurred when the method operation times out. </summary>
+''' <value>   <see cref="UserDefinedError"/>. </value>
+Public Property Get TimeoutError() As UserDefinedError
+    
+    Set TimeoutError = m_timeoutError
 
 End Property
 

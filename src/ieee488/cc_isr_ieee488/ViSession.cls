@@ -13,7 +13,11 @@ Implements cc_isr_Winsock.IConnectable
 
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
 
-Private Const READ_AFTER_WRITE_DELAY_DEFAULT = 5
+Private Const READ_AFTER_WRITE_DELAY_DEFAULT As Integer = 5
+
+Private Const SESSION_READ_TIMEOUT_DEFAULT As Integer = 3000
+
+Private Const SOCKET_RECEIVE_TIMEOUT_DEFAULT As Integer = 500
 
 Private m_gpibLan As GpibLanController
 
@@ -21,7 +25,9 @@ Private m_readAfterWriteDelay As Integer
 
 Private m_readTermination As String
 
-Private m_receiveTimeout As Long
+Private m_socketReceiveTimeout As Long
+
+Private m_sessionReadTimeout As Long
 
 Private m_readAfterWriteEnabled As Boolean
 
@@ -47,7 +53,8 @@ Private Sub Class_Initialize()
     Set m_tcpClient = cc_isr_Winsock.Constructor.CreateTcpClient
     m_readTermination = vbLf
     m_writeTermination = vbLf
-    m_receiveTimeout = 500
+    m_socketReceiveTimeout = SOCKET_RECEIVE_TIMEOUT_DEFAULT
+    m_sessionReadTimeout = SESSION_READ_TIMEOUT_DEFAULT
     Me.ReadAfterWriteDelay = READ_AFTER_WRITE_DELAY_DEFAULT
     
     Set m_gpibLan = New GpibLanController
@@ -121,30 +128,41 @@ End Property
 
 ''' <summary>   Gets the Read After Write Delay. </summary>
 ''' <value>   An Integer. </value>
-Friend Property Get ReadAfterWriteDelay() As Integer
+Public Property Get ReadAfterWriteDelay() As Integer
     ReadAfterWriteDelay = m_readAfterWriteDelay
 End Property
 
 ''' <summary>   Sets the Read After Write Delay. </summary>
-Friend Property Let ReadAfterWriteDelay(ByVal a_value As Integer)
+Public Property Let ReadAfterWriteDelay(ByVal a_value As Integer)
     m_readAfterWriteDelay = a_value
 End Property
 
-''' <summary>   Gets the receive timeout in Milliseconds. </summary>
+''' <summary>   Gets the Session Read Timeout. </summary>
+''' <value>   An Integer. </value>
+Public Property Get SessionReadTimeout() As Integer
+    SessionReadTimeout = m_sessionReadTimeout
+End Property
+
+''' <summary>   Sets the Session Read Timeout. </summary>
+Public Property Let SessionReadTimeout(ByVal a_value As Integer)
+    m_sessionReadTimeout = a_value
+End Property
+
+''' <summary>   Gets the socket receive timeout in Milliseconds. </summary>
 ''' <value>   A Long. </value>
-Public Property Get ReceiveTimeout() As Long
-    ReceiveTimeout = m_receiveTimeout
+Public Property Get SocketReceiveTimeout() As Long
+    SocketReceiveTimeout = m_socketReceiveTimeout
 End Property
 
 ''' <summary>   Sets the socket receive timeout. </summary>
-''' <param name="timeoutMs">   The timeout interval in milliseconds. </param>
-Public Sub SetReceiveTimeout(ByVal a_timeoutMs As Long)
+''' <param name="a_timeoutMs">   The timeout interval in milliseconds. </param>
+Public Sub SetSocketReceiveTimeout(ByVal a_timeoutMs As Long)
     If Me.Connected Then
         If a_timeoutMs <> m_tcpClient.TcpClientSocket.ReceiveTimeout Then
             m_tcpClient.TcpClientSocket.SetReceiveTimeout a_timeoutMs
         End If
     End If
-    m_receiveTimeout = a_timeoutMs
+    m_socketReceiveTimeout = a_timeoutMs
     
 End Sub
 
@@ -335,6 +353,10 @@ Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_por
         m_gpibLan.Enabled = Me.UsingGpibLan
         
         Connectable.OpenConnection a_host, a_port, a_timeoutMs
+        
+        ' update teh socket receive timeout.
+        
+        m_socketReceiveTimeout = a_timeoutMs
         
         OnConnectionChanged Connectable.Connected
         
