@@ -504,6 +504,35 @@ Public Function ServiceRequested() As Boolean
     
 End Function
 
+''' <summary>   Wait for the specified masked bits on the status byte or timeout. </summary>
+''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
+''' <param name="a_bitMask">    [Integer] the bitmask to match for terminating the wait. </param>
+''' <returns>   [Integer] The last status byte read before ending the wait. </returns>
+Public Function AwaitStatus(ByVal a_timeout As Integer, _
+        ByVal a_bitMask As Integer) As Integer
+
+    Dim p_statusByte As Integer
+    
+    ' wait for data to read or timeout
+    Dim p_stopper As cc_isr_Core.StopWatch
+    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+    p_stopper.Restart
+    
+    Do Until (a_bitMask = (p_statusByte And a_bitMask)) Or _
+             (p_stopper.ElapsedMilliseconds > a_timeout)
+    
+        DoEvents
+        
+        ' read the status byte and check for errors.
+        p_statusByte = Me.SerialPoll()
+        
+    Loop
+        
+    AwaitStatus = p_statusByte
+
+End Function
+    
+
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '

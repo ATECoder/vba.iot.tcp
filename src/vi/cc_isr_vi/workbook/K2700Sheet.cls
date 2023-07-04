@@ -9,7 +9,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-Private Const m_receiveTimeoutCell As String = "B1"
+Private Const m_sessionReadTimeoutCell As String = "B1"
 Private Const m_inputHostCell As String = "B2"
 Private Const m_inputPortCell As String = "B3"
 Private Const m_socketAddressCell As String = "C2"
@@ -97,6 +97,12 @@ End Property
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
     Set m_stopWatch = Nothing
+    
+    If Not m_eventTimer Is Nothing Then
+      m_eventTimer.StopTimer
+      Set m_eventTimer = Nothing
+    End If
+    
     If Not m_k2700 Is Nothing Then m_k2700.Dispose
     Set m_k2700 = Nothing
 End Sub
@@ -329,7 +335,7 @@ Friend Sub ConnectToggleButton_Click()
 
     Dim p_host As String: p_host = Me.host
     Dim p_port As Integer: p_port = Me.port
-    Dim p_timeout As Integer: p_timeout = Me.ReceiveTimeout
+    Dim p_sessionReadTimeout As Integer: p_sessionReadTimeout = Me.SessionReadTimeout
       
     If Not ConnectToggleButton.value And Me.K2700.Connected Then
         
@@ -337,7 +343,9 @@ Friend Sub ConnectToggleButton_Click()
         
     ElseIf ConnectToggleButton.value And Not Me.K2700.Connected Then
     
-        Me.K2700.OpenConnection p_host, p_port, p_timeout
+        Me.K2700.OpenConnection p_host, p_port
+        
+        Me.K2700.Session.VISession.SessionReadTimeout = p_sessionReadTimeout
         
     End If
     
@@ -699,8 +707,8 @@ Friend Property Get port() As Integer
 End Property
 
 ''' <summary>   Get the receive timeout. </summary>
-Friend Property Get ReceiveTimeout() As Integer
-    ReceiveTimeout = CInt(Range(m_receiveTimeoutCell).value)
+Friend Property Get SessionReadTimeout() As Integer
+    SessionReadTimeout = CInt(Range(m_sessionReadTimeoutCell).value)
 End Property
 
 ''' <summary>   Gets the received message. </summary>

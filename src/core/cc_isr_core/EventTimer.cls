@@ -65,6 +65,12 @@ Attribute m_remoteWorkbook.VB_VarHelpID = -1
 
 Private m_callback As IRunnable
 
+' true when the workbook begines closing
+Private m_workbookClosing As Boolean
+
+' the timer interval in milliseconds.
+Private m_interval As Integer
+
 'Create an instance of the timer
 '@param {Long} Number of milliseconds to raise Tick Event between
 '@param {ICallable=Nothing} <see cref="IRunnable"/> Callback object. Must contain a Run() method.
@@ -79,6 +85,8 @@ End Function
 '@param {IRunnable} Optional Listener
 Public Sub ProtInit(ByVal a_interval As Long, a_callback As IRunnable)
     
+    m_interval = a_interval
+    
     Set m_callback = a_callback
     If Not GetVBOM Then Call SetVBOM(True)
     Set m_remoteWorkbook = CreateRemoteWorkbook()
@@ -87,7 +95,6 @@ Public Sub ProtInit(ByVal a_interval As Long, a_callback As IRunnable)
     ' inject the timer code into the timer module.
     
     Call InjectCode(m_remoteWorkbook, TIMER_MODULE, GetTimerCode(a_interval))
-    ' Call m_remoteWorkbook.Application.Run("TimerMain.StartTimer")
 
 End Sub
 
@@ -200,10 +207,39 @@ Private Function GetTimerCode(ByVal a_interval As Long) As String
 
 End Function
 
-'On terminate, stop timer. This will cause workbook to close
+''' <summary>   Handles the termination of this class. </summary>
+''' <remarks>   On terminate, stop timer. This will cause workbook to close. </remarks>
 Private Sub Class_Terminate()
-  Call m_remoteWorkbook.Application.Run(TIMER_STOP_CALL)
-  Set m_remoteWorkbook = Nothing
+
+    ' 20230704: this worked well.
+    
+    m_workbookClosing = False
+
+    If Not m_remoteWorkbook Is Nothing Then
+        
+        ' this should also close the workbook
+        
+        Call m_remoteWorkbook.Application.Run(TIMER_STOP_CALL)
+        
+        ' wait for the timer interval to close.
+        Dim stopper As New StopWatch
+        Do Until stopper.ElapsedMilliseconds > m_interval Or m_workbookClosing
+            DoEvents
+        Loop
+        
+        If Not m_workbookClosing Then
+          m_remoteWorkbook.Close False
+        End If
+        
+    End If
+    
+    ' terminating the workbook does not see to close excel.
+    Set m_remoteWorkbook = Nothing
+    
+End Sub
+
+Private Sub m_remoteWorkbook_BeforeClose(Cancel As Boolean)
+    m_workbookClosing = True
 End Sub
 
 ''' <summary>   Handles the workbook sheet change event, which raises the <see cref="Tick"/>
@@ -218,7 +254,8 @@ Public Sub StartTimer()
   Call m_remoteWorkbook.Application.Run(TIMER_START_CALL)
 End Sub
 
-''' <summary>   Stopes the timer. </summary>
+''' <summary>   Stops the timer. </summary>
+''' <remarks>   This also closes teh workbook. </remakrs>
 Public Sub StopTimer()
   Call m_remoteWorkbook.Application.Run(TIMER_STOP_CALL)
 End Sub

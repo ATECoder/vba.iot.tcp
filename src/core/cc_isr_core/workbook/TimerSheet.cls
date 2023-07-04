@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+Option Explicit
+
 Private WithEvents m_eventTimer As cc_isr_Core.EventTimer
 Attribute m_eventTimer.VB_VarHelpID = -1
 Private pauseRequested As Boolean
@@ -30,18 +32,22 @@ Sub PauseTimer()
 End Sub
 
 Sub AbortTimer()
-  ' we need to figure out how to recreate the timer
-  m_eventTimer.StopTimer
+
+  If Not m_eventTimer Is Nothing Then
+    m_eventTimer.StopTimer
+    Set m_eventTimer = Nothing
+  End If
+  
 End Sub
 
 Private Sub m_eventTimer_Tick()
     On Error Resume Next
     If Range("B4").value <= 0 Or pauseRequested Then
-        m_eventTimer.PauseTimer
+        If Not m_eventTimer Is Nothing Then m_eventTimer.PauseTimer
     Else
         Range("B4") = Range("B4") - TimeValue("00:00:01")
     End If
     On Error GoTo 0
 End Sub
 
-    
+

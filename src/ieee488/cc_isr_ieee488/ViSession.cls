@@ -179,7 +179,7 @@ End Property
 ''' setting the device to talk prematurely which might cause the device
 ''' (e.g., the Keithley 2700 scanning multimeter) to issue error -420 Query Unterminated. </remarks>
 ''' <param name="a_message">             [String] The message to send to the instrument. </param>
-''' <param name="a_appendTermination">   [Option, Boolean, True] True to append termination to
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append termination to
 '''                                      the message. </param>
 ''' <returns>   [Long] The number of sent characters. </returns>
 Public Function WriteLine(ByVal a_message As String, _
@@ -195,27 +195,86 @@ Public Function WriteLine(ByVal a_message As String, _
 
 End Function
 
-''' <summary>   Receives a message from the server until reaching the specified termination
-''' or reading the specified number of characters. </summary>
-''' <remarks>   If using the Prologix device at port 1234, this
-''' method first sets the Prologix to auto on (++auto 1) assuming auto was turned off on
-''' the previous read on <see cref="WriteLine"/>. </remarks>
-''' <param name="a_maxLength">     [Optional, Long, 32767] The maximum number of bytes to read. </param>
-''' <param name="a_trimEnd">       [Optional, Boolean, True] True to return the string without the termination. </param>
-''' <returns>   [String] The received string. </returns>
+''' <summary>   Receives a message from the server until reaching the specified termination,
+''' reading the specified number of characters, or <see cref="SeassionReadTimeout">timeout</see>. </summary>
+''' <param name="a_maxLength">  [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">    [Optional, Boolean, True] True to return the string without
+'''                             the termination. </param>
+''' <returns>   [String] The received message. </returns>
 Public Function Read(Optional ByVal a_maxLength As Long = &H7FFF, _
-                     Optional ByVal a_trimEnd As Boolean = True) As String
-    If Me.UsingGpibLan Then
-        Read = Me.GpibLan.ReceiveFromDevice(a_maxLength, a_trimEnd)
+        Optional ByVal a_trimEnd As Boolean = True) As String
+    
+    Dim p_reading As String
+    If Me.SessionReadTimeout > 0 Then
+        p_reading = AwaitReading(Me.SessionReadTimeout, a_maxLength, a_trimEnd)
     Else
-        Read = m_tcpClient.ReceiveRaw(a_maxLength, a_trimEnd, Me.ReadTermination)
+        On Error Resume Next
+        If Me.UsingGpibLan Then
+            p_reading = Me.GpibLan.ReceiveFromDevice(a_maxLength, a_trimEnd)
+        Else
+            p_reading = m_tcpClient.ReceiveRaw(a_maxLength, a_trimEnd, Me.ReadTermination)
+        End If
+        On Error GoTo 0
     End If
+        
+    ' report an error on failure to read.
+    If 0 = Len(p_reading) Then
+    
+        ' raise the read error adding some information
+        Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.ViSession.Read", _
+                  UserDefinedErrors.TimeoutError.Description & _
+                  ". Data not received reading the instrument at " & Me.SocketAddress & _
+                  " with a timeout of " & CStr(Me.SessionReadTimeout) & "ms."
+    
+    End If
+    
+    Read = p_reading
 
 End Function
+
+''' <summary>   Receives a message from the server until reaching the specified termination, reading the
+''' specified number of characters, or timeout. </summary>
+''' <remarks>   If using a GPIB-Lan device, such as the Prologix GPIB-Lan interface, this
+''' method first iuses the device <c>++read</c> to read the instrument. </remarks>
+''' <param name="a_timeout">     [Integer] time to wait for reply in millisecods. </param>
+''' <param name="a_maxLength">   [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">     [Optional, Boolean, True] True to return the string without the termination. </param>
+''' <returns>   [String] The reading. </returns>
+Public Function AwaitReading(ByVal a_timeout As Integer, Optional ByVal a_maxLength As Long = &H7FFF, _
+        Optional ByVal a_trimEnd As Boolean = True) As String
+
+    On Error Resume Next
     
+    Dim p_reading As String
+    Dim p_stopper As cc_isr_Core.StopWatch
+    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+    p_stopper.Restart
+    
+    ' wait for data or timeout
+    Do Until (Len(p_reading) > 0) Or _
+             (p_stopper.ElapsedMilliseconds > a_timeout)
+    
+        DoEvents
+        
+        ' take a reading
+        
+        If Me.UsingGpibLan Then
+            p_reading = Me.GpibLan.ReceiveFromDevice(a_maxLength, a_trimEnd)
+        Else
+            p_reading = m_tcpClient.ReceiveRaw(a_maxLength, a_trimEnd, Me.ReadTermination)
+        End If
+        
+    Loop
+        
+    AwaitReading = p_reading
+
+    On Error GoTo 0
+    
+End Function
+   
 ''' <summary>   Sends a message and receives a reply. </summary>
 ''' <param name="a_message">             [String] The message to send to the instrument. </param>
-''' <param name="a_appendTermination">   [Option, Boolean, True] True to append termination to
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append termination to
 '''                                      the message. </param>
 ''' <param name="a_maxLength">           [Optional, 32767] The maximum number of bytes to read. </param>
 ''' <param name="a_trimEnd">             [Optional, Boolean, True] True to return the string without the termination. </param>

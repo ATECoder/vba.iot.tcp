@@ -54,20 +54,19 @@ Public Property Get SocketId() As Long
 End Property
 
 ''' <summary>   Sends a message. </summary>
-''' <param name="a_message">                 [String] The message to send to the instrument. </param>
-''' <param name="a_queryStatusAfterWrite">   [Option, Boolean, True] True to read the status byte and
-'''                                          check for errors after sending the message, which
-'''                                          requires <see cref="UsingGpibLan"/> or VXI support. </param>
-''' <param name="a_appendTermination">       [Option, Boolean, True] True to append termination to
-'''                                          the message. </param>
+''' <param name="a_message">             [String] The message to send to the instrument. </param>
+''' <param name="a_queryEAV">            [Optional, Boolean, True] True to check the Error Available status bit
+'''                                      after sending the message if <see cref="UsingGpibLan"/> or VXI. </param>
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append termination to
+'''                                      the message. </param>
 ''' <returns>   [Long] The number of sent characters. </returns>
 Public Function WriteLine(ByVal a_message As String, _
-        Optional ByVal a_queryStatusAfterWrite As Boolean = True, _
+        Optional ByVal a_queryEAV As Boolean = True, _
         Optional ByVal a_appendTermination As Boolean = True) As Long
     
     WriteLine = Me.ViSession.WriteLine(a_message, a_appendTermination)
     
-    If Me.ViSession.UsingGpibLan And a_queryStatusAfterWrite Then
+    If Me.ViSession.UsingGpibLan And a_queryEAV Then
     
         ' read the status byte and check for errors.
         Dim p_status As Integer: p_status = Me.ViSession.GpibLan.SerialPoll()
@@ -91,40 +90,47 @@ End Function
 
 ''' <summary>   Receives a message from the server until reaching the specified termination
 ''' or reading the specified number of characters. </summary>
-''' <param name="a_queryStatusBeforeRead">   [Option, Boolean, True] True to read the status byte and
-'''                                          check for errors before reading, which
-'''                                          requires <see cref="UsingGpibLan"/> or VXI support. </param>
-''' <param name="a_maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
-''' <param name="a_trimEnd">                 [Optional, Boolean, True] True to return the string without
-'''                                          the termination. </param>
+''' <param name="a_awaitMAV">    [Optional, Boolean, True] True to wait for the Message Available
+'''                              status bit before reading if <see cref="UsingGpibLan"/> or VXI. </param>
+''' <param name="a_maxLength">   [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">     [Optional, Boolean, True] True to return the string without
+'''                              the termination. </param>
 ''' <returns>   [String] The received message. </returns>
-Public Function Read(Optional ByVal a_queryStatusBeforeRead As Boolean = True, _
+Public Function Read(Optional ByVal a_awaitMAV As Boolean = True, _
         Optional ByVal a_maxLength As Long = &H7FFF, _
         Optional ByVal a_trimEnd As Boolean = True) As String
     
     Dim p_statusByte As Integer
     
-    If Me.ViSession.UsingGpibLan And a_queryStatusBeforeRead Then
+    If Me.ViSession.UsingGpibLan And a_awaitMAV Then
         
         ' check if we have data to read.
     
-        ' read the status byte and check for errors.
         If Me.ViSession.SessionReadTimeout > 0 Then
-            p_statusByte = Me.AwaitMessageAvailable(Me.ViSession.SessionReadTimeout, _
-                                                    ServiceRequests.MessageAvailable)
+            
+            ' wait for the message available bits.
+            
+            p_statusByte = Me.ViSession.GpibLan.AwaitStatus(Me.ViSession.SessionReadTimeout, _
+                                                            ServiceRequests.MessageAvailable)
         Else
+            
+            ' if no timeout, just serial poll the status byte.
+            
             p_statusByte = Me.ViSession.GpibLan.SerialPoll()
+            
         End If
         
     End If
     
+    ' either way, try reading the instrument
+    
+    On Error Resume Next
     If Me.ViSession.SessionReadTimeout > 0 Then
-        Read = AwaitReading(Me.ViSession.SessionReadTimeout)
+        Read = Me.ViSession.AwaitReading(Me.ViSession.SessionReadTimeout, a_maxLength, a_trimEnd)
     Else
-        On Error Resume Next
         Read = Me.ViSession.Read(a_maxLength, a_trimEnd)
-        On Error GoTo 0
     End If
+    On Error GoTo 0
         
     ' report an error on failure to read.
     If 0 = Len(Read) Then
@@ -156,91 +162,30 @@ Public Function Read(Optional ByVal a_queryStatusBeforeRead As Boolean = True, _
 
 End Function
 
-''' <summary>   Wait for the specified masked bits on the status byte or timeout. </summary>
-''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
-''' <param name="a_bitMask">    [Integer] the bitmask to match for determining the message
-'''                             availabel status. </param>
-''' <returns>   [Integer] The service request status. </returns>
-Public Function AwaitMessageAvailable(ByVal a_timeout As Integer, _
-        Optional ByVal a_bitMask As Integer = ServiceRequests.MessageAvailable) As Integer
-
-    Dim p_statusByte As Integer
-    
-    ' wait for data to read or timeout
-    Dim p_stopper As cc_isr_Core.StopWatch
-    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
-    p_stopper.Restart
-    
-    Do Until (a_bitMask = (p_statusByte And a_bitMask)) Or _
-             (p_stopper.ElapsedMilliseconds > a_timeout)
-    
-        DoEvents
-        
-        ' read the status byte and check for errors.
-        p_statusByte = Me.ViSession.GpibLan.SerialPoll()
-        
-    Loop
-        
-    AwaitMessageAvailable = p_statusByte
-
-End Function
-    
-''' <summary>   Wait for a reading or timeout. </summary>
-''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
-''' <returns>   [String] The reading. </returns>
-Public Function AwaitReading(ByVal a_timeout As Integer) As String
-
-    On Error Resume Next
-    
-    Dim p_reading As String
-    Dim p_stopper As cc_isr_Core.StopWatch
-    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
-    p_stopper.Restart
-    
-    ' wait for data or timeout
-    Do Until (Len(p_reading) > 0) Or _
-             (p_stopper.ElapsedMilliseconds > a_timeout)
-    
-        DoEvents
-        
-        ' take a reading
-        p_reading = Me.ViSession.Read()
-        
-    Loop
-        
-    AwaitReading = p_reading
-
-    On Error GoTo 0
-    
-End Function
-  
-   
 ''' <summary>   Sends a message and receives a reply. </summary>
-''' <param name="a_message">                 [String] The message to send to the instrument. </param>
-''' <param name="a_queryStatusAfterWrite">   [Option, Boolean, True] True to read the status byte and
-'''                                          check for errors after sending the message, which
-'''                                          requires <see cref="UsingGpibLan"/> or VXI support. </param>
-''' <param name="a_queryStatusBeforeRead">   [Option, Boolean, True] True to read the status byte and
-'''                                          check for errors before reading, which
-'''                                          requires <see cref="UsingGpibLan"/> or VXI support. </param>
-''' <param name="a_appendTermination">       [Option, Boolean, True] True to append termination to
-'''                                          the message. </param>
-''' <param name="a_maxLength">               [Optional, Long, 32767] The maximum number of bytes to read. </param>
-''' <param name="a_trimEnd">                 [Optional, Boolean True] True to return the string without
-'''                                          the termination. </param>
-''' <param name="a_timeout">                 [Optional, Integer, 0] positive value indicates
-'''                                          the timeout to wait for a reading and message available status. </param>
+''' <param name="a_message">             [String] The message to send to the instrument. </param>
+''' <param name="a_queryEAV">            [Optional, Boolean, True] True to check the Error Available status bit
+'''                                      after sending the message if <see cref="UsingGpibLan"/> or VXI. </param>
+''' <param name="a_awaitMAV">            [Optional, Boolean, True] True to wait for the Message Available
+'''                                      status bit before reading if <see cref="UsingGpibLan"/> or VXI. </param>
+''' <param name="a_appendTermination">   [Optional, Boolean, True] True to append termination to
+'''                                      the message. </param>
+''' <param name="a_maxLength">           [Optional, Long, 32767] The maximum number of bytes to read. </param>
+''' <param name="a_trimEnd">             [Optional, Boolean True] True to return the string without
+'''                                      the termination. </param>
+''' <param name="a_timeout">             [Optional, Integer, 0] positive value indicates
+'''                                      the timeout to wait for a reading and message available status. </param>
 ''' <returns>   [String] The received message. </returns>
 Public Function QueryLine(ByVal a_message As String, _
-        Optional ByVal a_queryStatusAfterWrite As Boolean = True, _
-        Optional ByVal a_queryStatusBeforeRead As Boolean = True, _
+        Optional ByVal a_queryEAV As Boolean = True, _
+        Optional ByVal a_awaitMAV As Boolean = True, _
         Optional ByVal a_appendTermination As Boolean = True, _
         Optional ByVal a_maxLength As Long = &H7FFF, _
         Optional ByVal a_trimEnd As Boolean = True) As String
     
-    If Me.WriteLine(a_message, a_queryStatusAfterWrite, a_appendTermination) > 0 Then
+    If Me.WriteLine(a_message, a_queryEAV, a_appendTermination) > 0 Then
         DoEvents
-        QueryLine = Me.Read(a_queryStatusBeforeRead, a_maxLength, a_trimEnd)
+        QueryLine = Me.Read(a_awaitMAV, a_maxLength, a_trimEnd)
     Else
         QueryLine = vbNullString
     End If
