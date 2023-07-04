@@ -1,6 +1,7 @@
 ### TODO
 
 #### Tests
+* ieee488: test the IEEE test sheet.
 
 #### Fixes
 * vI: handle error on toggle connection. 

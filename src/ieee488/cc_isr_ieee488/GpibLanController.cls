@@ -44,7 +44,7 @@ Private Sub Class_Initialize()
     m_readTermination = vbLf
     m_writeTermination = vbLf
     m_controllerMode = True
-    m_errTracer = New ErrTracer
+    Set m_errTracer = New ErrTracer
 End Sub
 
 ''' <summary>   Handles the Class terminate event; disposes of the <see cref="TcpClient"/>. </summary>
@@ -80,7 +80,7 @@ End Sub
 Public Sub Dispose()
     
     ' because the tcp client is passed by value we can null this
-    m_tcpClient = Nothing
+    Set m_tcpClient = Nothing
 
     Set m_stopper = Nothing
 

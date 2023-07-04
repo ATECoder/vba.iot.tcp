@@ -277,8 +277,10 @@ End Sub
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Private Sub IConnectable_Dispose()
 
-    If Me.Connectable.Connected Then
-        Me.Connectable.CloseConnection
+    If Not Me.Connectable Is Nothing Then
+        If Me.Connectable.Connected Then
+            Me.Connectable.CloseConnection
+        End If
     End If
     
     ' dispose the GPIB-Lan controller only after closing the connection.
