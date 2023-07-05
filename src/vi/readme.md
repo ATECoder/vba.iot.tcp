@@ -59,6 +59,6 @@ Bug reports and contributions are welcome at the [cc.isr.vi] repository.
 [cc.isr.Ieee488]: https://github.com/ATECoder/vba.iot.tcp/src/ieee488
 [cc.isr.Winsock]: https://github.com/ATECoder/vba.iot.tcp/src/Winsock
 [cc.isr.Core]: https://github.com/ATECoder/vba.iot.tcp/src/core
-[Testing]: ./testing.md
+[Testing]: ./cc.isr.vi.testing.md
 [Prologix]: https://prologix.biz/product/gpib-ethernet-controller/
 

@@ -513,21 +513,29 @@ Public Function AwaitStatus(ByVal a_timeout As Integer, _
 
     Dim p_statusByte As Integer
     
-    ' wait for data to read or timeout
-    Dim p_stopper As cc_isr_Core.StopWatch
-    Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
-    p_stopper.Restart
+    ' read the status byte
+    p_statusByte = Me.SerialPoll()
     
-    Do Until (a_bitMask = (p_statusByte And a_bitMask)) Or _
-             (p_stopper.ElapsedMilliseconds > a_timeout)
+    If a_timeout > 0 Then
     
-        DoEvents
+        ' wait for the status byte to match the bit mask
         
-        ' read the status byte and check for errors.
-        p_statusByte = Me.SerialPoll()
+        Dim p_stopper As cc_isr_Core.StopWatch
+        Set p_stopper = cc_isr_Core.Constructor.CreateStopWatch()
+        p_stopper.Restart
         
-    Loop
+        Do Until (a_bitMask = (p_statusByte And a_bitMask)) Or _
+                 (p_stopper.ElapsedMilliseconds > a_timeout)
         
+            DoEvents
+            
+            ' read the status byte.
+            p_statusByte = Me.SerialPoll()
+            
+        Loop
+    
+    End If
+    
     AwaitStatus = p_statusByte
 
 End Function

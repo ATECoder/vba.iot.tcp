@@ -126,7 +126,27 @@ Catch {
     return
 }
 
+$SOURCE = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md")
+Try {
+	echo coping $SOURCE to $BUILD_DIRECTORY
+	copy-item $SOURCE -destination $BUILD_DIRECTORY
+}
+Catch {
+    echo $_.Exception.Message
+    return
+}
+
 $SOURCE = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.xlsm")
+Try {
+	echo coping $SOURCE to $BUILD_DIRECTORY
+	copy-item $SOURCE -destination $BUILD_DIRECTORY
+}
+Catch {
+    echo $_.Exception.Message
+	return
+}
+
+$SOURCE = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.testing.md")
 Try {
 	echo coping $SOURCE to $BUILD_DIRECTORY
 	copy-item $SOURCE -destination $BUILD_DIRECTORY
@@ -146,10 +166,10 @@ Catch {
 	return
 }
 
-$SOURCE = [IO.Path]::Combine($CWD, "testing.md")
+$SOURCE = [IO.Path]::Combine($CWD, "cc.isr.ieee488.testing.md")
 Try {
 	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
+	Copy-Item $SOURCE -Destination $BUILD_DIRECTORY
 }
 Catch {
     echo $_.Exception.Message

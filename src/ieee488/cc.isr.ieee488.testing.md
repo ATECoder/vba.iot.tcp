@@ -1,13 +1,13 @@
 # Testing the [cc.isr.Ieee488] Workbook
 
-[cc.isr.Ieee488] is an Excel workbook for interacting with an instrument that supports the IEEE 488.2 standard with commands such as `*IDN?` and `*CLS`.
+[cc.isr.Ieee488] is an Excel workbook for interacting with an instrument that supports the IEEE 488.2 standard with commands such as `*IDN?` and `*CLS` and supporting higher level [ISR] workbooks
 
 ## Dependencies
 
 The [cc.isr.Ieee488] workbook depends on the following Workbooks:
 
-* [cc.isr.Core]
-* [cc.isr.Winsock]
+* [cc.isr.Core] - Includes core Visual Basic for Applications classes and modules.
+* [cc.isr.Winsock] - Implements TCP Client and Server classes with Windows Winsock API.
 
 ## References
 
@@ -18,13 +18,20 @@ The following object libraries are used as references:
 
 ## Worksheets
 
-The [cc.isr.ieee488] workbook includes two worksheets: _IEEE488_ and _Identity_.
+The [cc.isr.Ieee488] workbook includes two worksheets:
 
-### Identity Worksheet
+* Identity -- To query the instrument identity using the *IDN? command.
+* IEEE488  -- To command and query an IEEE488.2 instrument.
 
-* The Identity Worksheet is used to query the instrument identity using the `*IDN?` command.
+## Unit Testing
 
-#### Identity Worksheet Testing
+At this time, the [cc.isr.ieee488] workbooks exclusively employs integration testing using the IEEE488 and Identity worksheets. 
+
+Units testing will be added in future releases.
+
+## Integration Testing
+
+### Identity Worksheet Testing
 
 Follow this procedure for reading the instrument identity string:
 
@@ -33,10 +40,12 @@ Follow this procedure for reading the instrument identity string:
 * Enter the instrument port:
   * `5025` for an LXI instrument or
   * `1234` for a GPIB instrument connected via a GPIB-Lan controller such as the [Prologix GPIB-Lan controller].
-* Check either ___Use VI Session___ or ___Use IEEE 488 Session___ and click __Read Identity___ to read the instrument identity.
-	* _VI session_ is the underlying `session` for communicating with the instrument that the _IEEE488 Session_ use for sending commands and query the instrument.
+* Click _Read Identity_ to read the instrument identity using the `*IDN?` query command:
+  * Check the following options:
+	* ___Use VI Session___ to test the `ViSssion` class;
+	* ___Use IEEE 488 Session___ to test the IEEE488 session class.
 
-### IEEE 488 Worksheet
+### IEEE 488 Worksheet Testing
 
 * The IEEE 488 Worksheet is used to command and query the instrument using IEEE488.2 commands and queries.
 
@@ -62,9 +71,9 @@ Here are some issues to keep in mind when using the IEEE488 test sheet:
 	* The program then updates the state of the _Read-After-Write_ value on the sheet.
 	* In other words, with this implementation, instrument communication is largely aimed at avoiding Query Unterminated by turning _Read-After-Write_ off.
 
-#### IEEE 488 Worksheet Testing 
+#### Connecting and Disconnecting
 
-Follow the procedures before connecting, disconnecting and controlling the instrument using the IEEE488 session:
+Follow the procedures below for connecting and disconnecting the instrument:
 
 * Enter the instrument dotted IP address such as `192.168.0.252`.
 * Enter the instrument port:
@@ -74,7 +83,7 @@ Follow the procedures before connecting, disconnecting and controlling the instr
 	* The instrument connection information such as the _Socket Address_ and _Id_ display at the top row;
 	* Control buttons are enabled.
 * Release the ___Toggle Connection___ button to disconnect the instrument.
-	* Control buttons are diabled.
+	* Control buttons are disabled.
 
 #### Errors
 
@@ -125,3 +134,4 @@ Follow this procedure to exercise the GPIB-Lan controller:
 [Microsoft Scripting Runtime]: c:\windows\system32\scrrun.dll
 [Microsoft Visual Basic for Applications Extensibility 5.3]: <c:/program&#32;files/common&#32;files/microsoft&#32;shared/vba/vba7.1/vbeui.dll>
 [Prologix GPIB-Lan controller]: https://prologix.biz/product/GPIB-ethernet-controller/
+[ISR]: https://www.integratedscientificresources.com

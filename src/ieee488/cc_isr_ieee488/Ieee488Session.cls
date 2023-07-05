@@ -10,6 +10,7 @@ Attribute VB_Exposed = True
 Option Explicit
 
 Private WithEvents m_viSession As ViSession
+
 Private m_identity As String
 
 ''' <summary>   The event that is raised upon change of connection. </summary>
@@ -104,21 +105,10 @@ Public Function Read(Optional ByVal a_awaitMAV As Boolean = True, _
     
     If Me.ViSession.UsingGpibLan And a_awaitMAV Then
         
-        ' check if we have data to read.
-    
-        If Me.ViSession.SessionReadTimeout > 0 Then
-            
-            ' wait for the message available bits.
-            
-            p_statusByte = Me.ViSession.GpibLan.AwaitStatus(Me.ViSession.SessionReadTimeout, _
-                                                            ServiceRequests.MessageAvailable)
-        Else
-            
-            ' if no timeout, just serial poll the status byte.
-            
-            p_statusByte = Me.ViSession.GpibLan.SerialPoll()
-            
-        End If
+        ' wait for the message available bits.
+        
+        p_statusByte = Me.ViSession.GpibLan.AwaitStatus(Me.ViSession.SessionReadTimeout, _
+                                                        ServiceRequests.MessageAvailable)
         
     End If
     

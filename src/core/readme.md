@@ -1,50 +1,37 @@
-### About
+# About
 
-[cc.isr.Core] is an Excel workbook with core Visual Basic for Applications code.
+[cc.isr.Core] is an Excel workbook with code Visual Basic for Applications modules and classes that support [ISR] workbooks.
 
-#### Dependencies
+## Dependencies
 
 The [cc.isr.Core] has no additional dependencies.
 
-#### Worksheets
+## References
 
-The [cc.isr.Core] workbook includes two worksheets: TestSheet and Countdown Timer.
+The following object libraries are used as references:
 
-##### TestSheet Worksheet
+* [Microsoft Scripting Runtime]
+* [Microsoft Visual Basic for Applications Extensibility 5.3]
 
-* Allows the operator to run unit tests.
+## Worksheets
 
-To enable unit testing, the Excel _Trust Center_, which can be found from the _Search_ box, and check _Trust access to the VBA project object model_ from the _Macro Settings_ in the _Trust Center_.  
+The [cc.isr.Core] workbook includes two worksheets: 
 
-Use the following procedure to run unit tests:
-1) Click the _List Tests_ button.
-2) The drop down list now includes the list of available test suites;
-3) Select a test from the list;
-4) Click _Run Tests_;
-	* The list of tests included in the test suite will display.
-	* Passed tests display Passed with a green background;
-	* Failed tests display Fail with a red background and a message describing the failure.
+* TestSheet -- To run unit tests.
+* Countdown Timer -- To test the `EventTimer` class.
 
-##### Countdown Timer Worksheet
+## Key Features
 
-* Allows the operator to test the `clsTimer` class.
-
-#### How to Use
-
-Typically, the [cc.isr.Core] Workbook is added as a reference in other workbooks.
-
-#### Key Features
-
-* Provides core classes such as `clsTimer` and 'StringBuilder'.
+* Provides core classes such as `EventTimer` and 'StringBuilder'.
 * Provide extension classes such as `StringExtensions` and`PathExtensions`.
 * Provides a rudimentary test executive.
 
-### Main Types
+# Main Types
 
 The main types provided by this library are:
 
-* _Assert_ returns results from unit tests.
-* _CanceEventArg_ event arguments for canceling event handlers.
+* _Assert_ - returns results from unit tests.
+* _CanceEventArg_ - event arguments for canceling event handlers.
 * _CollectionExtensions_ Singleton. Collection extensions.
 * _MacroInfo_ holds information such as name and module name about Excel Macro methods.
 * _Marshal_ Singleton. Supports Endianess.
@@ -56,17 +43,21 @@ The main types provided by this library are:
 * _StringExtensions_ Singleton. String extensions.
 * _TestExecutive_ Singleton. A rudimentary unit test executive.
 * _UserDefinedError_ A user defined error class.
-* _WorkbookUnititiels_ Singleton. Exports code files and enumerates test methods.
+* _WorkbookUnilities_ Singleton. Exports code files and enumerates test methods.
 
-### Testing
+## [Testing]
 
-The project `TestSheet` includes commands buttons for running build-in unit tests of the core classes.
+Testing information is included in the [Testing] document.
 
-To enable unit testing, the Excel _Trust Center_, which can be found from the _Search_ box, and check _Trust access to the VBA project object model_ from the _Macro Settings_ in the _Trust Center_.  
-
-### Feedback
+# Feedback
 
 [cc.isr.Core] is released as open source under the MIT license.
 Bug reports and contributions are welcome at the [cc.isr.Core] repository.
 
 [cc.isr.Core]: https://github.com/ATECoder/vba.iot.tcp/src/core
+[Testing]: ./cc.isr.core.testing.md
+
+[ISR]: https://www.integratedscientificresources.com
+
+[Microsoft Scripting Runtime]: c:\windows\system32\scrrun.dll
+[Microsoft Visual Basic for Applications Extensibility 5.3]: <c:/program&#32;files/common&#32;files/microsoft&#32;shared/vba/vba7.1/vbeui.dll>
