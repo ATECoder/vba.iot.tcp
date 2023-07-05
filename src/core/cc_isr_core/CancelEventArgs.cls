@@ -16,13 +16,13 @@ Public Sub Initialize()
 End Sub
 
 ''' <summary>   Gets the cancel requested value. </summary>
-''' <value>   [Boolean] True to request the cancelation of the event. </value>
+''' <value>   [Boolean] True to request the cancellation of the event. </value>
 Public Property Get CancelRequested() As Boolean
     CancelRequested = m_cancelRequested
 End Property
 
 ''' <summary>   Gets the cancel requested value. </summary>
-''' <param name="a_value">   [Boolean] true to request the cancelation of the event. </param>
+''' <param name="a_value">   [Boolean] true to request the cancellation of the event. </param>
 Public Property Let CancelRequested(ByVal a_value As Boolean)
     m_cancelRequested = a_value
 End Property

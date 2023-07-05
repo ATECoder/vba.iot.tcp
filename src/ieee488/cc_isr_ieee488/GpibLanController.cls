@@ -55,8 +55,8 @@ End Sub
 ''' <summary>   Initializes the <see cref="TcpClient"/> for the GpibLan I/O. </summary>
 ''' <param name="a_client">                  <see cref="TcpClient"/> object. </param>
 ''' <param name="a_tracer">                  <see cref="IErrTracer"/> implementation. </param>
-''' <param name="a_readTerm">                [Optiona, String, VbLf] the read termination. </param>
-''' <param name="a_writeTerm">               [Optiona, String, VbLf] the write termination. </param>
+''' <param name="a_readTerm">                [Options, String, VbLf] the read termination. </param>
+''' <param name="a_writeTerm">               [Options, String, VbLf] the write termination. </param>
 ''' <param name="a_readAfterWriteDelayMs">   [Optional, Integer, 5] The read after write delay. </param>
 Public Sub Initialize(ByVal a_client As TcpClient, _
                       ByVal a_tracer As IErrTracer, _
@@ -79,7 +79,7 @@ End Sub
 ''' <summary>   Closes and releases the TCP Client. </summary>
 Public Sub Dispose()
     
-    ' because the tcp client is passed by value we can null this
+    ' because the Tcp client is passed by value we can null this
     Set m_tcpClient = Nothing
 
     Set m_stopper = Nothing
@@ -151,7 +151,7 @@ End Property
 ''' address to TALK or LISTEN. ++auto 0 addresses the instrument to LISTEN and
 ''' ++auto 1 addresses the instrument to TALK.
 ''' If the command is issued without any arguments it returns the current state of the
-''' readafter-write feature.
+''' read-after-write feature.
 '''
 ''' NOTE:
 ''' Some instruments generate “Query Unterminated” or “-420” error if they are addressed
@@ -224,7 +224,7 @@ Public Function ReceiveFromDevice(Optional ByVal a_maxLength As Long = &H7FFF, _
     
     If Not Me.ReadAfterWriteEnabled Then
         ' if auto read after write is disabled, we can either turn on ' read after write,
-        ' but it seems that getting the controller to read from the instrumet is much faster.
+        ' but it seems that getting the controller to read from the instrument is much faster.
         
         Me.ReadFromDeviceToController
     
@@ -302,8 +302,8 @@ Public Function QueryController(ByVal a_message As String, _
     End If
 End Function
 
-''' <summary>   Sends the '++read eoi' copmmand to have the controller set the instrument to talk
-''' and get the data from the instrument into the controller until EOI character is recevied.
+''' <summary>   Sends the '++read eoi' command to have the controller set the instrument to talk
+''' and get the data from the instrument into the controller until EOI character is received.
 ''' </summary>
 ''' <remarks>
 ''' This command can be used to read data from an instrument until:
@@ -380,7 +380,7 @@ End Function
 ''' </remarks>
 ''' <para name="a_primaryAddress">     [Integer] Specifies the primary GPIB address
 '''                                     between 0 and 30. </param>
-''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
+''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the second GPIB Address
 '''                                    between 0 and 30. </param>
 ''' <returns>   The status byte. </returns>
 Public Sub GpibAddressSetter(ByVal a_primaryAddress As Integer, _
@@ -466,12 +466,12 @@ End Sub
 '''
 ''' After the Controller reads the status byte, it sends another command message, Serial Poll Disable (SPD),
 ''' to the device. The SPD message terminates the serial poll mode, thus returning the device to its normal
-''' Talker/Listener state. Once a device requesting service is serial polled, it usually unasserts the SRQ
+''' Talker/Listener state. Once a device requesting service is serial polled, it usually un-asserts the SRQ
 ''' line.
 ''' </remarks>
 ''' <para name="a_primaryAddress">     [Optional, Integer] Specifies the primary GPIB address
 '''                                     between 0 and 30. </param>
-''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the secondard GPIB Address
+''' <para name="a_secondaryAddress)>   [Optional, Integer] Specifies the second GPIB Address
 '''                                    between 0 and 30. </param>
 ''' <returns>   The status byte. </returns>
 Public Function SerialPoll(Optional ByVal a_primaryAddress As Integer = -1, _
@@ -495,7 +495,7 @@ Public Function SerialPoll(Optional ByVal a_primaryAddress As Integer = -1, _
 End Function
 
 ''' <summary>   Queries the GPIB SRQ signal status. </summary>
-''' <remarks>   This command returns the current state of the GPIB SRQ signal. The controler returns
+''' <remarks>   This command returns the current state of the GPIB SRQ signal. The controller returns
 ''' <c>1</c> if the SRQ signal is asserted (low) and <c>0</c> if the signal is not asserted (high). </remarks>
 ''' <returns>   True if Server requested. </returns>
 Public Function ServiceRequested() As Boolean
@@ -505,7 +505,7 @@ Public Function ServiceRequested() As Boolean
 End Function
 
 ''' <summary>   Wait for the specified masked bits on the status byte or timeout. </summary>
-''' <param name="a_timeout">    [Integer] time to wait for reply in millisecods. </param>
+''' <param name="a_timeout">    [Integer] time to wait for reply in milliseconds. </param>
 ''' <param name="a_bitMask">    [Integer] the bitmask to match for terminating the wait. </param>
 ''' <returns>   [Integer] The last status byte read before ending the wait. </returns>
 Public Function AwaitStatus(ByVal a_timeout As Integer, _

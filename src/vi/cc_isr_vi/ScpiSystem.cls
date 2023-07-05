@@ -50,13 +50,13 @@ Public Function ErrorDequeue() As Boolean
     ErrorDequeue = Me.Session.VISession.QueryLine(":SYST:ERR?")
 End Function
 
-''' <summary>   Clears teh error queue. </summary>
+''' <summary>   Clears the error queue. </summary>
 Public Sub ErrorQueueClear()
     Me.Session.VISession.WriteLine (":SYST:CLE")
 End Sub
 
 ''' <summary>   Query INPUTS switch (0=rear, 1=front). </summary>
-''' <value>   A boolean true if the inputs are set to the front pannel. </value>
+''' <value>   A boolean true if the inputs are set to the front panel. </value>
 Public Function FrontSwitch() As Boolean
     FrontSwitch = 1 = Me.Session.VISession.QueryLine(":SYST:FRSW?")
 End Function

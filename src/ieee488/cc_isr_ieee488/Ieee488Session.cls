@@ -391,22 +391,23 @@ End Sub
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
-''' <summary>   Gets a reference to the connectable <see cref="cc_isr_Winsoc.TcpClient"/> object . </summary>
+''' <summary>   Gets a reference to the <see cref="cc_isr_Winsock.IConnectable"/>
+''' <see cref="ViSession">VI Session</see>. </summary>
 ''' <value>   [<see cref="cc_isr_Winsock.IConnectable"/>]. </value>
 Public Property Get Connectable() As cc_isr_Winsock.IConnectable
     Set Connectable = m_viSession
 End Property
 
-''' <summary>   Returns the connection state of the client. </summary>
-''' <value>   [Boolean] True if the VI Session is connected; otherwise, False. </value>
+''' <summary>   Returns the connection state of the <see cref="ViSession">VI Session</see>. </summary>
+''' <value>   [Boolean] True if the <see cref="ViSession">VI Session</see> is connected; otherwise, False. </value>
 Public Property Get Connected() As Boolean
     
     Connected = IConnectable_Connected
 
 End Property
 
-''' <summary>   Returns the connection state of the <see cref="ViSession"/>. </summary>
-''' <value>   [Boolean] True if the <see cref="ViSession"/> is connected; otherwise, False. </value>
+''' <summary>   Returns the connection state of the <see cref="cc_isr_Winsock.IConnectable"/>. </summary>
+''' <value>   [Boolean] True if the <see cref="cc_isr_Winsock.IConnectable"/> is connected; otherwise, False. </value>
 Private Property Get IConnectable_Connected() As Boolean
     
     If Me.Connectable Is Nothing Then
@@ -437,14 +438,14 @@ Private Property Get IConnectable_CanConnect() As Boolean
 
 End Property
 
-''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
+''' <summary>   Closes the connection and releases the <see cref="ViSession">VI Session</see>. </summary>
 Public Sub Dispose()
     
     IConnectable_Dispose
 
 End Sub
 
-''' <summary>   Closes the connection and releases the <see cref="ViSession"/>. </summary>
+''' <summary>   Closes the connection and releases the <see cref="cc_isr_Winsock.IConnectable"/> </summary>
 Private Sub IConnectable_Dispose()
 
     If Not Me.Connectable Is Nothing Then
@@ -461,11 +462,11 @@ Private Sub IConnectable_Dispose()
     
 End Sub
 
-''' <summary>   Opens a VI Session connection to the specified host at the specified port
-''' as sets the connection timeout. </summary>
+''' <summary>   Opens a <see cref="ViSession">VI Session</see> connection to the specified host
+''' at the specified port as sets the socket receive timeout. </summary>
 ''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
 ''' <param name="a_port">        [Long] The port that the server is listening on. </param>
-''' <param name=a_"timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <param name=a_"timeoutMs">   [Optional, Long, 500] The socket receive timeout in milliseconds. </param>
 ''' <returns>   [Boolean] True if the VI Session is connected. </returns>
 Public Function OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
         Optional ByVal a_timeoutMs As Long = 500) As Boolean
@@ -474,11 +475,11 @@ Public Function OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
 
 End Function
 
-''' <summary>   Opens a VI Session connection to the specified host at the specified port
-''' as sets the connection timeout. </summary>
+''' <summary>   Opens a <see cref="ViSession">VI Session</see> connection to the specified host
+''' at the specified port as sets the socket receive timeout. </summary>
 ''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
 ''' <param name="a_port">        [Long] The port that the server is listening on. </param>
-''' <param name="a_timeoutMs">   [Optional, Long, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_timeoutMs">   [Optional, Long, 500] The socket receive timeout in milliseconds. </param>
 ''' <returns>   [Boolean] True if the VI Session is connected. </returns>
 Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_port As Long, _
         Optional ByVal a_timeoutMs As Long = 500&) As Boolean
@@ -499,7 +500,7 @@ Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_por
     
 End Function
 
-''' <summary>   Closes the VI Session connection. </summary>
+''' <summary>   Closes the <see cref="cc_isr_Winsock.IConnectable"/> connection. </summary>
 ''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
 Public Function CloseConnection() As Boolean
     
@@ -507,7 +508,7 @@ Public Function CloseConnection() As Boolean
     
 End Function
 
-''' <summary>   Closes the VI Session connection. </summary>
+''' <summary>   Closes the <see cref="cc_isr_Winsock.IConnectable"/> connection. </summary>
 ''' <returns>   [Boolean] True if disconnection succeeded; otherwise, false. </returns>
 Private Function IConnectable_CloseConnection() As Boolean
 
@@ -535,8 +536,8 @@ Private Sub OnConnectionChanged(ByVal a_isConnected As Boolean)
 
 End Sub
 
-''' <summary>   Raises the <see cref="Connectionchanged"/> event. </summary>
-''' <para name="a_eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
+''' <para name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
 Private Sub IConnectable_OnConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
     
     RaiseEvent ConnectionChanged(a_eventArgs)
@@ -544,7 +545,7 @@ Private Sub IConnectable_OnConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock
 End Sub
 
 ''' <summary>   Raises the <see cref="ConnectionChanging"/> event. </summary>
-''' <para name="a_eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
+''' <para name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>]. </param>
 Private Sub IConnectable_OnConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
     
     RaiseEvent ConnectionChanging(a_eventArgs)

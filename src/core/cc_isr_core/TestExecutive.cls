@@ -11,7 +11,7 @@ Option Explicit
 
 ''' <summary>   Executes all test macros in the module specified in the test sheet. </summary>
 ''' <para name="a_testSheet">             [Worksheet] Specifies the work sheet were test data are set and logged. </param>
-''' <para name="a_usingRemoteWorkbook">   [Optional, Boolan, True] True if using a remote workbook
+''' <para name="a_usingRemoteWorkbook">   [Optional, Boolean, True] True if using a remote workbook
 '''                                       where workbook file needs to be added
 ''' to the application run call. </param>
 Public Sub Execute(ByVal a_testSheet As Worksheet, Optional a_usingRemoteWorkbook As Boolean = False)

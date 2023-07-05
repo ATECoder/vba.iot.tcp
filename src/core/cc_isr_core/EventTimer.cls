@@ -65,7 +65,7 @@ Attribute m_remoteWorkbook.VB_VarHelpID = -1
 
 Private m_callback As IRunnable
 
-' true when the workbook begines closing
+' true when the workbook begins closing
 Private m_workbookClosing As Boolean
 
 ' the timer interval in milliseconds.
@@ -145,7 +145,7 @@ Private Function SetVBOM(ByVal a_newValue As Boolean) As Boolean
   
   Dim i As Long: i = IIf(a_newValue, 1, 0)
   #If Mac Then
-    Shell "defaults write com.microsoft.Excel AccessVBOM -int " & i
+    Shell "defaults write com.Microsoft.Excel AccessVBOM -int " & i
     SetVBOM = True
   #Else
     Dim p_registeryKey As String
@@ -255,7 +255,7 @@ Public Sub StartTimer()
 End Sub
 
 ''' <summary>   Stops the timer. </summary>
-''' <remarks>   This also closes teh workbook. </remakrs>
+''' <remarks>   This also closes the workbook. </remarks>
 Public Sub StopTimer()
   Call m_remoteWorkbook.Application.Run(TIMER_STOP_CALL)
 End Sub

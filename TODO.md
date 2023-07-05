@@ -4,7 +4,6 @@
 
 
 #### Fixes
-* vi 2700: implement connectable.
 * vI: handle error on toggle connection. 
 	* implement connectable
 

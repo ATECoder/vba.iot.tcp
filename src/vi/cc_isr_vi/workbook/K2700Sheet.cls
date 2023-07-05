@@ -55,6 +55,7 @@ Attribute m_eventTimer.VB_VarHelpID = -1
 ' and the timer is paused on the next event.
 Private m_pauseRequested As Boolean
 
+
 ' true when handling the timer event to prevent timer
 ' event handler overrun.
 Private m_handlingTimerEvent As Boolean
@@ -719,7 +720,7 @@ End Property
 ''' <summary>   Sets the received message. </summary>
 Friend Property Let receivedMessage(ByVal a_value As String)
     Range(m_receivedMessageCell).value = a_value
-    Range(m_receivedMessageLengthCell).value = Len(value)
+    Range(m_receivedMessageLengthCell).value = Len(a_value)
 End Property
 
 ''' <summary>   Gets the Read After Write Enabled. </summary>
@@ -778,7 +779,6 @@ End Property
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
-
 Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = a_usingGpibLanController
     Me.GoToLocalButton.Enabled = a_usingGpibLanController
@@ -793,6 +793,7 @@ Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
     Me.ReadTimeoutSetButton.Enabled = a_usingGpibLanController
 End Sub
 
+''' <summary>   Handles the Go To Local button click event. </summary>
 Private Sub GoToLocalButton_Click()
 
     Const p_procedureName = "GoToLocalButton_Click"
@@ -827,6 +828,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the local lockout button click event. </summary>
 Private Sub LocalLockoutButton_Click()
 
     Const p_procedureName = "LocalLockoutButton_Click"
@@ -861,6 +863,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the read after write set button click event. </summary>
 Private Sub ReadAfterWriteSetButton_Click()
 
     Const p_procedureName = "ReadAfterWriteSetButton_Click"
@@ -897,6 +900,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the read after write get button click event. </summary>
 Private Sub ReadAfterWriteGetButton_Click()
 
     Const p_procedureName = "ReadAfterWriteGetButton_Click"
@@ -933,6 +937,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the serial poll button click event. </summary>
 Private Sub SerialPollButton_Click()
 
     Const p_procedureName = "SerialPollButton_Click"
@@ -967,6 +972,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the SRQ button click event. </summary>
 Private Sub SRQButton_Click()
 
     Const p_procedureName = "SRQButton_Click"
@@ -1001,6 +1007,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the GPIB Address Get button click event. </summary>
 Private Sub GetGpibAddressButton_Click()
 
     Const p_procedureName = "GetGpibAddressButton_Click"
@@ -1035,6 +1042,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the GPIB Address set button click event. </summary>
 Private Sub SetGpibAddressButton_Click()
 
     Const p_procedureName = "SetGpibAddressButton_Click"
@@ -1070,6 +1078,7 @@ err_Handler:
 End Sub
 
 
+''' <summary>   Handles the Read Timeout get button click event. </summary>
 Private Sub ReadTimeoutGetButton_Click()
 
     Const p_procedureName = "ReadTimeoutGetButton_Click"
@@ -1104,6 +1113,7 @@ err_Handler:
 
 End Sub
 
+''' <summary>   Handles the Read Timeout set button click event. </summary>
 Private Sub ReadTimeoutSetButton_Click()
 
     Const p_procedureName = "ReadTimeoutSetButton_Click"
@@ -1140,7 +1150,7 @@ End Sub
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 '
-' 2700 Measurments Control
+' 2700 Measurements Control
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
@@ -1192,20 +1202,23 @@ Private Sub SetResistance(ByVal a_resistanceNo As Integer, ByVal a_resistance As
     Range(m_resistanceNoCell).value = a_resistanceNo
     Range(m_resistanceCell).value = a_resistance
     
-    Dim p_rowNo As Integer: p_rowNo = m_resistanceNoTopRow + resistanceNo - 1
+    Dim p_rowNo As Integer: p_rowNo = m_resistanceNoTopRow + a_resistanceNo - 1
     Range(m_resistanceNoCol & CStr(p_rowNo)).value = "R" & CStr(a_resistanceNo)
     Range(m_resistanceCol & CStr(p_rowNo)).value = Format(a_resistance, m_resistanceFormat)
     
 End Sub
 
+''' <summary>   Handles the front/read toggle button click event. </summary>
 Private Sub FrontRearToggleButton_Click()
     FrontRearToggleButton.Caption = IIf(FrontRearToggleButton.value, "Front", "Rear")
 End Sub
 
+''' <summary>   Handles the auto-increment toggle button click event. </summary>
 Private Sub AutoIncrementToggleButton_Click()
     AutoIncrementToggleButton.Caption = IIf(AutoIncrementToggleButton.value, "Auto", "Manual")
 End Sub
 
+''' <summary>   Handles the single/all button click event. </summary>
 Private Sub SingleAllToggleButton_Click()
     SingleAllToggleButton.Caption = IIf(SingleAllToggleButton.value, "Single", "All")
 End Sub
@@ -1245,7 +1258,7 @@ err_Handler:
     
 End Sub
 
-''' <summary> </summary>
+''' <summary>   Handles the read cards button click event. </summary>
 Private Sub ReadCardsButton_Click()
     
     Const p_procedureName = "ReadCardsButton_Click"
@@ -1283,7 +1296,8 @@ err_Handler:
     
 End Sub
 
-''' <summary>   Read a single or all resistances from the front or read panel. </summary>
+''' <summary>   Handles the read resistance button click event. Reads a single or all
+''' resistances from the front or read panel. </summary>
 Private Sub ReadResistanceButton_Click()
     
     Const p_procedureName = "ReadResistanceButton_Click"
@@ -1372,7 +1386,8 @@ err_Handler:
     
 End Sub
 
-''' <summary>   Sets and displays the scan list for the cards. </summary>
+''' <summary>   Handles the Set Scans button click event. Sets and displays the scan list
+''' for the cards. </summary>
 Private Sub SetScansButton_Click()
 
     Const p_procedureName = "SetScansButton_Click"
@@ -1584,7 +1599,7 @@ Private Sub HandleTimerEvent()
     
     If m_pauseRequested Or m_handlingTimerEvent Then Exit Sub
    
-    ' prevent reenty
+    ' prevent reentry
     m_handlingTimerEvent = True
     
     Dim p_resistanceNo As Integer
@@ -1626,7 +1641,7 @@ Private Sub HandleTimerEvent()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
-    ' release reenty prevention
+    ' release reentry prevention
     m_handlingTimerEvent = False
 
     On Error GoTo 0
@@ -1655,13 +1670,13 @@ err_Handler:
 End Sub
 
 ''' <summary>   Starts the event timer. </summary>
-''' <param name="a_timerInterval">   [Long] Specifies the timer interval in milliseconds. </param>
-Friend Sub StartTimer(Optional ByVal a_timerInterval As Long = 100)
+''' <param name="a_interval">   [Long] Specifies the timer interval in milliseconds. </param>
+Friend Sub StartTimer(Optional ByVal a_interval As Long = 100)
     
     m_handlingTimerEvent = False
     m_pauseRequested = False
     If m_eventTimer Is Nothing Then
-        Set m_eventTimer = cc_isr_Core.Constructor.CreateStdTimer(timerInterval)
+        Set m_eventTimer = cc_isr_Core.Constructor.CreateEventTimer(a_interval)
         m_eventTimer.StartTimer
     Else
         m_eventTimer.ResumeTimer
@@ -1678,9 +1693,11 @@ End Sub
 
 ''' <summary>   Aborts the timer. </summary>
 Friend Sub AbortTimer()
-  
-  ' we need to figure out how to recreate the timer
-  m_eventTimer.StopTimer
+
+    If Not m_eventTimer Is Nothing Then
+      m_eventTimer.StopTimer
+      Set m_eventTimer = Nothing
+    End If
 
 End Sub
 
@@ -1689,7 +1706,7 @@ Private Sub m_eventTimer_Tick()
     
     On Error Resume Next
     If m_pauseRequested Then
-        m_eventTimer.PauseTimer
+        If Not m_eventTimer Is Nothing Then m_eventTimer.PauseTimer
     Else
         HandleTimerEvent
     End If
@@ -1704,15 +1721,15 @@ End Sub
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.ResistanceNumberMeasured"/> event. </summary>
-''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_VI.ResistanceNumberEventArgs"/> event arguments. </param>
+''' <param name="a_eventArgs">   [<see cref="cc_isr_VI.ResistanceNumberEventArgs"/>] event arguments. </param>
 Private Sub m_k2700_ResistanceNumberMeasured(ByVal a_eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
 
-    SetResistance eventArgs.ResistanceNumber, eventArgs.Resistance
+    SetResistance a_eventArgs.ResistanceNumber, a_eventArgs.Resistance
     
     If Me.AutoIncrementResistanceNoEnabled Then
     
         ' increment the resistance for the next reading
-        m_currentResistanceNo = eventArgs.ResistanceNumber + 1
+        m_currentResistanceNo = a_eventArgs.ResistanceNumber + 1
         If m_currentResistanceNo > Me.ResistanceCount Then
             m_currentResistanceNo = 1
         End If
@@ -1723,12 +1740,12 @@ Private Sub m_k2700_ResistanceNumberMeasured(ByVal a_eventArgs As cc_isr_VI.Resi
 End Sub
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.K2700.ConnectionChanged"/> event. </summary>
-''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
+''' <param name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/>] event arguments. </param>
 Private Sub m_k2700_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Me.Initialize eventArgs
+    Me.Initialize a_eventArgs
 
-    If eventArgs.Connected Then
+    If a_eventArgs.Connected Then
     
         ' report the socket number
         Range(m_socketAddressCell).value = Me.Session.VISession.socketAddress
@@ -1752,9 +1769,8 @@ Private Sub m_k2700_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.Connec
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_VI.K2700.ConnectionChanging"/> event. </summary>
-''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/> event arguments. </param>
+''' <param name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionChangingEventArgs"/>] event arguments. </param>
 Private Sub m_k2700_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangingEventArgs)
-
 End Sub
 
 

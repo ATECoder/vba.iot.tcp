@@ -18,8 +18,8 @@ Public AssertSuccessful As Boolean
 Public AssertMessage As String
 
 ''' <summary>   Asserts that values are equal. If not, this will return a failed assertion. </summary>
-''' <param name="a_expected">   [Vatiant] The value the caller expects to have. </param
-''' <param name="a_actual">     [Vatiant] The actual value. </param
+''' <param name="a_expected">   [Variant] The value the caller expects to have. </param
+''' <param name="a_actual">     [Variant] The actual value. </param
 ''' <param name=a_"message">    [String] A message to show in case the assertion failed. </param
 ''' <returns>   An <see cref="Assert"/>   instant of True if values are equal; otherwise, False. </returns>
 Public Function AreEqual(ByVal a_expected As Variant, ByVal a_actual As Variant, ByRef a_message As String) As Assert
@@ -33,8 +33,8 @@ Public Function AreEqual(ByVal a_expected As Variant, ByVal a_actual As Variant,
 End Function
 
 ''' <summary>   Asserts that values are not equal. If not, this will return a failed assertion. </summary>
-''' <param name="a_expected">   [Vatiant] The value the caller expects to have. </param
-''' <param name="a_actual">     [Vatiant] The actual value. </param
+''' <param name="a_expected">   [Variant] The value the caller expects to have. </param
+''' <param name="a_actual">     [Variant] The actual value. </param
 ''' <param name="a_message">    [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if values are not equal; otherwise, false. </returns>
 Public Function AreNotEqual(ByVal a_expected As Variant, ByVal a_actual As Variant, ByRef a_message As String) As Assert
@@ -48,7 +48,7 @@ Public Function AreNotEqual(ByVal a_expected As Variant, ByVal a_actual As Varia
 End Function
 
 ''' <summary>   Asserts that the given value is null. </summary>
-''' <param name="a_actual">    [Vatiant] The actual value. </param
+''' <param name="a_actual">    [Variant] The actual value. </param
 ''' <param name="a_message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="a_actual"/>   is null; otherwise, false. </returns>
 Public Function IsNull(ByVal a_actual As Variant, ByRef a_message As String) As Assert
@@ -56,7 +56,7 @@ Public Function IsNull(ByVal a_actual As Variant, ByRef a_message As String) As 
 End Function
 
 ''' <summary>   Asserts that the given value is not null. </summary>
-''' <param name="a_actual">    [Vatiant] The actual value. </param
+''' <param name="a_actual">    [Variant] The actual value. </param
 ''' <param name="a_message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="a_actual"/>   is not null; otherwise, false. </returns>
 Public Function IsNotNull(ByVal a_actual As Variant, ByRef a_message As String) As Assert
@@ -64,7 +64,7 @@ Public Function IsNotNull(ByVal a_actual As Variant, ByRef a_message As String) 
 End Function
 
 ''' <summary>   Asserts that the given value is true. </summary>
-''' <param name="a_truthy">    [Vatiant] A value that can be seen as truthy. Very likely should be boolean,
+''' <param name="a_truthy">    [Variant] A value that can be seen as truthy. Very likely should be boolean,
 '''                             but maybe you like to live dangerously. </param
 ''' <param name="a_message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   True if <paramref name="truthy"/>   is true; otherwise, false. </returns>
@@ -80,7 +80,7 @@ Public Function IsTrue(ByVal a_truthy As Variant, ByRef a_message As String) As 
 End Function
 
 ''' <summary>   Asserts that the given value is False. </summary>
-''' <param name="a_falsy">     [Vatiant] A value that can be seen as falsy. Very likely should be boolean,
+''' <param name="a_falsy">     [Variant] A value that can be seen as falsy. Very likely should be boolean,
 '''                            but maybe you like to live dangerously. </param
 ''' <param name="a_message">   [String] A message to show in case the assertion failed. </param
 ''' <returns>   False if <paramref name="falsy"/>   is False; otherwise, false. </returns>

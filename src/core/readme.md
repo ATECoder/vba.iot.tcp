@@ -30,20 +30,20 @@ The [cc.isr.Core] workbook includes two worksheets:
 
 The main types provided by this library are:
 
-* _Assert_ - returns results from unit tests.
-* _CanceEventArg_ - event arguments for canceling event handlers.
-* _CollectionExtensions_ Singleton. Collection extensions.
-* _MacroInfo_ holds information such as name and module name about Excel Macro methods.
-* _Marshal_ Singleton. Supports Endianess.
-* _ModuleInfo_ holds information such as name and project name about Excel modules.
-* _PathExtensions_ Singleton. Build builder with  file and folder deletion and existence methods.
-* _stdTimer_ a timer class capable of issuing events with millisecond time resolution.
-* _StopWatch_ high resolution stop watch using the Windows API.
-* _StringBuilder_ A fast string builder.
-* _StringExtensions_ Singleton. String extensions.
-* _TestExecutive_ Singleton. A rudimentary unit test executive.
-* _UserDefinedError_ A user defined error class.
-* _WorkbookUnilities_ Singleton. Exports code files and enumerates test methods.
+* _Assert_ - Returns results from unit tests.
+* _CanceEventArg_ - Event arguments for canceling event handlers.
+* _CollectionExtensions_ - Singleton. Collection extensions.
+* _MacroInfo_ - Holds information such as name and module name about Excel Macro methods.
+* _Marshal_ - Singleton. Supports Endianess.
+* _ModuleInfo_ - Holds information such as name and project name about Excel modules.
+* _PathExtensions_ - Singleton. Build builder with  file and folder deletion and existence methods.
+* _EventTimer_ - A timer class capable of issuing events with millisecond time resolution.
+* _StopWatch_ - A high resolution stop watch using the Windows API.
+* _StringBuilder_ - A fast string builder.
+* _StringExtensions_ - Singleton. String extensions.
+* _TestExecutive_ - Singleton. A rudimentary unit test executive.
+* _UserDefinedError_ - A user defined error class.
+* _WorkbookUnilities_ - Singleton. Exports code files and enumerates test methods.
 
 ## [Testing]
 

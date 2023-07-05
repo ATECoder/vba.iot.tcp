@@ -235,8 +235,8 @@ End Function
 ''' <summary>   Receives a message from the server until reaching the specified termination, reading the
 ''' specified number of characters, or timeout. </summary>
 ''' <remarks>   If using a GPIB-Lan device, such as the Prologix GPIB-Lan interface, this
-''' method first iuses the device <c>++read</c> to read the instrument. </remarks>
-''' <param name="a_timeout">     [Integer] time to wait for reply in millisecods. </param>
+''' method first uses the device <c>++read</c> to read the instrument. </remarks>
+''' <param name="a_timeout">     [Integer] time to wait for reply in milliseconds. </param>
 ''' <param name="a_maxLength">   [Optional, Long, 32767] The maximum number of bytes to read. </param>
 ''' <param name="a_trimEnd">     [Optional, Boolean, True] True to return the string without the termination. </param>
 ''' <returns>   [String] The reading. </returns>
@@ -413,7 +413,7 @@ Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_por
         
         Connectable.OpenConnection a_host, a_port, a_timeoutMs
         
-        ' update teh socket receive timeout.
+        ' update the socket receive timeout.
         
         m_socketReceiveTimeout = a_timeoutMs
         
@@ -461,7 +461,7 @@ Private Sub OnConnectionChanged(ByVal a_isConnected As Boolean)
 
 End Sub
 
-''' <summary>   Raises the <see cref="Connectionchanged"/> event. </summary>
+''' <summary>   Raises the <see cref="ConnectionChanged"/> event. </summary>
 ''' <para name="a_eventArgs">   [<<see cref="cc_isr_Winsock.ConnectionchangedEventArgs"/>]. </param>
 Private Sub IConnectable_OnConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
     

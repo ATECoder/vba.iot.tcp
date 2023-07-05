@@ -37,7 +37,7 @@ Private Sub Workbook_Activate()
 End Sub
 
 ''' <summary>   Handles the workbook after save event. </summary>
-''' <para name="a_success">   [Boolean] True if save succeded. </param>
+''' <para name="a_success">   [Boolean] True if save succeeded. </param>
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
     

@@ -86,7 +86,7 @@ Property Get ElapsedSeconds() As Double
 End Property
 
 ''' <summary>   Returns the elapsed time in milliseconds. </summary>
-''' <value>   [Double] Elapsed time in lilliseconds. </value>
+''' <value>   [Double] Elapsed time in milliseconds. </value>
 Property Get ElapsedMilliseconds() As Double
     ElapsedMilliseconds = 1000# * Me.ElapsedSeconds
 End Property

@@ -12,7 +12,7 @@ Option Explicit
 ''' <summary>   A public creatable singleton class for creating instances of this workbook
 ''' classes to share with external workbooks. </summary>
 ''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' <see href="https://learn.Microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
 Private Sub Class_Initialize()
 End Sub
@@ -20,7 +20,7 @@ End Sub
 ''' <summary>   Creates a new instance of the <see cref="MacroInfo"/> class to share
 ''' with external workbooks. </summary>
 ''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' <see href="https://learn.Microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
 ''' <returns>   A new instance of the <see cref="MacroInfo"/> class. </returns>
 Public Function CreateMacroInfo() As MacroInfo
@@ -30,7 +30,7 @@ End Function
 ''' <summary>   Creates a new instance of the <see cref="ModuleInfo"/> class to share
 ''' with external workbooks. </summary>
 ''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' <see href="https://learn.Microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
 ''' <returns>   A new instance of the <see cref="ModuleInfo"/> class. </returns>
 Public Function CreateModuleInfo() As ModuleInfo
@@ -50,7 +50,7 @@ End Function
 ''' <summary>   Creates a new instance of the <see cref="StopWatch"/> class to share
 ''' with external workbooks. </summary>
 ''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' <see href="https://learn.Microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
 ''' <returns>   A new instance of the <see cref="StopWatch"/> class. </returns>
 Public Function CreateStopWatch() As StopWatch
@@ -60,7 +60,7 @@ End Function
 ''' <summary>   Creates a new instance of the <see cref="StringBuilder"/> class to share
 ''' with external workbooks. </summary>
 ''' <remarks>
-''' <see href="https://learn.microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
+''' <see href="https://learn.Microsoft.com/en-us/previous-versions/office/troubleshoot/office-developer/set-up-vb-project-using-class"/>
 ''' </remarks>
 ''' <returns>   A new instance of the <see cref="StringBuilder"/> class. </returns>
 Public Function CreateStringBuilder() As StringBuilder
