@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Implements cc_isr_Winsock.IConnectable
+
 Private WithEvents m_viSession As ViSession
 
 Private m_identity As String
