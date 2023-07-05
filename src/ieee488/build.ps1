@@ -88,14 +88,17 @@ Function AddReference( $workbook )
 # -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 function RemoveWorkbookReference()
 {
-	$PRMYPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $PRMYFILE)
+	
+    LogInfo( "Removing refernece " + $REFFILE )
+
+    $PRMYPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $PRMYFILE)
 	$PRMYBOOK = $excel.Workbooks.Open($PRMYPATH)
-    LogInfo( "Opened " + $excel.Workbooks.Item($PRMYFILE).Name )
+    LogInfo( "   Opened " + $excel.Workbooks.Item($PRMYFILE).Name )
 
 	$REFPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $REFFILE)
-
     $REFFILE = $REFFILE 
 	RemoveReference( $PRMYBOOK )
+
 	$PRMYBOOK.Save()
 
 	$PRMYBOOK.SaveAs($PRMYPATH, $XL_FILE_FORMAT_MACRO_ENABLED)
