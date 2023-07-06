@@ -26,35 +26,15 @@ End Property
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
     
+    Const p_procedureName As String = "Workbook_Activate"
+    
     On Error Resume Next
     
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
     
-    On Error GoTo 0
-
-End Sub
-
-''' <summary>   Handles the workbook after save event. </summary>
-''' <para name="a_value">   [Boolean] True if save succeeded. </param>
-''' <remarks>   Exports source code files. </remarks>
-Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
-    On Error Resume Next
-    If a_success And Me.ExportCodeAfterSave Then
-        cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
-    End If
-    On Error GoTo 0
-End Sub
-
-
-''' <summary>   Handles the workbook before close event. </summary>
-Private Sub Workbook_BeforeClose(Cancel As Boolean)
-    
-    Const p_procedureName As String = "Workbook_BeforeClose"
-    On Error Resume Next
-    TimerSheet.Dispose
-    
     If Err.Number <> 0 Then
+        
         ' append the error source
         UserDefinedErrors.SetErrSource p_procedureName, Me.name
         
@@ -63,17 +43,87 @@ Private Sub Workbook_BeforeClose(Cancel As Boolean)
         
     End If
     
+    On Error GoTo 0
+    
+End Sub
+
+''' <summary>   Handles the workbook after save event. </summary>
+''' <remarks>   Exports source code files. </remarks>
+''' <para name="a_success">   [Boolean] True if saved successfully. </param>
+Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
+    
+    Const p_procedureName As String = "Workbook_AfterSave"
+    
+    On Error Resume Next
+    
+    If a_success And Me.ExportCodeAfterSave Then
+        cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
+    End If
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
     
     On Error GoTo 0
+
+End Sub
+
+''' <summary>   Handles the workbook before close event. </summary>
+''' <remarks>   Disposes the disposable workseets. </remarks>
+''' <para name="a_cancel">   [Boolean] Set to true to cancel closing. </param>
+Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
+    
+    Const p_procedureName As String = "Workbook_BeforeClose"
+    
+    On Error Resume Next
+    
+    ' dispose the disposable worksheets
+    TimerSheet.Dispose
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>
 ''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()
-
+    
+    Const p_procedureName As String = "Workbook_Open"
+    
+    On Error Resume Next
+    
     ' turn on code exporting for this work book
     ThisWorkbook.ExportCodeAfterSave = True
+    
     Application.Windows(ThisWorkbook.name).Visible = True
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
 
 End Sub
 

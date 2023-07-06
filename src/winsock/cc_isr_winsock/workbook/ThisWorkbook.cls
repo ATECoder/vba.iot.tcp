@@ -27,8 +27,24 @@ End Property
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
     
+    Const p_procedureName As String = "Workbook_Activate"
+    
+    On Error Resume Next
+    
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
     
 End Sub
 
@@ -37,19 +53,38 @@ End Sub
 ''' <remarks>   Exports source code files. </remarks>
 Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
 
+    Const p_procedureName As String = "Workbook_AfterSave"
+    
     On Error Resume Next
+    
+    ' export project files.
+    
     If a_success And Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
-
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
     On Error GoTo 0
-
+    
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>
 ''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()
 
+    Const p_procedureName As String = "Workbook_Open"
+    
+    On Error Resume Next
+    
     ' hide and turn off code saving on the referenced workbooks
     cc_isr_Core.ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
@@ -58,4 +93,16 @@ Private Sub Workbook_Open()
     ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True
 
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
+    
 End Sub

@@ -26,63 +26,93 @@ End Property
 ''' <remarks>   Initializes the user defined errors. </remarks>
 Private Sub Workbook_Activate()
     
+    Const p_procedureName As String = "Workbook_Activate"
+    
+    On Error Resume Next
+    
     ' init the user defined errors.
     cc_isr_Core.UserDefinedErrors.Initialize
     
-    ' activate the sheets to initialize values.
-    ' Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
+    ' initialize the sheets to initial values.
+    Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
     
-End Sub
-
-''' <summary>   Handles the workbook after save event. </summary>
-''' <para name="a_success">   [Boolean] True is save succeeded. </param>
-''' <remarks>   Exports source code files. </remarks>
-Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
-    
-    On Error Resume Next
-    If a_success And Me.ExportCodeAfterSave Then
-        cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
-    End If
-    On Error GoTo 0
-
-End Sub
-
-Private Sub Workbook_BeforeClose(Cancel As Boolean)
-    
-    Const p_procedureName As String = "Workbook_BeforeClose"
-    
-    On Error Resume Next
-    Ieee488Sheet.Dispose
     
     If Err.Number <> 0 Then
+        
         ' append the error source
         UserDefinedErrors.SetErrSource p_procedureName, Me.name
         
         ' display the error message
         MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
     End If
 
     On Error GoTo 0
+    
 End Sub
 
-''' <summary>   Handles the Workbook deactivate event. </summary>
-''' <remarks>   disable the controls. </remarks>
-Private Sub Workbook_Deactivate()
-
-    ' dispose if not disposed.
-    If Not Ieee488Sheet Is Nothing Then
-        Ieee488Sheet.Dispose
+''' <summary>   Handles the workbook after save event. </summary>
+''' <remarks>   Exports source code files. </remarks>
+''' <para name="a_success">   [Boolean] True is save succeeded. </param>
+Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
     
-        ' deactivate the sheets to initialize values.
-        Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
+    Const p_procedureName As String = "Workbook_AfterSave"
+    
+    On Error Resume Next
+    
+    If a_success And Me.ExportCodeAfterSave Then
+        cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
     
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    End If
+
+    On Error GoTo 0
+    
+End Sub
+
+''' <summary>   Handles the workbook before close event. </summary>
+''' <remarks>   Disposes of the disposable worksheets. </remarks>
+''' <para name="a_cancel">   [Boolean] Set to true to cancel closing. </param>
+Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
+    
+    Const p_procedureName As String = "Workbook_BeforeClose"
+    
+    On Error Resume Next
+    
+    ' dispose the disposable worksheets.
+    
+    Ieee488Sheet.Dispose
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    End If
+
+    On Error GoTo 0
+
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>
 ''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()
 
+    Const p_procedureName As String = "Workbook_Open"
+    
+    On Error Resume Next
+    
     ' hide and turn off code saving on the referenced workbooks
     cc_isr_Core.ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
@@ -93,6 +123,18 @@ Private Sub Workbook_Open()
     ' turn on code exporting for this work book
     ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True
+    
+    If Err.Number <> 0 Then
+        
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    End If
+
+    On Error GoTo 0
 
 End Sub
 

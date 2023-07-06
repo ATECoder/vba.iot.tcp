@@ -55,7 +55,6 @@ Attribute m_eventTimer.VB_VarHelpID = -1
 ' and the timer is paused on the next event.
 Private m_pauseRequested As Boolean
 
-
 ' true when handling the timer event to prevent timer
 ' event handler overrun.
 Private m_handlingTimerEvent As Boolean
