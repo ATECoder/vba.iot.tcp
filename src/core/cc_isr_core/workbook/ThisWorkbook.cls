@@ -47,6 +47,26 @@ Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
 End Sub
 
 
+''' <summary>   Handles the workbook before close event. </summary>
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    
+    Const p_procedureName As String = "Workbook_BeforeClose"
+    On Error Resume Next
+    TimerSheet.Dispose
+    
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    
+    On Error GoTo 0
+End Sub
+
 ''' <summary>   Handles the workbook open event. </summary>
 ''' <remarks>   Toggles visibility of referenced workbooks. </remarks>
 Private Sub Workbook_Open()

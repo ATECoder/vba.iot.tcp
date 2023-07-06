@@ -488,7 +488,7 @@ Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_por
     Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
     IConnectable_OnConnectionChanging p_eventArgs
     
-    If Not p_eventArgs.cancel Then
+    If Not p_eventArgs.Cancel Then
     
         Connectable.OpenConnection a_host, a_port, a_timeoutMs
         
@@ -516,7 +516,7 @@ Private Function IConnectable_CloseConnection() As Boolean
     Set p_args = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
     IConnectable_OnConnectionChanging p_args
    
-    If Not p_args.cancel Then
+    If Not p_args.Cancel Then
     
         IConnectable_CloseConnection = Connectable.CloseConnection
     

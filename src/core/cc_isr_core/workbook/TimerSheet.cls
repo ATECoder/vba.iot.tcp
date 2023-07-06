@@ -13,6 +13,28 @@ Private WithEvents m_eventTimer As cc_isr_Core.EventTimer
 Attribute m_eventTimer.VB_VarHelpID = -1
 Private pauseRequested As Boolean
 
+''' <summary>   Dispose of the worksheet objects. </summary>
+Public Sub Dispose()
+    Const p_procedureName As String = "Dispose"
+    On Error Resume Next
+    If Not m_eventTimer Is Nothing Then
+      m_eventTimer.StopTimer
+      Set m_eventTimer = Nothing
+    End If
+    
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
+End Sub
+
+
 Sub ResetClock()
     Range("B4") = TimeValue("00:00:15")
 End Sub

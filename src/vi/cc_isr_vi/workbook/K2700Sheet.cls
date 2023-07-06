@@ -97,6 +97,11 @@ End Property
 
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
+
+    Const p_procedureName As String = "Dispose"
+    
+    On Error Resume Next
+    
     Set m_stopWatch = Nothing
     
     If Not m_eventTimer Is Nothing Then
@@ -106,6 +111,18 @@ Public Sub Dispose()
     
     If Not m_k2700 Is Nothing Then m_k2700.Dispose
     Set m_k2700 = Nothing
+    
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
+    
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>

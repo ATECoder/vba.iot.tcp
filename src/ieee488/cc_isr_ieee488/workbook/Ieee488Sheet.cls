@@ -55,6 +55,9 @@ End Property
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
 
+    Const p_procedureName As String = "Dispose"
+    On Error Resume Next
+    
     Dim p_disconnected As Boolean
     
     If m_session Is Nothing Then
@@ -71,6 +74,18 @@ Public Sub Dispose()
     End If
 
     Set m_stopWatch = Nothing
+    
+    If Err.Number <> 0 Then
+    
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+    
+    On Error GoTo 0
 
 End Sub
 

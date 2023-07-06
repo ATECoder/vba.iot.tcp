@@ -72,8 +72,23 @@ End Sub
 ''' <summary>   Handles the workbook before close event. </summary>
 ''' <remarks>   Disposes of worksheet objects. </remarks>
 Private Sub Workbook_BeforeClose(Cancel As Boolean)
+
+    Const p_procedureName As String = "Workbook_BeforeClose"
+    On Error Resume Next
+
     ' disposes of sheet objects.
     K2700Sheet.Dispose
+
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+        
+    End If
+
+    On Error GoTo 0
 End Sub
 
 

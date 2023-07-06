@@ -47,6 +47,24 @@ Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
 
 End Sub
 
+Private Sub Workbook_BeforeClose(Cancel As Boolean)
+    
+    Const p_procedureName As String = "Workbook_BeforeClose"
+    
+    On Error Resume Next
+    Ieee488Sheet.Dispose
+    
+    If Err.Number <> 0 Then
+        ' append the error source
+        UserDefinedErrors.SetErrSource p_procedureName, Me.name
+        
+        ' display the error message
+        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    End If
+
+    On Error GoTo 0
+End Sub
+
 ''' <summary>   Handles the Workbook deactivate event. </summary>
 ''' <remarks>   disable the controls. </remarks>
 Private Sub Workbook_Deactivate()

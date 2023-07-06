@@ -404,7 +404,7 @@ Private Function IConnectable_OpenConnection(ByVal a_host As String, ByVal a_por
     Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
     IConnectable_OnConnectionChanging p_eventArgs
     
-    If Not p_eventArgs.cancel Then
+    If Not p_eventArgs.Cancel Then
     
         ' enable/disable the GPIB-Lan controller; this ensure that the controller correctly handles the
         ' Tcp Client connection events.
@@ -441,7 +441,7 @@ Private Function IConnectable_CloseConnection() As Boolean
     Set p_eventArgs = cc_isr_Winsock.Constructor.CreateConnectionChangingEventArgs(Me.Connected)
     IConnectable_OnConnectionChanging p_eventArgs
     
-    If Not p_eventArgs.cancel Then
+    If Not p_eventArgs.Cancel Then
     
         IConnectable_CloseConnection = Connectable.CloseConnection
     
