@@ -18,7 +18,7 @@ The following object libraries are used as references:
 
 ## Worksheets
 
-The [cc.isr.Ieee488] workbook includes two worksheets:
+The [cc.isr.Ieee488] workbook includes the following worksheets:
 
 * Identity -- To query the instrument identity using the *IDN? command.
 * IEEE488  -- To command and query an IEEE488.2 instrument.

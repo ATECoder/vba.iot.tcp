@@ -1,6 +1,6 @@
 # Testing the [cc.isr.Ieee488] Workbook
 
-[cc.isr.Ieee488] is an Excel workbook for interacting with an instrument that supports the IEEE 488.2 standard with commands such as `*IDN?` and `*CLS` and supporting higher level [ISR] workbooks
+[cc.isr.Ieee488] is an Excel workbook for controlling and querying instruments that support the IEEE 488.2 standard over Tcp/IP and supporting higher level [ISR] workbooks
 
 ## Dependencies
 
@@ -18,7 +18,7 @@ The following object libraries are used as references:
 
 ## Worksheets
 
-The [cc.isr.Ieee488] workbook includes two worksheets:
+The [cc.isr.Ieee488] workbook includes the following worksheets:
 
 * Identity -- To query the instrument identity using the *IDN? command.
 * IEEE488  -- To command and query an IEEE488.2 instrument.

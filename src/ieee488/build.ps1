@@ -28,6 +28,11 @@ Function LogInfo($message)
     Write-Host $message -ForegroundColor Gray
 }
 
+Function LogError($message)
+{
+    Write-Host $message -ForegroundColor Red
+}
+
 Function LogEmptyLine()
 {
     echo ""
@@ -75,7 +80,6 @@ Function AddReference( $workbook )
 	$workbook.VBProject.References.AddFromFile( $REFFILE )
 }
 
-
 # -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 # Summary:  Removes reference to the reference workbook from the primary work book 
 #           and save the primary workbook.
@@ -89,7 +93,7 @@ Function AddReference( $workbook )
 function RemoveWorkbookReference()
 {
 	
-    LogInfo( "Removing refernece " + $REFFILE )
+    LogInfo( "Removing reference " + $REFFILE )
 
     $PRMYPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $PRMYFILE)
 	$PRMYBOOK = $excel.Workbooks.Open($PRMYPATH)
@@ -106,6 +110,35 @@ function RemoveWorkbookReference()
     LogInfo( "   closed")
 }
 
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+# Summary:  Copies a specified file to the build directory.
+#
+# Parameters:
+# 
+# SOURCE           - the path of the source file
+# BUILD_DIRECTORY  - the path of the build directory
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+function CopyToBuildDirectory( $sourcePath )
+{
+
+	Try { 
+
+        $path = (Resolve-Path $sourcePath).Path
+
+		LogInfo( "coping " + $path + " to " + $BUILD_DIRECTORY )
+		copy-item $path -destination $BUILD_DIRECTORY
+		return $true
+
+	}
+	Catch {
+
+		LogError( $_.Exception.Message )
+        $z = Read-Host "Press enter to exit: "        
+		return $false
+	}
+
+}
+
 # END FUNCTIONS
 # ----------------------------------------------------------------------
 
@@ -119,65 +152,23 @@ MkDir -Force $BUILD_DIRECTORY > $null
 
 # Copy all workbooks to the build directory
 
-$SOURCE = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.xlsm")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-    return
-}
+$src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.xlsm")
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
-$SOURCE = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-    return
-}
+$src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
-$SOURCE = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.xlsm")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-	return
-}
+$src = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.xlsm") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
-$SOURCE = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.testing.md")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-	return
-}
+$src = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
-$SOURCE = [IO.Path]::Combine($CWD, "cc.isr.ieee488.xlsm")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-	return
-}
+$src = [IO.Path]::Combine($CWD, "cc.isr.ieee488.xlsm") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
-$SOURCE = [IO.Path]::Combine($CWD, "cc.isr.ieee488.testing.md")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	Copy-Item $SOURCE -Destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-	return
-}
+$src =  [IO.Path]::Combine($CWD, "cc.isr.ieee488.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
 
 # Open excel as hidden
 
@@ -185,6 +176,7 @@ $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $AutoSecurity = $Excel.AutomationSecurity
 $Excel.AutomationSecurity = 3
+
 Try {
 	
 	$excel.DisplayAlerts = $false
@@ -212,10 +204,8 @@ Try {
 	RemoveWorkbookReference
 
 }
-
 Catch {
-    echo $_.Exception.Message
-    return
+    LogError( $_.Exception.Message )
 }
 Finally{
 
@@ -225,4 +215,4 @@ Finally{
 }
 
 LogInfo( "project built" )
-$z = Read-Host "Press enter to exit: "
+$z = Read-Host "Press enter to exit"

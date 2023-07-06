@@ -28,11 +28,33 @@ Function LogInfo($message)
     Write-Host $message -ForegroundColor Gray
 }
 
+Function LogError($message)
+{
+    Write-Host $message -ForegroundColor Red
+}
+
 Function LogEmptyLine()
 {
     echo ""
 }
 
+function AwaitKeyPress()
+{
+    # this does not work: getting an exception
+    # Exception calling "ReadKey" with "1" argument(s): "Cannot read keys when either application does not have a console or when console input has been redirected from a 
+    # file. Try Console.Read."
+    loginfo( "Press any key" )
+	do{ $x = [console]::ReadKey() } while( $x.Key -ne "" )	
+}
+
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+# Summary:  Removes reference from the specified workbook.
+#
+# Parameters:
+# 
+# $workbook - the workbook from which the reference REFNAME needs to be removed
+# REFNAME   - The name of the referenced workbook that needs to be removed
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 Function RemoveReference( $workbook )
 {
 	ForEach ($ref in $workbook.VBProject.References ) {
@@ -44,16 +66,77 @@ Function RemoveReference( $workbook )
 	}
 }
 
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+# Summary:  Adds a reference to the specified workbook.
+#
+# Parameters:
+# 
+# $workbook - the workbook to which the reference needs to be added
+# REFFILE   - the file name of the referenced workbook to add, e.g., "cc.isr.core.xlsm"
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 Function AddReference( $workbook )
 {
 	RemoveReference( $workbook ) 
 	$workbook.VBProject.References.AddFromFile( $REFFILE )
 }
 
-
-function AwaitKeyPress()
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+# Summary:  Removes reference to the reference workbook from the primary work book 
+#           and save the primary workbook.
+#
+# Parameters:
+# 
+# PRMYFILE - the file name of the primary workbook, e.g., "cc.isr.winsock.xlsm"
+# REFFILE  - the file name of the referenced workbook, e.g., "cc.isr.core.xlsm"
+# REFNAME  - The new of the referenced workbook, e.g., "cc_isr_Core"
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+function RemoveWorkbookReference()
 {
-	do{ echo "Press any key";$x = [System.Console]::ReadKey() } while( $x.Key -ne "" )	
+	
+    LogInfo( "Removing reference " + $REFFILE )
+
+	$PRMYPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $PRMYFILE)
+	$PRMYBOOK = $excel.Workbooks.Open($PRMYPATH)
+    LogInfo( "   Opened " + $excel.Workbooks.Item($PRMYFILE).Name )
+
+	$REFPATH = [IO.Path]::Combine($BUILD_DIRECTORY, $REFFILE)
+    $REFFILE = $REFFILE 
+	RemoveReference( $PRMYBOOK )
+
+	$PRMYBOOK.Save()
+
+	$PRMYBOOK.SaveAs($PRMYPATH, $XL_FILE_FORMAT_MACRO_ENABLED)
+    $PRMYBOOK.Close()
+    LogInfo( "   closed")
+}
+
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+# Summary:  Copies a specified file to the build directory.
+#
+# Parameters:
+# 
+# SOURCE           - the path of the source file
+# BUILD_DIRECTORY  - the path of the build directory
+# -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+function CopyToBuildDirectory( $sourcePath )
+{
+
+	Try { 
+
+        $path = (Resolve-Path $sourcePath).Path
+
+		LogInfo( "coping " + $path + " to " + $BUILD_DIRECTORY )
+		copy-item $path -destination $BUILD_DIRECTORY
+		return $true
+
+	}
+	Catch {
+
+		LogError( $_.Exception.Message )
+        $z = Read-Host "Press enter to exit: "        
+		return $false
+	}
+
 }
 
 # END FUNCTIONS
@@ -63,69 +146,49 @@ function AwaitKeyPress()
 # ----------------------------------------------------------------------
 # SCRIPT ENTRY POINT
 
+# create the build directory if new 
+
 MkDir -Force $BUILD_DIRECTORY > $null
 
-$SOURCE = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.xlsm")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-    return
-}
+# Copy all workbooks to the build directory
 
-$SOURCE = [IO.Path]::Combine($CWD, "cc.isr.winsock.xlsm")
-Try {
-	echo coping $SOURCE to $BUILD_DIRECTORY
-	copy-item $SOURCE -destination $BUILD_DIRECTORY
-}
-Catch {
-    echo $_.Exception.Message
-	return
-}
+$src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.xlsm")
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+
+$src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+
+$src = [IO.Path]::Combine($CWD, "cc.isr.winsock.xlsm") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+
+$src = [IO.Path]::Combine($CWD, "cc.isr.winsock.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+
+# Open excel as hidden
 
 $excel = New-Object -ComObject Excel.Application
 $excel.Visible = $false
 $AutoSecurity = $Excel.AutomationSecurity
 $Excel.AutomationSecurity = 3
+
 Try {
 	
 	$excel.DisplayAlerts = $false
 
-    $FILE1 = "cc.isr.winsock.xlsm"
-	$PATH1 = [IO.Path]::Combine($BUILD_DIRECTORY, $FILE1)
-	$BOOK1 = $excel.Workbooks.Open($PATH1)
-    echo "Opened " + $excel.Workbooks.Item($FILE1).Name
+# Remove the references from each workbook starting with the workbook that
+# has the fewest references.
 
-    $FILE2 = "cc.isr.core.xlsm"
-	$PATH2 = [IO.Path]::Combine($BUILD_DIRECTORY, $FILE2)
-	# $BOOK2 = $excel.Workbooks.Open($PATH2)
-    # echo $excel.Workbooks.Item($FILE2).Name
+# Remove cc_isr_core references
 
-    $REFFILE = $FILE2 
     $REFNAME = "cc_isr_Core"
-	RemoveReference( $BOOK1 )
-    # $excel.Workbooks.Item($FILE2).Close()
-    # if looks like the reference was updated automatically at this point?!
-	$BOOK1.Save()
-
-	#$BOOK2 = $excel.Workbooks.Open($PATH2)
-    #$excel.Workbooks.Add($PATH2)
-    
-    # $REFFILE = $FILE2 
-    # $REFNAME = "cc_isr_Core"
-	# AddReference( $BOOK1 )
-
-	# $BOOK2.SaveAs($PATH2, $XL_FILE_FORMAT_MACRO_ENABLED)
-	$BOOK1.SaveAs($PATH1, $XL_FILE_FORMAT_MACRO_ENABLED)
-    $BOOK1.Close()
-
+    $REFFILE = "cc.isr.core.xlsm"
+	
+    $PRMYFILE = "cc.isr.winsock.xlsm"
+	RemoveWorkbookReference
+	
 }
-
 Catch {
-    echo $_.Exception.Message
-    return
+    LogError( $_.Exception.Message )
 }
 Finally{
 
@@ -134,5 +197,5 @@ Finally{
 	$excel.Quit()
 }
 
-echo "project built"
-LogInfo "Project built"
+LogInfo( "project built" )
+$z = Read-Host "Press enter to exit"
