@@ -77,15 +77,16 @@ End Property
 ''' <summary>   Initializes the k2700 legacy mode. </summary>
 ''' <param name="a_host">        [String] An IPv4 dotted-decimal host address. </param>
 ''' <param name="a_port">        [Long] The port that the server is listening on. </param>
-''' <param name="a_timeoutMs">   [Optional, 500] The receive timeout in milliseconds. </param>
+''' <param name="a_timeoutMs">   [Optional, 3000] The session read timeout in milliseconds. </param>
 ''' <returns>   True if the device was initialized. </returns>
 Public Function InitializeLegacy(ByVal a_host As String, ByVal a_port As Long, _
-        Optional ByVal a_timeoutMs As Long = 500) As Boolean
+        Optional ByVal a_timeoutMs As Long = 3000) As Boolean
 
-    Me.OpenConnection a_host, a_port, a_timeoutMs
+    Me.OpenConnection a_host, a_port
 
     ' reset clear the device.
     If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
+    Me.Session.VISession.SessionReadTimeout = a_timeoutMs
     Me.Session.ResetKnownState
     Me.Session.ClearExecutionState
     
@@ -152,7 +153,7 @@ Public Function ContinuousResistanceAutoRange()
     Me.Session.WriteLine ":RES:RANG:AUTO ON"
     Me.Session.WriteLine ":RES:NPLC 1"
     
-   ' set reading format
+    ' set reading format
     Me.Session.WriteLine ":FORM:ELEM READ"
     
     ' turn on continuous mode
@@ -223,7 +224,7 @@ End Property
 
 ''' <summary>   Returns true if the instrument as a 40 channel multiplexer
 ''' such as the 7702 board in the first position. </summary>
-''' <value> A Boolean. </value>
+''' <value>   [Boolean]. </value>
 Public Property Get HasMux40A() As Boolean
         
     HasMux40A = m_hasMux40A
@@ -232,7 +233,7 @@ End Property
 
 ''' <summary>   Returns true if the instrument as a 40 channel multiplexer
 ''' such as the 7702 board in the second position. </summary>
-''' <value> A Boolean. </value>
+''' <value>   [Boolean]. </value>
 Public Property Get HasMux40B() As Boolean
 
     HasMux40B = m_hasMux40B
@@ -241,7 +242,7 @@ End Property
 
 ''' <summary>   Returns true if the instrument as a 20 channel multiplexer
 ''' such as the 7700 or 7710 boards in the first position. </summary>
-''' <value> A Boolean. </value>
+''' <value>   [Boolean]. </value>
 Public Property Get HasMux20A() As Boolean
 
     HasMux20A = m_hasMux20A
@@ -250,13 +251,20 @@ End Property
 
 ''' <summary>   Returns true if the instrument as a 20 channel multiplexer
 ''' such as the 7700 or 7710 boards in the second position. </summary>
-''' <value> A Boolean. </value>
+''' <value>   [Boolean]. </value>
 Public Property Get HasMux20B() As Boolean
 
     HasMux20B = m_hasMux20B
 
 End Property
 
+''' <summary>   Returns true if the instrument as any mux cards. </summary>
+''' <value>   [Boolean]. </value>
+Public Property Get HasMuxCards() As Boolean
+
+    HasMuxCards = Me.HasMux20A Or Me.HasMux20B Or Me.HasMux40A Or Me.HasMux40B
+
+End Property
 
 ''' <summary>   Returns the channel list. </summary>
 ''' <param name="a_resistanceNumber">   [Integer] The resistance number. </param>
@@ -375,6 +383,9 @@ Public Function ConfigureSingleResistanceReading()
     Me.Session.WriteLine ":SAMP:COUN 1"
     Me.Session.WriteLine ":TRIG:COUN 1"
     Me.Session.WriteLine ":FUNC 'RES'"
+    
+    ' set reading format
+    Me.Session.WriteLine ":FORM:ELEM READ"
 
 End Function
 
@@ -449,6 +460,9 @@ Public Sub SetExternalTriggerResistanceMode()
     If Me.Session.VISession.UsingGpibLan Then Me.Session.VISession.GpibLan.SelectiveDeviceClear
     Me.Session.ClearExecutionState
     
+    ' set reading format
+    Me.Session.WriteLine ":FORM:ELEM READ"
+    
     ' set external triggering
     Me.Session.WriteLine ":INIT:CONT OFF"
     Me.Session.WriteLine ":FUNC 'FRES'"
@@ -458,9 +472,29 @@ Public Sub SetExternalTriggerResistanceMode()
     Me.Session.WriteLine ":TRIG:COUN 1"
     Me.Session.WriteLine ":TRIG:SOUR EXT"
     
+    ' setup the status register so that we get a RQS
+    ' on measurement available
+    
+    Me.Session.WriteLine "*ESE 0"
+    Me.Session.WriteLine "*SRE 63"
+    
+    ' clear the measurement event enable register
+    
+    Me.Session.WriteLine "STAT:PRES"
+    
+    ' enable the reading available bit of the measurement event register.
+    
+    Me.Session.WriteLine "STAT:MEAS:ENAB 32"
+    
+#If False Then
+    ' legacy code used the operation register going to idle to indicate that
+    ' a measurment is available. This did not work when testing
+    ' the VI code.
+    
     ' enable idle operation SRQ
     Me.Session.WriteLine ":STAT:OPER:ENAB 1024"
     Me.Session.WriteLine "*CLS; *SRE 128"
+#End If
     
     ' clear the flag indicating that the external
     ' trigger mode was not initiated
@@ -536,12 +570,10 @@ Public Sub MonitorExternalTrigger(ByVal a_resistanceNo As Integer, ByVal a_isDon
     
             ' we need to initiate the next wait for an external trigger.
             
-            ' clear the trigger register
+            ' toggle external trigger mode.
             
             Me.Session.WriteLine ":TRIG:SOUR IMM"
             Me.Session.WriteLine ":TRIG:SOUR EXT"
-            
-            ' clear the screen
             
             Me.Session.WriteLine ":FRES:NPLC 1"
               

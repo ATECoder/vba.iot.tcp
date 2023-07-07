@@ -184,16 +184,53 @@ Friend Sub EnableControls(ByVal a_connected As Boolean)
     Me.ReadStandardEventStatusButton.Enabled = a_connected
     Me.WriteButton.Enabled = a_connected
     
+    Me.InitExtTrigButton.Enabled = a_connected
     Me.ReadCardsButton.Enabled = a_connected
     Me.SetScansButton.Enabled = a_connected
     Me.QueryInputsButton.Enabled = a_connected
-    Me.ReadResistanceButton.Enabled = a_connected
+    
+    Me.EnableReadResistanceButton
+    Me.EnableExtTrigToggleButton
     
     If a_connected Then
         Me.EnableGpibLanControls Me.Session.VISession.UsingGpibLan
     Else
         Me.EnableGpibLanControls False
     End If
+
+End Sub
+
+''' <summary>   Toggle the enable state of the Read Resistane Button based on the status
+''' of the K2700 and the availablity of MUX cards. </summary>
+Friend Sub EnableReadResistanceButton()
+    
+    Dim p_enable As Boolean
+    p_enable = Not K2700 Is Nothing
+    If p_enable Then
+        p_enable = Me.K2700.Connected
+    End If
+    If p_enable Then
+        p_enable = Me.K2700.HasMuxCards
+    End If
+    
+    Me.ReadResistanceButton.Enabled = p_enable
+
+End Sub
+
+''' <summary>   Toggle the enable state of the External Trig Toggle Button based on the status
+''' of the K2700 and the availablity of MUX cards. </summary>
+Friend Sub EnableExtTrigToggleButton()
+    
+    Dim p_enable As Boolean
+    p_enable = Not K2700 Is Nothing
+    If p_enable Then
+        p_enable = Me.K2700.Connected
+    End If
+    If p_enable Then
+        p_enable = Me.K2700.HasMuxCards
+    End If
+    
+    Me.ExtTrigToggleButton.Enabled = p_enable
 
 End Sub
 
@@ -236,12 +273,17 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand & _
             ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
    
-    Me.CommandsComboBox.AddItem ":FUNC 'RES',(@101:120)"
-    Me.CommandsComboBox.AddItem ":FUNC 'RES',(@201:220)"
-    Me.CommandsComboBox.AddItem ":SYST:BEEP"
-    Me.CommandsComboBox.AddItem ":SYST:CLE"
-    Me.CommandsComboBox.AddItem ":SYST:ERR?"
-    Me.CommandsComboBox.AddItem ":SYST:FRSW?"
+    Me.CommandsComboBox.AddItem "SYST:BEEP OFF"
+    Me.CommandsComboBox.AddItem "SYST:CLE"
+    Me.CommandsComboBox.AddItem "SYST:ERR?"
+    Me.CommandsComboBox.AddItem "SYST:FRSW?"
+    Me.CommandsComboBox.AddItem "FUNC 'RES',(@101:120)"
+    Me.CommandsComboBox.AddItem "FUNC 'RES',(@201:220)"
+    Me.CommandsComboBox.AddItem "FORM:ELEM READ"
+    Me.CommandsComboBox.AddItem "STAT:PRES"
+    Me.CommandsComboBox.AddItem "STAT:MEAS:ENAB 32"
+    Me.CommandsComboBox.AddItem "FETCH?"
+    Me.CommandsComboBox.AddItem "READ?"
     
     Me.CommandsComboBox.ListIndex = 1
    
@@ -457,6 +499,58 @@ Private Sub CLSButton_Click()
     
     Me.ReadStopWatch
     
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Handles the Initialize External Trigger Button click event. </summary>
+''' <remarks>   Sets the instrument to turn on the RQS bit on external trigger. </remarks>
+Private Sub InitExtTrigButton_Click()
+
+
+    Const p_procedureName = "ReadStandardEventStatusButton"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+   
+    Me.Session.WriteLine ":TRIG:SOUR IMM"
+    
+    Me.Session.WriteLine ":TRIG:SOUR EXT"
+    
+    ' clear the serial poll register
+    
+    Me.Session.WriteLine "*ESE 0"
+    Me.Session.WriteLine "*SRE 63"
+    
+    ' clear the measurement event enable register
+    Me.Session.WriteLine "STAT:PRES"
+    
+    ' enable the reading available bit of the measurement event register.
+    Me.Session.WriteLine "STAT:MEAS:ENAB 32"
+    
+    Me.Session.QueryServiceRequestStatus
+    
+    ' initiate awaiting for the external trigger
+    
+    Me.Session.WriteLine ":INIT; *CLS"
+   
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
@@ -1349,6 +1443,9 @@ Private Sub ReadCardsButton_Click()
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    Me.EnableReadResistanceButton
+    Me.EnableExtTrigToggleButton
+
     On Error GoTo 0
     Exit Sub
 
@@ -1602,7 +1699,7 @@ Private Sub ExtTrigToggleButton_Click()
     
     If Me.ExternalTrigEnabled Then
     
-        Me.ExtTrigToggleButton.Enabled = False
+        Me.ExtTrigToggleButton.Enabled = True
         Me.ReadResistanceButton.Enabled = False
         
         If Me.AutoIncrementResistanceNoEnabled Then
