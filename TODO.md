@@ -1,9 +1,5 @@
 ### TODO
 
-update error handling int he worksheet and workbook.
-
-winsock: add getting the last error message from windows base.
-
 
 #### Tests
 VI

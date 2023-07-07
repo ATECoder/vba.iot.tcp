@@ -181,6 +181,7 @@ Friend Sub EnableControls(ByVal a_connected As Boolean)
     Me.QueryButton.Enabled = a_connected
     Me.ReadButton.Enabled = a_connected
     Me.ReadStatusByteButton.Enabled = a_connected
+    Me.ReadStandardEventStatusButton.Enabled = a_connected
     Me.WriteButton.Enabled = a_connected
     
     Me.ReadCardsButton.Enabled = a_connected
@@ -242,7 +243,7 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem ":SYST:ERR?"
     Me.CommandsComboBox.AddItem ":SYST:FRSW?"
     
-    Me.CommandsComboBox = Me.CommandsComboBox.ItemData(1)
+    Me.CommandsComboBox.ListIndex = 1
    
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -833,12 +834,12 @@ End Property
 
 ''' <summary>   Gets the Last Error Message. </summary>
 Friend Property Get LastErrorMessage() As String
-    LastErrorMessage = Me.LastErrorMessage
+    LastErrorMessage = Range(m_lastErrorMessageCell).value
 End Property
 
 ''' <summary>   Sets the Last Error Message. </summary>
 Friend Property Let LastErrorMessage(ByVal a_value As String)
-    Me.LastErrorMessage = a_value
+    Range(m_lastErrorMessageCell).value = a_value
 End Property
 
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
