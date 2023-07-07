@@ -49,6 +49,11 @@ The main types provided by this library are:
 
 Testing information is included in the [Testing] document.
 
+## [User-Defined Type Not Defined error]
+
+Occasionally, this error message displays when compiling this project.  Importing all code files did not resolve this 
+issue per the above link.
+
 # Feedback
 
 [cc.isr.Core] is released as open source under the MIT license.
@@ -61,3 +66,5 @@ Bug reports and contributions are welcome at the [cc.isr.Core] repository.
 
 [Microsoft Scripting Runtime]: c:\windows\system32\scrrun.dll
 [Microsoft Visual Basic for Applications Extensibility 5.3]: <c:/program&#32;files/common&#32;files/microsoft&#32;shared/vba/vba7.1/vbeui.dll>
+[User-Defined Type Not Defined error]: https://stackoverflow.com/questions/19680402/compile-throws-a-user-defined-type-not-defined-error-but-does-not-go-to-the-of#:~:text=So%20the%20solution%20is%20to%20declare%20every%20referenced,objXML%20As%20Variant%20Set%20objXML%20%3D%20CreateObject%20%28%22MSXML2.DOMDocument%22%29
+

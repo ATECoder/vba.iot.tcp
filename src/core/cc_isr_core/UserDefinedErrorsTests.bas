@@ -37,12 +37,12 @@ err_Handler:
     ' build the error source
     UserDefinedErrors.SetErrSource thisProcedureName, m_moduleName
     
-    Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(Err.source) > 0, "Err.Source should not be empty")
+    Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(Err.Source) > 0, "Err.Source should not be empty")
     
     Dim p_expectedErrorSource As String
     p_expectedErrorSource = ThisWorkbook.VBProject.name & "." & m_moduleName & "." & thisProcedureName
     
-    Set TestErrorMessageShouldBuild = Assert.AreEqual(p_expectedErrorSource, Err.source, "Err.Source should equal the expected value")
+    Set TestErrorMessageShouldBuild = Assert.AreEqual(p_expectedErrorSource, Err.Source, "Err.Source should equal the expected value")
     
     Dim p_errorMessage As String: p_errorMessage = UserDefinedErrors.BuildStandardErrorMessage()
     

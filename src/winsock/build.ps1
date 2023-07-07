@@ -14,7 +14,8 @@
 # VARIABLES
 
 $CWD = (Resolve-Path .\).Path
-$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "bin")
+$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "..\..\bin\winsock")
+$BUILD_DIRECTORY = (Resolve-Path $BUILD_DIRECTORY).Path
 $XL_FILE_FORMAT_MACRO_ENABLED = 52
 
 # END VARIABLES
@@ -153,16 +154,16 @@ MkDir -Force $BUILD_DIRECTORY > $null
 # Copy all workbooks to the build directory
 
 $src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.xlsm")
-if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
 $src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md") 
-if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
 $src = [IO.Path]::Combine($CWD, "cc.isr.winsock.xlsm") 
-if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
 $src = [IO.Path]::Combine($CWD, "cc.isr.winsock.testing.md") 
-if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit }
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
 # Open excel as hidden
 

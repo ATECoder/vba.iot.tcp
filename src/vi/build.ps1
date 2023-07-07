@@ -14,7 +14,8 @@
 # VARIABLES
 
 $CWD = (Resolve-Path .\).Path
-$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "bin")
+$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "..\..\bin\vi")
+$BUILD_DIRECTORY = (Resolve-Path $BUILD_DIRECTORY).Path
 $XL_FILE_FORMAT_MACRO_ENABLED = 52
 
 # END VARIABLES

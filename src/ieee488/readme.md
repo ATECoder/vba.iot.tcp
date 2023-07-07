@@ -41,6 +41,11 @@ The main types provided by this library are:
 
 Testing information is included in the [Testing] document.
 
+## Scripts
+
+* Build: copies files to the build folder and remove the existing references.
+* Deploy: copies files to the build folder.
+
 ## Feedback
 
 [cc.isr.Ieee488] is released as open source under the MIT license.

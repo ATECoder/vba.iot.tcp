@@ -154,7 +154,7 @@ Public Function FormattedErr() As String
     
     Dim p_errNoDetails As String
     p_errNoDetails = " (" & (Err.Number - VBA.vbObjectError) & " / 0x" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")"
-    FormattedErr = "[Error Number=" & Err.Number & p_errNoDetails & ", Source=" & Err.source & ", Description=" & Err.Description & "]"
+    FormattedErr = "[Error Number=" & Err.Number & p_errNoDetails & ", Source=" & Err.Source & ", Description=" & Err.Description & "]"
 
 End Function
 
@@ -335,7 +335,7 @@ Public Sub SetErrSource(ByVal a_errProcedureName As String, ByVal a_errModuleNam
     
     ' get the current source string
     
-    Dim p_errorSource As String: p_errorSource = Err.source
+    Dim p_errorSource As String: p_errorSource = Err.Source
     
     ' build the error source.
     
@@ -343,7 +343,7 @@ Public Sub SetErrSource(ByVal a_errProcedureName As String, ByVal a_errModuleNam
   
     ' Update the Err.Source
     
-    Err.source = p_errorSource
+    Err.Source = p_errorSource
  
 End Sub
 
@@ -381,7 +381,7 @@ Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boo
         p_builder.Append Hex$(p_errNumber)
         p_builder.Append ") "
         p_builder.Append "occurred in "
-        p_builder.Append Err.source
+        p_builder.Append Err.Source
         p_builder.Append a_descriptionDelimiter
         p_builder.Append Err.Description
         

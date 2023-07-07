@@ -14,7 +14,7 @@
 # VARIABLES
 
 $CWD = (Resolve-Path .\).Path
-$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "..\..\bin\winsock")
+$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "..\..\bin\ieee488")
 $BUILD_DIRECTORY = (Resolve-Path $BUILD_DIRECTORY).Path
 $XL_FILE_FORMAT_MACRO_ENABLED = 52
 
@@ -96,10 +96,16 @@ if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 $src = [IO.Path]::Combine($CWD, "..\core\cc.isr.core.testing.md") 
 if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
-$src = [IO.Path]::Combine($CWD, "cc.isr.winsock.xlsm") 
+$src = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.xlsm") 
 if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
-$src = [IO.Path]::Combine($CWD, "cc.isr.winsock.testing.md") 
+$src = [IO.Path]::Combine($CWD, "..\winsock\cc.isr.winsock.testing.md") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
+
+$src = [IO.Path]::Combine($CWD, "cc.isr.ieee488.xlsm") 
+if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
+
+$src =  [IO.Path]::Combine($CWD, "cc.isr.ieee488.testing.md") 
 if ( -Not( CopyToBuildDirectory ( $src  ) ) ) { exit 1 }
 
 LogInfo( "project deployed" )
