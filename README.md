@@ -1,4 +1,4 @@
-### VBA IOT Tcp
+# [VBA IOT TCP]
 
 TCP Socket-based control and communication workbooks for LXI-based instruments. 
 
@@ -6,7 +6,11 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 * [Issues](#Issues)
 * [Supported VBA Releases](#Supported-VBA-Releases)
 * Project README files:
-  * [identity](/src/tcp/identity/readme.md)
+  * [core](/src/core/readme.md)
+  * [ieee488](/src/ieee488/readme.md)
+  * [vi](/src/vi/readme.md)
+  * [winapi](/src/winapi/readme.md)
+  * [winsock](/src/winsock/readme.md)
 * [Using Prologix](Prologix.md)
 * [Attributions](Attributions.md)
 * [Change Log](./CHANGELOG.md)
@@ -20,30 +24,30 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 * [Authors](#Authors)
 * [Security](security.md)
 
-#### Description
+## Description
 
 The ISR VBA IOT TCP workbooks consists of VBA class for communicating with LXI instruments in desktop platforms.
 
 Unlike VXI-11 or HiSlip, these classes do not implement the bus level method for issuing device clear, reading service requests or responding to instrument initiated event. While  control ports for these methods are available in some Keysight instruments, these ports are not part of the standard LXI framework.
 
-#### Issues
+## Issues
 
-##### read after write delay is required  for Async methods
+### read after write delay is required  for Async methods
 A delay of 1 ms is required for implementing the asynchronous query method using the TCP Client write and read asynchronous methods. Neither the console nor unit tests are succeptible to this issue. 
 
-#### Supported VBA Releases
+## Supported VBA Releases
 
 * TBA
 
-#### Repository Owner
+## Repository Owner
 * [ATE Coder]
 
 <a name="Authors"></a>
-#### Authors
+## Authors
 * [ATE Coder]  
 
 <a name="legal-notices"></a>
-#### Legal Notices
+## Legal Notices
 
 Integrated Scientific Resources, Inc., and any contributors grant you a license to the documentation and other content in this repository under the [Creative Commons Attribution 4.0 International Public License], see the [LICENSE](./LICENSE) file, and grant you a license to any code in the repository under the [MIT License], see the [LICENSE-CODE](./LICENSE-CODE) file.
 
@@ -56,5 +60,5 @@ Integrated Scientific Resources, Inc., and any contributors reserve all other ri
  
 [ATE Coder]: https://www.IntegratedScientificResources.com
 
-[vba.iot.tcp.identity]: https://github.com/ATECoder/vba.iot.tcp.git
+[VBA IOT TCP]: https://github.com/ATECoder/vba.iot.tcp.git
 

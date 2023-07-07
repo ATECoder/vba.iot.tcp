@@ -2,6 +2,9 @@
 All notable changes to these libraries will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+##### [1.0.8588] - 2023-07-07
+* Release candidate. 
+
 ##### [1.0.8572] - 2023-06-21
 * Add VI sheets for the 2700 and IEEE488 devices. 
 * Fix error -420 issue at the VI Session level.
@@ -28,4 +31,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 &copy;  2023 Integrated Scientific Resources, Inc. All rights reserved.
 
-[1.0.8567]: https://github.com/ATECoder/vba.iot.tcp
+[1.0.8588]: https://github.com/ATECoder/vba.iot.tcp

@@ -1,6 +1,8 @@
 
 $CWD = (Resolve-Path .\).Path
-$FILENAME = [IO.Path]::Combine($CWD, "IdentityReader.xlsm")
+$BUILD_DIRECTORY = [IO.Path]::Combine($CWD, "..\..\bin\core")
+$BUILD_DIRECTORY = (Resolve-Path $BUILD_DIRECTORY).Path
+$FILENAME = [IO.Path]::Combine($BUILD_DIRECTORY, "cc.isr.core.xlsm")
 
 Function LogInfo($message)
 {
@@ -185,3 +187,6 @@ LogSummary "Test suites: " $passedSuites ($suites.Count - $passedSuites)
 LogSummary "Tests:       " $passedTests ($testCount - $passedTests)
 LogInfo "Ran all test suites."
 LogEmptyLine
+$z = Read-Host "Press enter to exit"
+exit 0
+

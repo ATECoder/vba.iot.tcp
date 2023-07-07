@@ -6,8 +6,7 @@ Flying
 #### Fixes
 
 #### Updates
-* add test power shell scripts
-	* run test on the build folder
+* Core: fix the test.ps1 script
 * add ieee488 unit tests.
 * add vi unit tests.
 
