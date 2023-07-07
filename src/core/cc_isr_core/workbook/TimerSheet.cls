@@ -15,25 +15,37 @@ Private pauseRequested As Boolean
 
 ''' <summary>   Dispose of the worksheet objects. </summary>
 Public Sub Dispose()
+
     Const p_procedureName As String = "Dispose"
-    On Error Resume Next
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     If Not m_eventTimer Is Nothing Then
       m_eventTimer.StopTimer
       Set m_eventTimer = Nothing
     End If
     
-    If Err.Number <> 0 Then
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-        
-    End If
-    
-    On Error GoTo 0
-End Sub
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    cc_isr_Core.UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    MsgBox cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
 
 Sub ResetClock()
     Range("B4") = TimeValue("00:00:15")

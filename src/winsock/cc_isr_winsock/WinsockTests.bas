@@ -51,6 +51,26 @@ Public Function TestInitializeAndDispose() As Assert
     
 End Function
 
+''' <summary>   Unit test. Asserts getting the error description from the Windows API. </summary>
+''' <returns>   An <see cref="Assert"/> instance of <see cref="Assert.AssertSuccessful"/> True if the test passed. </returns>
+Public Function TestGettingLastErrorDescription() As Assert
+
+    Dim p_errorNumber As Long: p_errorNumber = 5
+    Dim p_expected As String: p_expected = "Access is denied."
+    Dim p_actual As String: p_actual = Winsock.LastErrorDescription(p_errorNumber)
+    
+    Set TestGettingLastErrorDescription = Assert.AreEqual(p_expected, p_actual, _
+            "Winsock should get the correct error description for error number " & CStr(p_errorNumber))
+    
+End Function
+
+
+
+
+
+
+
+
 
 
 

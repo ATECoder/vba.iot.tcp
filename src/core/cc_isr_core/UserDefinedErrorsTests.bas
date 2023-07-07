@@ -8,9 +8,9 @@ Private Const m_moduleName As String = "UserDefinedErrorsTests"
 Public Function TestUserDefinedErrorShouldExist() As Assert
     
     ' this should be added to the activate event of the workbook
-    ' UserDefinedErrors.Initialize
+    ' cc_isr_Core.UserDefinedErrors.Initialize
     Dim p_userError As UserDefinedError
-    Set p_userError = UserDefinedErrors.SocketConnectionError
+    Set p_userError = cc_isr_Core.UserDefinedErrors.SocketConnectionError
     Set TestUserDefinedErrorShouldExist = Assert.IsTrue(UserDefinedErrors.UserDefinedErrorExists(p_userError), _
                                                         p_userError.ToString(" should exist"))
 End Function
@@ -29,13 +29,14 @@ Public Function TestErrorMessageShouldBuild() As Assert
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
+    On Error GoTo 0
     Exit Function
 
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 err_Handler:
   
     ' build the error source
-    UserDefinedErrors.SetErrSource thisProcedureName, m_moduleName
+    cc_isr_Core.UserDefinedErrors.SetErrSource thisProcedureName, m_moduleName
     
     Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(Err.Source) > 0, "Err.Source should not be empty")
     
@@ -44,13 +45,12 @@ err_Handler:
     
     Set TestErrorMessageShouldBuild = Assert.AreEqual(p_expectedErrorSource, Err.Source, "Err.Source should equal the expected value")
     
-    Dim p_errorMessage As String: p_errorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Dim p_errorMessage As String: p_errorMessage = cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage()
     
     Set TestErrorMessageShouldBuild = Assert.IsTrue(Len(p_errorMessage) > 0, "error message should build")
     
-    ' exit this procedure (not an active handler)
-    On Error GoTo 0
-
+    On Error Resume Next
+    
     GoTo exit_Handler
 
 End Function

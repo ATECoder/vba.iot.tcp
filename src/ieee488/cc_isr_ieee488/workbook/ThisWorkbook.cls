@@ -28,26 +28,27 @@ Private Sub Workbook_Activate()
     
     Const p_procedureName As String = "Workbook_Activate"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
-    ' init the user defined errors.
-    cc_isr_Core.UserDefinedErrors.Initialize
-    
-    ' initialize the sheets to initial values.
-    Ieee488Sheet.Initialize cc_isr_Winsock.Constructor.CreateConnectionChangedEventArgs()
-    
-    
-    If Err.Number <> 0 Then
-        
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-    
-    End If
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
     On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
     
 End Sub
 
@@ -58,23 +59,31 @@ Private Sub Workbook_AfterSave(ByVal a_success As Boolean)
     
     Const p_procedureName As String = "Workbook_AfterSave"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     If a_success And Me.ExportCodeAfterSave Then
         cc_isr_Core.WorkbookUtilities.ExportProjectCodeFiles ThisWorkbook.VBProject
     End If
     
-    If Err.Number <> 0 Then
-        
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-    
-    End If
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
     On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
     
 End Sub
 
@@ -85,24 +94,32 @@ Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
     
     Const p_procedureName As String = "Workbook_BeforeClose"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     ' dispose the disposable worksheets.
     
     Ieee488Sheet.Dispose
     
-    If Err.Number <> 0 Then
-        
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-    
-    End If
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
     On Error GoTo 0
+    Exit Sub
 
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Handles the workbook open event. </summary>
@@ -111,7 +128,8 @@ Private Sub Workbook_Open()
 
     Const p_procedureName As String = "Workbook_Open"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     ' hide and turn off code saving on the referenced workbooks
     cc_isr_Core.ThisWorkbook.ExportCodeAfterSave = True
@@ -124,17 +142,32 @@ Private Sub Workbook_Open()
     ThisWorkbook.ExportCodeAfterSave = True
     Application.Windows(ThisWorkbook.name).Visible = True
     
-    If Err.Number <> 0 Then
-        
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    ' init the user defined errors.
+    cc_isr_Core.UserDefinedErrors.Initialize
     
-    End If
+    ' initialize the sheets to initial values.
+    Ieee488Sheet.Initialize
+    IdentitySheet.Initialize
+    TestSheet.Initialize
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
     On Error GoTo 0
+    Exit Sub
 
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 

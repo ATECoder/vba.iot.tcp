@@ -1,16 +1,18 @@
 ### TODO
 
+update error handling int he worksheet and workbook.
+
+winsock: add getting the last error message from windows base.
+
+
 #### Tests
+VI
 
 #### Fixes
-* vI: handle error on toggle connection. 
-	* implement connectable
 
 #### Updates
 * add test power shell scripts
-	* deploy to a bin folder.
-	* then run build using relative folders
-	* then run test.
+	* run test on the build folder
 * add ieee488 unit tests.
 * add vi unit tests.
 

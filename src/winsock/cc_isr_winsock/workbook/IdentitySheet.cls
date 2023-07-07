@@ -163,7 +163,7 @@ Finally:
     Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            p_errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
+            p_errorMessage = "Reading identity failed " & cc_isr_Core.UserDefinedErrors.FormattedErr & _
                              " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
@@ -315,7 +315,7 @@ Finally:
     Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            p_errorMessage = "Reading identity failed " & UserDefinedErrors.FormattedErr & _
+            p_errorMessage = "Reading identity failed " & cc_isr_Core.UserDefinedErrors.FormattedErr & _
                              " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If
@@ -468,7 +468,7 @@ Finally:
     Dim p_errorMessage As String
     If Not Err Is Nothing Then
         If Err.Number <> 0 Then
-            p_errorMessage = "Reading identity failed using Tcp Client " & UserDefinedErrors.FormattedErr & _
+            p_errorMessage = "Reading identity failed using Tcp Client " & cc_isr_Core.UserDefinedErrors.FormattedErr & _
                              " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
         End If
     End If

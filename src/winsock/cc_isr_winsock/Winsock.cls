@@ -45,6 +45,17 @@ Private Declare PtrSafe Function WSAGetLastError Lib "wsock32.dll" () As Long
 ''' <returns>
 Private Declare PtrSafe Function WSACleanup Lib "wsock32.dll" () As Long
 
+Private Declare PtrSafe Function FormatMessage_ Lib "kernel32" Alias "FormatMessageA" ( _
+         ByVal dwFlags As Long, _
+               lpSource As Any, _
+         ByVal dwMessageId As Long, _
+         ByVal dwLanguageId As Long, _
+         ByVal lpBuffer As String, _
+         ByVal nSize As Long, _
+               Arguments As LongPtr) As Long
+               
+Private Declare PtrSafe Function GetSystemDefaultLangID_ Lib "kernel32" Alias "GetSystemDefaultLangID" () As Integer
+               
 ''' <summary>   Initializes Winsock. </summary>
 '''< remarks>   This is a singleton class.
 ''' <see href="https://stackoverflow.com/questions/396117/class-static-methods-in-vba"/>
@@ -80,8 +91,9 @@ Public Function Initialize() As Long
     p_result = WSAStartup(wsock32.ws32_VERSION, p_startUpInfo)
     
     If p_result <> 0 Then
-        Err.Raise UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Initialize", _
-                  UserDefinedErrors.WinsockStartingError.Description & " Last error: " & CStr(Winsock.LastError)
+        Err.Raise cc_isr_Core.UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Initialize", _
+                  cc_isr_Core.UserDefinedErrors.WinsockStartingError.Description & _
+                  Me.LastErrorMessage(" Last error: ")
     End If
     m_initiated = (p_result = 0)
     m_disposed = False
@@ -131,12 +143,62 @@ Public Property Get Disposed() As Boolean
 
 End Property
 
+''' <summary>   Builds the last error message including the error number. </summary>
+''' <returns>   [String]. <returns>
+Public Function LastErrorMessage(ByVal prefix As String) As String
+    
+    Dim p_number As Long: p_number = Me.LastError
+    If p_number = 0 Then
+        LastErrorMessage vbNullString
+    Else
+        Dim p_description As String
+        p_description = Me.LastErrorDescription(p_number)
+        If StringExtensions.IsNullOrEmpty(p_description) Then
+            LastErrorMessage = prefix & p_description & " #" & CStr(p_number) & "."
+        Else
+            LastErrorMessage = prefix & "#" & CStr(p_number) & "."
+        End If
+    End If
+
+End Function
+
 ''' <summary>   returns the last Winsock 32 error . </summary>
 Public Property Get LastError() As Long
     
     LastError = WSAGetLastError()
 
 End Property
+
+''' <summary>   Gets the last windows base error message for the specified error number. </summary>
+''' <returns>   [String]. <returns>
+Public Function LastErrorDescription(ByVal a_errorNumber As Long) As String
+
+    Const FORMAT_MESSAGE_FROM_SYSTEM As Long = &H1000
+    Const FORMAT_MESSAGE_IGNORE_INSERTS As Long = &H200
+    Const FORMAT_MESSAGE_TEXT_LEN As Long = &HA0
+    
+    ' The language into which to format the message. 0 = default language.
+    
+    Dim langId As Long: langId = 0
+    
+    Dim p_errMessage As String * FORMAT_MESSAGE_TEXT_LEN
+    Dim p_result As Long
+    p_result = FormatMessage_(FORMAT_MESSAGE_FROM_SYSTEM Or FORMAT_MESSAGE_IGNORE_INSERTS, _
+           0, _
+           a_errorNumber, _
+           langId, _
+           p_errMessage, _
+           FORMAT_MESSAGE_TEXT_LEN, _
+           0)
+    
+    If p_result = 0 Then
+        LastErrorDescription = vbNullString
+    Else
+        p_errMessage = Split(p_errMessage, vbCrLf)(0)
+        LastErrorDescription = Trim(p_errMessage)
+    End If
+           
+End Function
 
 ''' <summary>   Terminates use of the Winsock dll. </summary>
 ''' <returns>
@@ -151,8 +213,9 @@ Public Function Cleanup() As Long
     
     p_result = WSACleanup()
     If p_result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                  UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
+        Err.Raise cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                  cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Description & _
+                  Winsock.LastErrorMessage(" Last error: ")
     End If
     Cleanup = p_result
 
@@ -175,8 +238,9 @@ Public Sub Dispose()
         ' Shutdown Winsock DLL
         Dim p_result As Long: p_result = WSACleanup()
         If p_result = wsock32.ws32_SOCKET_ERROR Then
-            Err.Raise UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                      UserDefinedErrors.WinsockCleanupError.Description & " Last error: " & CStr(Winsock.LastError)
+            Err.Raise cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
+                      cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Description & _
+                      Winsock.LastErrorMessage(" Last error: ")
         End If
     End If
     

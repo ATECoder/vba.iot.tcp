@@ -73,8 +73,6 @@ Private m_stopWatch As StopWatch
 Public Property Get K2700() As cc_isr_VI.K2700
     If m_k2700 Is Nothing Then
         Set m_k2700 = cc_isr_VI.Constructor.K2700
-        ' populate the combo box commands
-        PopulateCommandsComboBox
     End If
     Set K2700 = m_k2700
 End Property
@@ -99,7 +97,8 @@ Public Sub Dispose()
 
     Const p_procedureName As String = "Dispose"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     Set m_stopWatch = Nothing
     
@@ -111,55 +110,99 @@ Public Sub Dispose()
     If Not m_k2700 Is Nothing Then m_k2700.Dispose
     Set m_k2700 = Nothing
     
-    If Err.Number <> 0 Then
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-        
-    End If
-    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
     On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
     
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
-''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Sub Initialize()
 
-    Dim p_connected As Boolean: p_connected = a_eventArgs.Connected
+    Const p_procedureName = "Initialize"
+
+    ' Error are trapped to prevent crashes because this method gets started when
+    ' the main workbook is activated.
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
-    Me.ConnectToggleButton.value = p_connected
+    Me.EnableControls False
+    
+    ' populate the combo box commands
+    PopulateCommandsComboBox
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+
+End Sub
+
+''' <summary>   Toggle the enable state of the controls. </summary>
+''' <param name="a_connected">   [Boolean] True if connected; otehrwise, false. </param>
+Friend Sub EnableControls(ByVal a_connected As Boolean)
+
+    Me.ConnectToggleButton.value = a_connected
     
     ' report the connection state
-    Range(m_connectedCell).value = p_connected
+    Range(m_connectedCell).value = a_connected
         
-    Me.RSTButton.Enabled = p_connected
-    Me.CLSButton.Enabled = p_connected
-    Me.QueryButton.Enabled = p_connected
-    Me.ReadButton.Enabled = p_connected
-    Me.ReadStatusByteButton.Enabled = p_connected
-    Me.WriteButton.Enabled = p_connected
+    Me.RSTButton.Enabled = a_connected
+    Me.CLSButton.Enabled = a_connected
+    Me.QueryButton.Enabled = a_connected
+    Me.ReadButton.Enabled = a_connected
+    Me.ReadStatusByteButton.Enabled = a_connected
+    Me.WriteButton.Enabled = a_connected
     
-    Me.ReadCardsButton.Enabled = p_connected
-    Me.SetScansButton.Enabled = p_connected
-    Me.QueryInputsButton.Enabled = p_connected
-    Me.ReadResistanceButton.Enabled = p_connected
+    Me.ReadCardsButton.Enabled = a_connected
+    Me.SetScansButton.Enabled = a_connected
+    Me.QueryInputsButton.Enabled = a_connected
+    Me.ReadResistanceButton.Enabled = a_connected
     
-    If p_connected Then
-        EnableGpibLan Me.Session.VISession.UsingGpibLan
+    If a_connected Then
+        Me.EnableGpibLanControls Me.Session.VISession.UsingGpibLan
     Else
-        EnableGpibLan False
+        Me.EnableGpibLanControls False
     End If
 
 End Sub
 
 ''' <summary>   Populates the Commands combo box. </summary>
 Friend Sub PopulateCommandsComboBox()
+
     Const p_procedureName = "PopulateCommandsComboBox"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     Me.CommandsComboBox.Clear
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateCommand
@@ -198,18 +241,28 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem ":SYST:CLE"
     Me.CommandsComboBox.AddItem ":SYST:ERR?"
     Me.CommandsComboBox.AddItem ":SYST:FRSW?"
-   
-    If Err.Number <> 0 Then
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
-        
-    End If
     
-    On Error GoTo 0
+    Me.CommandsComboBox = Me.CommandsComboBox.ItemData(1)
+   
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Restarts the stop watch and clears the elapsed time cell. </summary>
@@ -601,8 +654,7 @@ Private Sub WriteButton_Click()
         Me.StatusByte = Me.Session.QueryServiceRequestStatus
         Me.StandardByte = Me.Session.QueryStandardEventsStatus
     End If
-    
-    
+        
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
@@ -795,7 +847,9 @@ End Property
 '
 ' + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
 
-Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
+''' <summary>   Toggle the enabled state of the GPIB Lan controls. </summary>
+''' <param name="a_usingGpibLanController">   [Boolean] True if using the GPIB-Lan controller. </param>
+Friend Sub EnableGpibLanControls(ByVal a_usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = a_usingGpibLanController
     Me.GoToLocalButton.Enabled = a_usingGpibLanController
     Me.LocalLockoutButton.Enabled = a_usingGpibLanController
@@ -1740,6 +1794,11 @@ End Sub
 ''' <param name="a_eventArgs">   [<see cref="cc_isr_VI.ResistanceNumberEventArgs"/>] event arguments. </param>
 Private Sub m_k2700_ResistanceNumberMeasured(ByVal a_eventArgs As cc_isr_VI.ResistanceNumberEventArgs)
 
+    Const p_procedureName = "m_session_ConnectionChanged"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
     SetResistance a_eventArgs.ResistanceNumber, a_eventArgs.Resistance
     
     If Me.AutoIncrementResistanceNoEnabled Then
@@ -1752,14 +1811,37 @@ Private Sub m_k2700_ResistanceNumberMeasured(ByVal a_eventArgs As cc_isr_VI.Resi
     
     End If
     
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Handles the K2700 <see cref="cc_isr_VI.K2700.ConnectionChanged"/> event. </summary>
 ''' <param name="a_eventArgs">   [<see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/>] event arguments. </param>
 Private Sub m_k2700_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
 
-    Me.Initialize a_eventArgs
+    Const p_procedureName = "m_session_ConnectionChanged"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.EnableControls a_eventArgs.Connected
 
     If a_eventArgs.Connected Then
     
@@ -1782,6 +1864,25 @@ Private Sub m_k2700_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.Connec
         
     End If
 
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_VI.K2700.ConnectionChanging"/> event. </summary>

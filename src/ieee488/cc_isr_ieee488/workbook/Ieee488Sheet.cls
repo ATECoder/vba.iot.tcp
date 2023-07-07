@@ -56,9 +56,11 @@ End Property
 Public Sub Dispose()
 
     Const p_procedureName As String = "Dispose"
-    On Error Resume Next
     
-    Dim p_disconnected As Boolean
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+        Dim p_disconnected As Boolean
     
     If m_session Is Nothing Then
         p_disconnected = True
@@ -74,67 +76,116 @@ Public Sub Dispose()
     End If
 
     Set m_stopWatch = Nothing
-    
-    If Err.Number <> 0 Then
-    
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        MsgBox UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
-        
-    End If
-    
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
     On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
 
 End Sub
 
 ''' <summary>   Initialize this worksheet. </summary>
-''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
-Public Sub Initialize(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
+Public Sub Initialize()
 
-    Const p_procedureName = "PopulateCommandsComboBox"
+    Const p_procedureName = "Initialize"
 
     ' Error are trapped to prevent crashes because this method gets started when
     ' the main workbook is activated.
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
-    Dim p_connected As Boolean: p_connected = a_eventArgs.Connected
-    
-    Me.ConnectToggleButton.value = p_connected
-    
-    ' report the connection state
-    Range(m_connectedCell).value = p_connected
-        
-    Me.RSTButton.Enabled = p_connected
-    Me.CLSButton.Enabled = p_connected
-    Me.QueryButton.Enabled = p_connected
-    Me.ReadButton.Enabled = p_connected
-    Me.ReadStatusByteButton.Enabled = p_connected
-    Me.ReadStandardEventStatusButton.Enabled = p_connected
-    Me.WriteButton.Enabled = p_connected
-    
-    If p_connected Then
-        EnableGpibLan m_session.ViSession.UsingGpibLan
-    Else
-        EnableGpibLan False
-    End If
+    Me.EnableControls False
     
     ' populate the combo box commands
     PopulateCommandsComboBox
-
-    If Err.Number <> 0 Then
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
-        
-    End If
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
 
     On Error GoTo 0
+    Exit Sub
 
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
+End Sub
+
+''' <summary>   Toggle the enable state of the controls. </summary>
+''' <param name="a_connected">   [Boolean] True if connected; otehrwise, false. </param>
+Friend Sub EnableControls(ByVal a_connected As Boolean)
+
+    Const p_procedureName = "EnableControls"
+
+    ' Error are trapped to prevent crashes because this method gets started when
+    ' the main workbook is activated.
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    
+    Me.ConnectToggleButton.value = a_connected
+    
+    ' report the connection state
+    Range(m_connectedCell).value = a_connected
+        
+    Me.RSTButton.Enabled = a_connected
+    Me.CLSButton.Enabled = a_connected
+    Me.QueryButton.Enabled = a_connected
+    Me.ReadButton.Enabled = a_connected
+    Me.ReadStatusByteButton.Enabled = a_connected
+    Me.ReadStandardEventStatusButton.Enabled = a_connected
+    Me.WriteButton.Enabled = a_connected
+    
+    If a_connected Then
+        EnableGpibLanControls m_session.ViSession.UsingGpibLan
+    Else
+        EnableGpibLanControls False
+    End If
+    
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+    
 End Sub
 
 ''' <summary>   Populates the Commands combo box. </summary>
@@ -142,7 +193,8 @@ Friend Sub PopulateCommandsComboBox()
     
     Const p_procedureName = "PopulateCommandsComboBox"
     
-    On Error Resume Next
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
     
     Me.CommandsComboBox.Clear
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.ClearExecutionStateCommand
@@ -174,17 +226,27 @@ Friend Sub PopulateCommandsComboBox()
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand
     Me.CommandsComboBox.AddItem cc_isr_Ieee488.WaitCommand & _
             ";" & cc_isr_Ieee488.OperationCompletedQueryCommand
-   
-    If Err.Number <> 0 Then
-        ' append the error source
-        UserDefinedErrors.SetErrSource p_procedureName, Me.name
-        
-        ' display the error message
-        Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
-        
-    End If
-    
+
+    Me.CommandsComboBox.ListIndex = 1
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
     On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
     
 End Sub
 
@@ -771,7 +833,9 @@ End Property
 '
 ' +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +  +
 
-Friend Sub EnableGpibLan(ByVal a_usingGpibLanController As Boolean)
+''' <summary>   Toggle the enabled state of the GPIB Lan controls. </summary>
+''' <param name="a_usingGpibLanController">   [Boolean] True if using the GPIB-Lan controller. </param>
+Friend Sub EnableGpibLanControls(ByVal a_usingGpibLanController As Boolean)
     Me.SDCButton.Enabled = a_usingGpibLanController
     Me.GoToLocalButton.Enabled = a_usingGpibLanController
     Me.ReadAfterWriteGetButton.Enabled = a_usingGpibLanController
@@ -1152,8 +1216,13 @@ End Sub
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanged"/> event. </summary>
 ''' <param name="a_eventArgs">   Reference to the <see cref="cc_isr_Winsock.ConnectionChangedEventArgs"/> event arguments. </param>
 Private Sub m_session_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.ConnectionChangedEventArgs)
-
-    Me.Initialize a_eventArgs
+        
+    Const p_procedureName = "m_session_ConnectionChanged"
+    
+    ' Trap errors to the error handler
+    On Error GoTo err_Handler
+    
+    Me.EnableControls a_eventArgs.Connected
 
     If a_eventArgs.Connected Then
     
@@ -1174,6 +1243,25 @@ Private Sub m_session_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.Conn
     
     End If
 
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+exit_Handler:
+
+    On Error GoTo 0
+    Exit Sub
+
+' . . . . . . . . . . . . . . . . . . . . . . . . . . .
+err_Handler:
+  
+    ' append the error source
+    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    
+    ' display the error message
+    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    
+    ' exit this procedure (not an active handler)
+    On Error Resume Next
+    GoTo exit_Handler
+   
 End Sub
 
 ''' <summary>   Handles the <see cref="cc_isr_Ieee488.Ieee488Session.ConnectionChanging"/> event. </summary>
