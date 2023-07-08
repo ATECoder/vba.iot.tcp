@@ -1,13 +1,13 @@
-## Using Prologix LAN-GPIB Device
+# Using Prologix LAN-GPIB Device
 
-#### Required Applications
+## Required Applications
 
 * [Netfinder]
 * [Prologix GPIB Configurer]
 
 Additional resources are located at the [Prologix] web site.
 
-#### Settings
+## Settings
 
 1) Connect the PC to the local network and record it IP address;
 2) Connect the Prologix to the local network or directly to the computer using a direct or crossover cable.

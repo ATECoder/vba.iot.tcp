@@ -1,4 +1,4 @@
-### Cloning
+# Cloning
 
 - [Source Code](#Source-Code)
   - [Repositories](#Repositories)
@@ -6,10 +6,10 @@
   - [Packages](#Packages)
 
 <a name="Source-Code"></a>
-#### Source Code
+## Source Code
 Clone the repository along with its requisite repositories to their respective relative path.
 
-##### Repositories
+### Repositories
 The repositories listed in [external repositories] are required:
 
 ```
@@ -22,7 +22,7 @@ Clone the repositories into the following folders (parents of the .git folder):
 ```
 where %vba% is the root folder of the VBA libraries, e.g., %my%\lib\vba, and %my%, e.g., c:\my is the overall root folder.
 
-##### Packages
+### Packages
 TBA
 
 [external repositories]: ExternalReposCommits.csv

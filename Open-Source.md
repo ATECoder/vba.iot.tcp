@@ -1,4 +1,4 @@
-### Open Source
+# Open Source
 
 TCP Socket-based control and communication workbooks for LXI-based instruments.
 
@@ -7,7 +7,7 @@ TCP Socket-based control and communication workbooks for LXI-based instruments.
 * [Resources](#Resources)
 
 <a name="Open-Source"></a>
-#### Open source
+## Open source
 Open source used by this software is described and licensed at the following sites:  
 * [Web Excel] 
 * [Enumerate and execute Excel Macros]  
@@ -19,12 +19,12 @@ Open source used by this software is described and licensed at the following sit
 * [Utter Access Archive: Singleton]  
 
 <a name="Closed-software"></a>
-#### Closed software
+## Closed software
 Closed software used by this software are described and licensed on the following sites:  
 * TBA
 
 <a name="Resources"></a>
-#### Resources 
+## Resources 
 
 [Use sockets to send and receive data over TCP]  
 
