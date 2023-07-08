@@ -20,13 +20,6 @@ Public Function CreateK2700() As K2700
     Set CreateK2700 = New K2700
 End Function
 
-''' <summary>   Gets a singleton instance of the <see cref="K2700"/> class. </summary>
-''' <value>   A singleton instance of the <see cref="K2700"/> class. </returns>
-Public Property Get K2700() As K2700
-    If m_k2700 Is Nothing Then Set m_k2700 = Me.CreateK2700()
-    Set K2700 = m_k2700
-End Property
-
 ''' <summary>   Gets an instance of the <see cref="ResistanceNumberEventArgs"/> class. </summary>
 ''' <para name="a_resistanceNo">   [integer] The resistance number. </param>
 ''' <para name="a_resistance">     [double] The resistance. </param>

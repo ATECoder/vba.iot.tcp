@@ -40,6 +40,10 @@ The main types provided by this library are:
 
 * _K2700_ Implements some basic 2700 scanning multimeter functionality.
 
+## Scripts
+
+* _Deploy_: copies files to the build folder.
+
 ### Testing
 
 Testing information is included in the [Testing] document.

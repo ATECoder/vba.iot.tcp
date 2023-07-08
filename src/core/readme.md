@@ -45,9 +45,16 @@ The main types provided by this library are:
 * _UserDefinedError_ - A user defined error class.
 * _WorkbookUnilities_ - Singleton. Exports code files and enumerates test methods.
 
+## Scripts
+
+* _Deploy_: copies files to the build folder.
+* _Test_: run unit tests.
+
 ## [Testing]
 
 Testing information is included in the [Testing] document.
+
+Testing can be accomplished using the _Test_ power shell script.
 
 ## [User-Defined Type Not Defined error]
 

@@ -72,7 +72,7 @@ Private m_stopWatch As StopWatch
 ''' <value>   The singleton instance of the 2700 virtual instrument. </value>
 Public Property Get K2700() As cc_isr_VI.K2700
     If m_k2700 Is Nothing Then
-        Set m_k2700 = cc_isr_VI.Constructor.K2700
+        Set m_k2700 = cc_isr_VI.Constructor.CreateK2700
     End If
     Set K2700 = m_k2700
 End Property

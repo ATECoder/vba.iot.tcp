@@ -37,6 +37,10 @@ The main types provided by this library are:
 * _ViSession_ -- Uses a _TcpCllient_ to communicate with the instrument by sending and receiving messages by way of the GPIB-Lan controller.
 * _IEEE488Session_ -- Implements the core methods for communicating with an IEEE488.2 Instrument.
 
+## Scripts
+
+* _Deploy_: copies files to the build folder.
+
 ## [Testing]
 
 Testing information is included in the [Testing] document.

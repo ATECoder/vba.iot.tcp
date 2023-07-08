@@ -35,14 +35,17 @@ The main types provided by this library are:
 * _IPv4StreamSocket_ - opens an IPv4 streaming socket to the instrument.
 * _TcpCllient_ - Encapsulates the _IPv4StreamSocket_.
 
+## Scripts
+
+* _Build_: copies files to the build folder and remove the existing references.
+* _Deploy_: copies files to the build folder.
+* _Test_: run unit tests.
+
 ## [Testing]
 
 Testing information is included in the [Testing] document.
 
-## Scripts
-
-* Build: copies files to the build folder and remove the existing references.
-* Deploy: copies files to the build folder.
+Testing can be accomplished using the _Test_ power shell script.
 
 # Feedback
 
