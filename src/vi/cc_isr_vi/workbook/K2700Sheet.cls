@@ -1619,22 +1619,29 @@ Private Sub SetExternalTriggerMode(Optional ByVal a_timerInterval As Integer = 1
         ' clear the triggered flag
         m_extTrigInitiated = False
         
-        ' reinitialize if device not defined
-        If Not Me.K2700.Connected Then
-            ' Me.K2700.InitializeLegacy Me.host, Me.port, Me.ReceiveTimeout
-        End If
-        
         ' make sure that the instrument is ready to accept
         ' input from the front panel
      
         ' check if front or read
-        If Not Me.K2700.IsFrontInputs Then
+        If Me.FrontReadRequired And Not Me.K2700.IsFrontInputs Then
         
             ' if rear, toggle back the button
             Me.ExternalTrigEnabled = False
             
             ' display the proper message
-            Me.LastErrorMessage = "Please release the front panel INPUTS button to its FRONT (F) position"
+            Me.LastErrorMessage = "Please release the front panel INPUTS button to its FRONT (F) position and try again."
+              
+            ' and get out
+            GoTo exit_Handler
+              
+        ElseIf Not Me.FrontReadRequired And Me.K2700.IsFrontInputs Then
+        
+        
+            ' if rear, toggle back the button
+            Me.ExternalTrigEnabled = False
+            
+            ' display the proper message
+            Me.LastErrorMessage = "Please depres the front panel INPUTS button to its REAR (R) position and try again."
               
             ' and get out
             GoTo exit_Handler

@@ -211,6 +211,11 @@ End Function
 ''' <remarks>   On terminate, stop timer. This will cause workbook to close. </remarks>
 Private Sub Class_Terminate()
 
+    ' errors are trapped in line here becuase the remote workbook may not be available
+    ' even if not disposed.
+    
+    On Error Resume Next
+    
     ' 20230704: this worked well.
     
     m_workbookClosing = False
@@ -219,9 +224,12 @@ Private Sub Class_Terminate()
         
         ' this should also close the workbook
         
+        ' this caused an exception; the remote workbook was said to be unavailable.
+       
         Call m_remoteWorkbook.Application.Run(TIMER_STOP_CALL)
         
-        ' wait for the timer interval to close.
+        ' wait for one timer interval to complete to ensure the timer
+        ' events no longer trigger.
         Dim stopper As New StopWatch
         Do Until stopper.ElapsedMilliseconds > m_interval Or m_workbookClosing
             DoEvents
@@ -231,10 +239,13 @@ Private Sub Class_Terminate()
           m_remoteWorkbook.Close False
         End If
         
+        ' terminating the workbook does not seem to close the excel
+        ' instance of this remote workbook.
+        Set m_remoteWorkbook = Nothing
+        
     End If
     
-    ' terminating the workbook does not see to close excel.
-    Set m_remoteWorkbook = Nothing
+    On Error GoTo 0
     
 End Sub
 

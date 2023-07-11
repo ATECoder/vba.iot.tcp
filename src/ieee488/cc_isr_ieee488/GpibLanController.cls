@@ -645,10 +645,8 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.Co
         ' from experiments it seems this needs to be set first.
         Dim p_enabled As Boolean: p_enabled = Me.ReadAfterWriteEnabledGetter
     
-        Me.ReadAfterWriteEnabledSetter True
-    
         ' defaults to turning off auto read-after-write
-        
+        m_readAfterWriteEnabled = True
         Me.ReadAfterWriteEnabledSetter False
         
     End If

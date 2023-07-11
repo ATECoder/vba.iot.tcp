@@ -511,6 +511,56 @@ Public Sub MonitorExternalTrigger(ByVal a_resistanceNo As Integer, ByVal a_isDon
     ' allow other events to occur
     DoEvents
     
+    If m_extTrigInitiated Then
+    
+        ' if awaiting the external trigger (external trigger mode
+        ' was initiated), check if service is requested
+        ' check if we can use this instead:
+        
+        If Me.Session.QueryServiceRequestStatus <> 0 Then
+      
+            ' clear the trigger initiation status to indicate
+            ' that it needs to be primed on the next timer event
+            m_extTrigInitiated = False
+        
+            ' clear the serial poll bit of this device
+            Me.Session.QueryServiceRequestStatus
+            
+            ' fetch the data
+            Me.Session.WriteLine ":FETCH?"
+          
+            ' read the data
+            Dim p_resistance As Double: p_resistance = CDbl(Me.Session.Read)
+
+            ' raise the resistance measured event.
+            OnResistanceNumberMeasured a_resistanceNo, p_resistance
+          
+        End If
+    
+    ElseIf Not a_isDone Then
+
+        ' we need to initiate the next wait for an external trigger.
+        
+        ' toggle external trigger mode.
+        
+        Me.Session.WriteLine ":TRIG:SOUR IMM"
+        Me.Session.WriteLine ":TRIG:SOUR EXT"
+        
+        Me.Session.WriteLine ":FRES:NPLC 1"
+          
+        ' clear the serial poll register
+        
+        Me.Session.QueryServiceRequestStatus
+        
+        ' initiate awaiting for the external trigger
+        
+        Me.Session.WriteLine ":INIT; *CLS"
+        
+        ' and indicate that external triggering was initiated
+        m_extTrigInitiated = True
+    
+    End If
+    
     ' check if the option button is on
     If a_isDone Then
     
@@ -535,61 +585,14 @@ Public Sub MonitorExternalTrigger(ByVal a_resistanceNo As Integer, ByVal a_isDon
         ' restore continuous reading
         
         Me.Session.WriteLine ":INIT:CONT ON"
-            
-    Else
-    
-        ' if not done, check we need to prime the external trigger mode.
         
-        If m_extTrigInitiated Then
+        ' clear execution state and wait for operation completion.
         
-            ' if awaiting the external trigger (external trigger mode
-            ' was initiated), check if service is requested
-            ' check if we can use this instead:
-            
-            If Me.Session.QueryServiceRequestStatus <> 0 Then
-          
-                ' clear the trigger initiation status to indicate
-                ' that it needs to be primed on the next timer event
-                m_extTrigInitiated = False
-            
-                ' clear the serial poll bit of this device
-                Me.Session.QueryServiceRequestStatus
-                
-                ' fetch the data
-                Me.Session.WriteLine ":FETCH?"
-              
-                ' read the data
-                Dim p_resistance As Double: p_resistance = CDbl(Me.Session.Read)
-    
-                ' raise the resistance measured event.
-                OnResistanceNumberMeasured a_resistanceNo, p_resistance
-              
-            End If
+        Me.Session.ClearExecutionState
         
-        Else
-    
-            ' we need to initiate the next wait for an external trigger.
+        ' and indicate that external triggering was not
+        m_extTrigInitiated = False
             
-            ' toggle external trigger mode.
-            
-            Me.Session.WriteLine ":TRIG:SOUR IMM"
-            Me.Session.WriteLine ":TRIG:SOUR EXT"
-            
-            Me.Session.WriteLine ":FRES:NPLC 1"
-              
-            ' clear the serial poll register
-            
-            Me.Session.QueryServiceRequestStatus
-            
-            ' initiate awaiting for the external trigger
-            
-            Me.Session.WriteLine ":INIT; *CLS"
-            
-            ' and indicate that external triggering was initiated
-            m_extTrigInitiated = True
-        
-        End If
-        
     End If
 
 End Sub
