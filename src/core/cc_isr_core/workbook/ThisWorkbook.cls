@@ -11,7 +11,7 @@ Option Explicit
 
 Private Type ThisData
     ExportCodeAfterSave As Boolean
-    DeployMode As Boolean
+    Deployed As Boolean
 End Type
 
 Private This As ThisData
@@ -28,17 +28,19 @@ Public Property Let ExportCodeAfterSave(ByVal a_value As Boolean)
     This.ExportCodeAfterSave = a_value
 End Property
 
-''' <summary>   Gets the deloy mode. </summary>
-''' <remarks>   Code is not saved when in deploy mode. </remarks>
+''' <summary>   Gets the deployed status. </summary>
+''' <remarks>   Code is not saved if the workbook is deployed. </remarks>
 ''' <value>   [Boolean]. </value>
-Public Property Get DeployMode() As Boolean
-    DeployMode = This.DeployMode
+Public Property Get Deployed() As Boolean
+    Deployed = This.Deployed
 End Property
 
-''' <summary>   Sets the deploy mode. </summary>
-''' <para name="value">   True to set the deploy mode. </param>
-Public Property Let DeployMode(ByVal a_value As Boolean)
-    This.DeployMode = a_value
+''' <summary>   Sets the deployed status. </summary>
+''' <para name="value">   True to set the deployed status. </param>
+Public Property Let Deployed(ByVal a_value As Boolean)
+
+    This.Deployed = a_value
+
 End Property
 
 ''' <summary>   Sets the Err object source string to project.module.procedure. </summary>
@@ -55,9 +57,7 @@ Public Sub SetErrSource(ByVal a_errProcedureName As String, ByVal a_errModuleNam
     ' thus we assume that this code is robust and will
     ' not cause errors.
     
-    If StringExtensions.IsNullOrEmpty(a_errProjectName) Then
-        a_errProjectName = ActiveWorkbook.VBProject.name
-    End If
+    If VBA.vbNullString = a_errProjectName Then a_errProjectName = ActiveWorkbook.VBProject.name
     
     ' get the current source string
     
@@ -116,6 +116,25 @@ Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boo
     BuildStandardErrorMessage = p_builder
 
 End Function
+
+''' <summary>   Marks a workbook as saved if not saved and deployed or read only. </summary>
+''' <param name="a_workbook">   [Excel.Workbook] The workbook. </param>
+''' <param name="a_deployed">   [Boolean] True if the workbook was deployed. </param>
+Public Sub MarkAsSaved(ByVal a_workbook As Excel.Workbook, ByVal a_deployed As Boolean)
+    
+    If Not a_workbook.Saved And (a_deployed Or a_workbook.ReadOnly) Then _
+        a_workbook.Saved = True
+
+End Sub
+
+''' <summary>   Disables saving code if deployed or read only. </summary>
+''' <param name="a_workbook">   [Excel.Workbook] The workbook. </param>
+''' <param name="a_deployed">   [Boolean] True if the workbook was deployed. </param>
+Public Sub DisableSavingCode(ByVal a_workbook As Excel.Workbook, ByVal a_deployed As Boolean)
+    
+    a_workbook.ExportCodeAfterSave = Not (a_deployed Or a_workbook.ReadOnly)
+
+End Sub
 
 ''' <summary>   Handles the Workbook activate event. </summary>
 ''' <remarks>   Initializes the user defined errors. </remarks>
@@ -195,7 +214,8 @@ Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
     ' dispose the disposable worksheets
     TimerSheet.Dispose
     
-    Workbooks(ThisWorkbook.name).Saved = Me.DeployMode Or ThisWorkbook.ReadOnly
+    ' this disables the save dialog on read only workbooks.
+    Me.MarkAsSaved ThisWorkbook, Me.Deployed
     
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
@@ -228,7 +248,7 @@ Private Sub Workbook_Open()
     On Error GoTo err_Handler
     
     ' turn on code exporting if not deploy or read only
-    ThisWorkbook.ExportCodeAfterSave = Not (Me.DeployMode Or ThisWorkbook.ReadOnly)
+    Me.DisableSavingCode ThisWorkbook, Me.Deployed
     
     Application.Windows(ThisWorkbook.name).Visible = True
     
