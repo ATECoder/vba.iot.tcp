@@ -8,19 +8,114 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
-Private m_exportCodeAfterSave As Boolean
+
+Private Type ThisData
+    ExportCodeAfterSave As Boolean
+    DeployMode As Boolean
+End Type
+
+Private This As ThisData
 
 ''' <summary>   Gets the option for exporting code files after save. </summary>
-''' <value> </value>
+''' <value>   [Boolean]. </value>
 Public Property Get ExportCodeAfterSave() As Boolean
-    ExportCodeAfterSave = m_exportCodeAfterSave
+    ExportCodeAfterSave = This.ExportCodeAfterSave
 End Property
 
 ''' <summary>   Enables or disables exporting code files after save. </summary>
-''' <para name="a_value">   [Boolean] True to enable exporting code files after save. </param>
+''' <para name="value">   True to enable exporting code files after save. </param>
 Public Property Let ExportCodeAfterSave(ByVal a_value As Boolean)
-    m_exportCodeAfterSave = a_value
+    This.ExportCodeAfterSave = a_value
 End Property
+
+''' <summary>   Gets the deloy mode. </summary>
+''' <remarks>   Code is not saved when in deploy mode. </remarks>
+''' <value>   [Boolean]. </value>
+Public Property Get DeployMode() As Boolean
+    DeployMode = This.DeployMode
+End Property
+
+''' <summary>   Sets the deploy mode. </summary>
+''' <para name="value">   True to set the deploy mode. </param>
+Public Property Let DeployMode(ByVal a_value As Boolean)
+    This.DeployMode = a_value
+End Property
+
+''' <summary>   Sets the Err object source string to project.module.procedure. </summary>
+''' <param name="a_errProcedureName">   [String] Specifies the name of the procedure. </param>
+''' <param name="a_errModuleName">      [String] Specifies the module name. </param>
+''' <param name="a_errProjectName">     [Optional, String] Specifies the project name; otherwise the project
+'''                                     name of the active workbook is used. </param>
+Public Sub SetErrSource(ByVal a_errProcedureName As String, ByVal a_errModuleName As String, _
+        Optional ByVal a_errProjectName As String = vbNullString)
+
+    ' this procedure must not trap errors because it must
+    ' not alter the error object.
+      
+    ' thus we assume that this code is robust and will
+    ' not cause errors.
+    
+    If StringExtensions.IsNullOrEmpty(a_errProjectName) Then
+        a_errProjectName = ActiveWorkbook.VBProject.name
+    End If
+    
+    ' get the current source string
+    
+    Dim p_errorSource As String: p_errorSource = Err.Source
+    
+    ' build the error source.
+    
+    p_errorSource = a_errProjectName & "." & a_errModuleName & "." & a_errProcedureName
+  
+    ' Update the Err.Source
+    
+    Err.Source = p_errorSource
+ 
+End Sub
+
+''' <summary>   Builds a standard error message. </summary>
+''' <param name="a_displayWarning">         [Optional, Boolean, false] True
+'''                                         to display a warning rather than
+'''                                         an error message. </param>
+''' <param name="a_descriptionDelimiter">   [Optional, String, ': '] Specify
+'''                                         the delimiter preceding the description. </param>
+''' <returns>   A Standard error message string in the form: <para>
+''' Error # (0x#) occurred in <c>Source</c>: Description </para><para>
+''' or  </para><para>
+''' Warning # (0x#) occurred in <c>Source</c>: Description  </para>
+''' </returns>
+Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boolean = False, _
+                Optional a_descriptionDelimiter As String = ": ") As String
+
+    Dim p_builder As String
+  
+    ' check if we have an error
+    If Err.Number <> 0 Then
+    
+        p_builder = p_builder & IIf(a_displayWarning, "Warning ", "Error ")
+        p_builder = p_builder & Format$(Err.Number)
+        
+        Dim p_errNumber As Long: p_errNumber = Err.Number - vbObjectError
+        
+        If Abs(p_errNumber) < &HFFFF& Then
+            p_errNumber = p_errNumber - &H200
+            p_builder = p_builder & " (+0x"
+        Else
+            p_errNumber = Err.Number
+            p_builder = p_builder & " (0x"
+        End If
+        p_builder = p_builder & Hex$(p_errNumber)
+        p_builder = p_builder & ") "
+        p_builder = p_builder & "occurred in "
+        p_builder = p_builder & Err.Source
+        p_builder = p_builder & a_descriptionDelimiter
+        p_builder = p_builder & Err.Description
+        
+    End If
+
+    BuildStandardErrorMessage = p_builder
+
+End Function
 
 ''' <summary>   Handles the Workbook activate event. </summary>
 ''' <remarks>   Initializes the user defined errors. </remarks>
@@ -41,10 +136,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    cc_isr_Core.UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    Me.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    MsgBox cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    MsgBox Me.BuildStandardErrorMessage(), vbExclamation
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -76,10 +171,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    cc_isr_Core.UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    Me.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    MsgBox cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    MsgBox Me.BuildStandardErrorMessage(), vbExclamation
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -100,6 +195,8 @@ Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
     ' dispose the disposable worksheets
     TimerSheet.Dispose
     
+    Workbooks(ThisWorkbook.name).Saved = Me.DeployMode Or ThisWorkbook.ReadOnly
+    
 ' . . . . . . . . . . . . . . . . . . . . . . . . . . .
 exit_Handler:
 
@@ -110,10 +207,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    cc_isr_Core.UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    Me.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    MsgBox cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    MsgBox Me.BuildStandardErrorMessage(), vbExclamation
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -130,8 +227,8 @@ Private Sub Workbook_Open()
     ' Trap errors to the error handler
     On Error GoTo err_Handler
     
-    ' turn on code exporting for this work book
-    ThisWorkbook.ExportCodeAfterSave = True
+    ' turn on code exporting if not deploy or read only
+    ThisWorkbook.ExportCodeAfterSave = Not (Me.DeployMode Or ThisWorkbook.ReadOnly)
     
     Application.Windows(ThisWorkbook.name).Visible = True
     
@@ -148,10 +245,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    cc_isr_Core.UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    Me.SetErrSource p_procedureName, Me.name
     
     ' display the error message
-    MsgBox cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage(), vbExclamation
+    MsgBox Me.BuildStandardErrorMessage(), vbExclamation
     
     ' exit this procedure (not an active handler)
     On Error Resume Next

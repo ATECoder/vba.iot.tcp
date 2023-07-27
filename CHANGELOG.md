@@ -1,6 +1,12 @@
 # Change log
 All notable changes to these libraries will be documented in this file in a format based on [Keep a Change log]
 
+## [1.0.8608] - 2023-07-26
+Release candidate 2.
+* Save all files with updated project folder references.
+* Add deploy mode to prevent code saving when deployed.
+* Add error processing to the workbook to prevent circular error when references are not found.
+
 ## [1.0.8592] - 2023-07-10
 Release candidate 1.
 
