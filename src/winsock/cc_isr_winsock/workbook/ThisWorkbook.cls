@@ -128,7 +128,7 @@ End Function
 ''' <param name="a_deployed">   [Boolean] True if the workbook was deployed. </param>
 Public Sub MarkAsSaved(ByVal a_workbook As Excel.Workbook, ByVal a_deployed As Boolean)
     
-    If Not a_workbook.Saved And (a_deployed Or a_workbook.ReadOnly) Then _
+    If a_deployed Or a_workbook.ReadOnly Then _
         a_workbook.Saved = True
 
 End Sub
@@ -212,9 +212,11 @@ err_Handler:
    
 End Sub
 
-''' <summary>   Handles the workbook open event. </summary>
-''' <remarks>   Disables the save dialog in deploy more or readonly workjbooks. </remarks>
-Private Sub Workbook_BeforeClose(Cancel As Boolean)
+''' <summary>   Handles the workbook before close event. </summary>
+''' <remarks>   Disables the save dialog for deployed or read-only workbooks.
+'''             Disposes any disposable worksheets. </remarks>
+''' <para name="a_cancel">   [Boolean] Set to true to cancel closing. </param>
+Private Sub Workbook_BeforeClose(ByRef a_cancel As Boolean)
 
     Const p_procedureName As String = "Workbook_BeforeClose"
    
@@ -260,7 +262,7 @@ Private Sub Workbook_Open()
     Me.DisableSavingCode ThisWorkbook, Me.Deployed
     
     ' hide the referenced workbooks
-    Application.Windows(Workbooks("cc.isr.core.xlsm").name).Visible = False
+    Application.Windows(cc_isr_Core.ThisWorkbook.name).Visible = False
     
     ' show work book
     Application.Windows(ThisWorkbook.name).Visible = True
