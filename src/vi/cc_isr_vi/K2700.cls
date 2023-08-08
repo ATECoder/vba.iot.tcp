@@ -17,6 +17,7 @@ Private Const Mux20Cards As String = "7700,7710"
 
 ' reference to the IEEE488 session
 Private WithEvents m_ieee488Session As Ieee488Session
+Attribute m_ieee488Session.VB_VarHelpID = -1
 
 ' reference to the SCPI System subsystem class
 Private m_scpiSystem As ScpiSystem

@@ -12,6 +12,7 @@ Option Explicit
 Implements cc_isr_Winsock.IConnectable
 
 Private WithEvents m_viSession As ViSession
+Attribute m_viSession.VB_VarHelpID = -1
 
 Private m_identity As String
 

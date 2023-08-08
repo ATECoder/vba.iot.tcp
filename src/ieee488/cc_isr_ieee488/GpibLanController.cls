@@ -31,6 +31,7 @@ Private m_statusByte As Integer
 Private m_stopper As StopWatch
 
 Private WithEvents m_tcpClient As TcpClient
+Attribute m_tcpClient.VB_VarHelpID = -1
 
 Private m_writeTermination As String
 
