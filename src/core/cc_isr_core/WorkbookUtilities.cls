@@ -34,7 +34,7 @@ Public Sub ExportProjectCodeFiles(ByVal a_project As VBProject, _
     Dim p_fileCount As Integer
     
     ' set the subfolder tot he project name in lower case
-    If a_useProjectName Then a_subFolder = LCase$(a_project.name)
+    If a_useProjectName Then a_subFolder = LCase$(a_project.Name)
     
     ' set and, optionally, create the folder.
     Dim p_path As String: p_path = PathExtensions.GetParentFolderName(a_project.FileName)
@@ -51,7 +51,7 @@ Public Sub ExportProjectCodeFiles(ByVal a_project As VBProject, _
     
     For Each p_vbComponent In a_project.VBComponents
         DoEvents
-        Dim p_name As String: p_name = p_vbComponent.name
+        Dim p_name As String: p_name = p_vbComponent.Name
         p_extension = GetFileExtension(p_vbComponent)
         If Not StringExtensions.IsNullOrEmpty(p_extension) Then
             p_destPath = Me.GetWorkbookPath(p_vbComponent, p_path, "workbook")
@@ -73,7 +73,7 @@ Public Function GetWorkbookPath(ByVal a_component As VBComponent, ByVal a_path A
         ByVal a_subPath As String)
     If Me.IsSheet(a_component) Or Me.IsWorkbook(a_component) Or _
         Me.IsChart(a_component) Or _
-        StringExtensions.StartsWith(a_component.name, "This", vbTextCompare) Then
+        StringExtensions.StartsWith(a_component.Name, "This", vbTextCompare) Then
         GetWorkbookPath = PathExtensions.Join(a_path, a_subPath, True)
     Else
         GetWorkbookPath = a_path
@@ -163,7 +163,7 @@ Public Function EnumerateProjectModules(ByVal a_project As VBProject, _
     For Each p_vbComponent In a_project.VBComponents
         DoEvents
         If IsObject(p_vbComponent) Then
-            p_newModule.Initialize a_project.name, p_vbComponent.CodeModule
+            p_newModule.Initialize a_project.Name, p_vbComponent.CodeModule
             If Not p_newModule.Equals(p_currentModule) Then
                 Set p_currentModule = p_newModule.Clone
                 If StringExtensions.EndsWith(p_currentModule.ModuleName, a_moduleSuffix) Then
@@ -212,7 +212,7 @@ Public Function FindProjectByName(ByVal a_projectName As String) As VBProject
     Dim p_vbProject As VBProject
     For Each p_vbProject In Application.VBE.VBProjects
         DoEvents
-        If 0 = StrComp(p_vbProject.name, a_projectName, vbTextCompare) Then
+        If 0 = StrComp(p_vbProject.Name, a_projectName, vbTextCompare) Then
             Set FindProjectByName = p_vbProject
             Exit For
         End If
@@ -311,7 +311,7 @@ Public Function RemoveReference(ByVal a_project As VBProject, ByVal a_referenceN
     RemoveReference = False
     Dim p_reference As Reference
     For Each p_reference In a_project.References
-        If 0 = StrComp(p_reference.name, a_referenceName, vbTextCompare) Then
+        If 0 = StrComp(p_reference.Name, a_referenceName, vbTextCompare) Then
             a_project.References.Remove p_reference
             RemoveReference = True
             Exit For

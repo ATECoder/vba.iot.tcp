@@ -45,7 +45,7 @@ End Function
 ''' <summary>   Adds the test modules. </summary>
 Private Sub AddTestModules(ByVal a_knownTestModules As VBA.Collection)
     
-    Dim p_projectName As String: p_projectName = Application.ActiveWorkbook.VBProject.name
+    Dim p_projectName As String: p_projectName = Application.ActiveWorkbook.VBProject.Name
     AddModule a_knownTestModules, p_projectName & ".CollectionExtensionsTests"
     AddModule a_knownTestModules, p_projectName & ".MarshalTests"
     AddModule a_knownTestModules, p_projectName & ".PathExtensionsTests"

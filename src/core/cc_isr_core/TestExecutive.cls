@@ -108,7 +108,7 @@ Public Sub Execute(ByVal a_testSheet As Worksheet, Optional a_usingRemoteWorkboo
     Exit Sub
 
 Finally:
-    MsgBox "Test execution failed " & cc_isr_Core.UserDefinedErrors.FormattedErr & _
+    MsgBox "Test execution failed " & ErrorMessageBuilder.FormattedErr & _
            " Last DLL error = 0x" & VBA.LCase$(VBA.Hex$(Err.LastDllError))
 End Sub
 

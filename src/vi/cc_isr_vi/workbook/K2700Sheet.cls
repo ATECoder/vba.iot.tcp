@@ -120,10 +120,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -156,10 +156,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -297,10 +297,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -354,10 +354,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -390,10 +390,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -425,10 +425,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -474,10 +474,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -509,10 +509,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -561,10 +561,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -596,10 +596,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -631,10 +631,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -666,10 +666,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -711,10 +711,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -760,10 +760,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -800,10 +800,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -843,10 +843,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -982,10 +982,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1017,10 +1017,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1054,10 +1054,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1091,10 +1091,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1126,10 +1126,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1161,10 +1161,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1196,10 +1196,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1231,10 +1231,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1267,10 +1267,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1302,10 +1302,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1412,10 +1412,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1453,10 +1453,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1543,10 +1543,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1582,10 +1582,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1685,10 +1685,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1741,10 +1741,10 @@ err_Handler:
     Me.PauseTimer
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1833,10 +1833,10 @@ err_Handler:
     Me.ReadResistanceButton.Enabled = True
     
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1926,10 +1926,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next
@@ -1979,10 +1979,10 @@ exit_Handler:
 err_Handler:
   
     ' append the error source
-    UserDefinedErrors.SetErrSource p_procedureName, Me.name
+    ErrorMessageBuilder.SetErrSource p_procedureName, Me.Name
     
     ' display the error message
-    Me.LastErrorMessage = UserDefinedErrors.BuildStandardErrorMessage()
+    Me.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage()
     
     ' exit this procedure (not an active handler)
     On Error Resume Next

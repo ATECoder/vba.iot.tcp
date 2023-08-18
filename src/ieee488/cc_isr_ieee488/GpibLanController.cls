@@ -654,7 +654,7 @@ Private Sub m_tcpClient_ConnectionChanged(ByVal a_eventArgs As cc_isr_Winsock.Co
     
     If Err.Number <> 0 Then
         ' report any error when debugging this code.
-        UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
+        ErrorMessageBuilder.SetErrSource p_procedureName, MODULE_NAME
         m_errTracer.TraceError
     End If
     
@@ -690,7 +690,7 @@ Private Sub m_tcpClient_ConnectionChanging(ByVal a_eventArgs As cc_isr_Winsock.C
 
     If Err.Number <> 0 Then
         ' report any error when debugging this code.
-        UserDefinedErrors.SetErrSource p_procedureName, MODULE_NAME
+        ErrorMessageBuilder.SetErrSource p_procedureName, MODULE_NAME
         m_errTracer.TraceError
     End If
     

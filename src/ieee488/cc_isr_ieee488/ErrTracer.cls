@@ -12,5 +12,5 @@ Option Explicit
 Implements cc_isr_Core.IErrTracer
 
 Private Sub IErrTracer_TraceError()
-    Ieee488Sheet.LastErrorMessage = cc_isr_Core.UserDefinedErrors.BuildStandardErrorMessage
+    Ieee488Sheet.LastErrorMessage = ErrorMessageBuilder.BuildStandardErrorMessage
 End Sub
