@@ -11,9 +11,9 @@ Option Explicit
 
 Implements cc_isr_Winsock.IConnectable
 
-Private Const MODULE_NAME As String = "K2700"
-Private Const Mux40Cards As String = "7702,7708"
-Private Const Mux20Cards As String = "7700,7710"
+Private Const m_moduleName As String = "K2700"
+Private Const m_mux40Cards As String = "7702,7708"
+Private Const m_mux20Cards As String = "7700,7710"
 
 ' reference to the IEEE488 session
 Private WithEvents m_ieee488Session As Ieee488Session
@@ -186,8 +186,8 @@ End Property
 ''' <value> A String. </value>
 Public Property Let Card1(ByVal a_value As String)
     m_card1 = a_value
-    m_hasMux20A = 0 < InStr(1, Mux20Cards, a_value, vbTextCompare)
-    m_hasMux40A = 0 < InStr(1, Mux40Cards, a_value, vbTextCompare)
+    m_hasMux20A = 0 < InStr(1, m_mux20Cards, a_value, vbTextCompare)
+    m_hasMux40A = 0 < InStr(1, m_mux40Cards, a_value, vbTextCompare)
 End Property
 
 ''' <summary>   Gets the top card scan list. </summary>
@@ -211,8 +211,8 @@ End Property
 ''' <value> A String. </value>
 Public Property Let Card2(ByVal a_value As String)
     m_card2 = a_value
-    m_hasMux40B = 0 < InStr(1, Mux40Cards, a_value, vbTextCompare)
-    m_hasMux20B = 0 < InStr(1, Mux20Cards, a_value, vbTextCompare)
+    m_hasMux40B = 0 < InStr(1, m_mux40Cards, a_value, vbTextCompare)
+    m_hasMux20B = 0 < InStr(1, m_mux20Cards, a_value, vbTextCompare)
 End Property
 
 ''' <summary>   Gets the bottom card scan list. </summary>
@@ -452,9 +452,9 @@ Public Sub SetExternalTriggerResistanceMode()
     ' input from the front panel
     
     If Not Me.IsFrontInputs Then
-        Err.Raise UserDefinedErrors.InvalidOperationError.Code, "cc_isr_VI.K2700.SetExternalTriggerResistanceMode", _
-                  UserDefinedErrors.InvalidOperationError.Description & _
-                  " The instrument Inputs must be set for Front inputs"
+        cc_isr_Core.UserDefinedErrors.RaiseError UserDefinedErrors.InvalidOperationError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".SetExternalTriggerResistanceMode", _
+                " The instrument Inputs must be set for Front inputs."
     End If
     
     ' Clear the device

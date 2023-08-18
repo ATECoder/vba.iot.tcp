@@ -9,6 +9,7 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_moduleName As String = "Ieee488Session"
 Implements cc_isr_Winsock.IConnectable
 
 Private WithEvents m_viSession As ViSession
@@ -80,12 +81,12 @@ Public Function WriteLine(ByVal a_message As String, _
         If ServiceRequests.ErrorAvailable = (p_status And ServiceRequests.ErrorAvailable) Then
         
             ' raise the write error adding some information
-            Err.Raise UserDefinedErrors.SocketSendError.Code, "cc_isr_Ieee488.Ieee488Session.WriteLine", _
-                      UserDefinedErrors.SocketSendError.Description & _
-                      " SRQ=0x" & Hex(p_status) & _
-                      ". Error Available (0x" & Hex(ServiceRequests.ErrorAvailable) & _
-                      ") after sending " & a_message & " to the instrument at " & _
-                      Me.ViSession.SocketAddress & "."
+            cc_isr_Core.UserDefinedErrors.RaiseError UserDefinedErrors.SocketSendError, _
+                    ThisWorkbook.VBProject.Name & "." & m_moduleName & ".WriteLine", _
+                    " SRQ=0x" & VBA.LCase$(VBA.Hex$(p_status)) & _
+                    ". Error Available (0x" & VBA.LCase$(VBA.Hex$(ServiceRequests.ErrorAvailable)) & _
+                    ") after sending " & a_message & " to the instrument at " & _
+                    Me.ViSession.SocketAddress & "."
         End If
     
     End If
@@ -132,22 +133,23 @@ Public Function Read(Optional ByVal a_awaitMAV As Boolean = True, _
         If 0 = (p_statusByte And ServiceRequests.MessageAvailable) Then
         
             ' raise the read error adding some information
-            Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
-                      UserDefinedErrors.TimeoutError.Description & _
-                      " SRQ=0x" & Hex(p_statusByte) & _
-                      ". No Message Available (0x" & Hex(ServiceRequests.MessageAvailable) & _
-                      ") reading the instrument at " & Me.ViSession.SocketAddress & _
-                      " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
+            cc_isr_Core.UserDefinedErrors.RaiseError UserDefinedErrors.TimeoutError, _
+                    ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Read", _
+                    " SRQ=0x" & VBA.LCase$(VBA.Hex$(p_statusByte)) & _
+                    ". No Message Available (0x" & VBA.LCase$(VBA.Hex$(ServiceRequests.MessageAvailable)) & _
+                    ") reading the instrument at " & Me.ViSession.SocketAddress & _
+                    " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
                       
         Else
         
             ' raise the read error adding some information
-            Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.Ieee488Session.Read", _
-                      UserDefinedErrors.TimeoutError.Description & _
-                      " SRQ=0x" & Hex(p_statusByte) & _
-                      ". Data not received after message available (0x" & Hex(ServiceRequests.MessageAvailable) & _
-                      ") reading the instrument at " & Me.ViSession.SocketAddress & _
-                      " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
+            cc_isr_Core.UserDefinedErrors.RaiseError UserDefinedErrors.TimeoutError, _
+                    ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Read", _
+                    " SRQ=0x" & VBA.LCase$(VBA.Hex$(p_statusByte)) & _
+                    ". Data not received after message available " & _
+                    "(0x" & VBA.LCase$(VBA.Hex$(ServiceRequests.MessageAvailable)) & _
+                    ") reading the instrument at " & Me.ViSession.SocketAddress & _
+                    " with a timeout of " & CStr(Me.ViSession.SessionReadTimeout) & "ms."
         
         End If
    

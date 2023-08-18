@@ -123,7 +123,9 @@ Friend Function BuildErrorMessage(Optional ByVal a_displayWarning As Boolean = F
 
 End Function
 
-''' <summary>   Builds a standard error message. </summary>
+''' <summary>   Builds a standard error message. Appends the
+'''             <see cref="cc_isr_Core.UserDefinedErrors.LastError"/> if difference from the
+'''             <see cref="VBA.Err"/>. </summary>
 ''' <param name="a_displayWarning">         [Boolean, false] True
 '''                                         to display a warning rather than
 '''                                         an error message. </param>
@@ -139,12 +141,14 @@ Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boo
 
     Dim p_builder As String: p_builder = VBA.vbNullString
     Dim p_errorNumber As Long: p_errorNumber = VBA.Err.Number
+    Dim p_errorSource As String: p_errorSource = VBA.Err.Source
     If p_errorNumber <> 0 Then
         p_builder = Me.BuildErrorMessage(a_displayWarning, a_descriptionDelimiter)
     End If
     
     If Not cc_isr_Core.UserDefinedErrors.LastError Is Nothing Then
-        If p_errorNumber <> cc_isr_Core.UserDefinedErrors.LastError.Code Then
+        If p_errorNumber <> cc_isr_Core.UserDefinedErrors.LastError.Code Or _
+           p_errorSource <> cc_isr_Core.UserDefinedErrors.LastError.Source Then
             If VBA.Len(p_builder) > 0 Then p_builder = p_builder & vbCrLf
             p_builder = p_builder & cc_isr_Core.UserDefinedErrors.LastError.ToString()
         End If

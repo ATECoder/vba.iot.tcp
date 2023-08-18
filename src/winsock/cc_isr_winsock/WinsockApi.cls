@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Private Const m_moduleName As String = "WinsockApi"
+
 ''' <summary>   Creates a socket that is bound to a specific transport service provider. </summary>
 ''' <param name="addressFamily">   [in] The address family specification.
 ''' The values currently supported are <see cref="ws32_AF_INET"/>   or <see cref="ws32_AF_INET6"/>, which are the Internet
@@ -182,9 +184,9 @@ Public Function DetermineReadability(ByRef a_readSocketSet As wsock32.ws32_fd_se
     p_selectResult = Select_(0, a_readSocketSet, p_emptyFdSet, p_emptyFdSet, p_time)
 
     If p_selectResult = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise cc_isr_Core.UserDefinedErrors.SocketSetStatusError.Code, "IdentityReader.WinsockApi.DetermineReadability", _
-                  cc_isr_Core.UserDefinedErrors.SocketSetStatusError.Description & _
-                  Winsock.LastErrorMessage(" Last error: ")
+        cc_isr_Core.UserDefinedErrors.RaiseError cc_isr_Core.UserDefinedErrors.SocketSetStatusError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".DetermineReadability", _
+                Winsock.LastErrorMessage(" Last error: ")
     End If
     DetermineReadability = p_selectResult
 

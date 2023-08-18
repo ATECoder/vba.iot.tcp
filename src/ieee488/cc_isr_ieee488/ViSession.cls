@@ -11,6 +11,8 @@ Option Explicit
 
 Implements cc_isr_Winsock.IConnectable
 
+Private Const m_moduleName As String = "ViSession"
+
 Private Const GPIB_LAN_PORT_NO As Integer = 1234
 
 Private Const READ_AFTER_WRITE_DELAY_DEFAULT As Integer = 5
@@ -222,10 +224,10 @@ Public Function Read(Optional ByVal a_maxLength As Long = &H7FFF, _
     If 0 = Len(p_reading) Then
     
         ' raise the read error adding some information
-        Err.Raise UserDefinedErrors.TimeoutError.Code, "cc_isr_Ieee488.ViSession.Read", _
-                  UserDefinedErrors.TimeoutError.Description & _
-                  ". Data not received reading the instrument at " & Me.SocketAddress & _
-                  " with a timeout of " & CStr(Me.SessionReadTimeout) & "ms."
+        cc_isr_Core.UserDefinedErrors.RaiseError UserDefinedErrors.TimeoutError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Read", _
+                ". Data not received reading the instrument at " & Me.SocketAddress & _
+                " with a timeout of " & CStr(Me.SessionReadTimeout) & "ms."
     
     End If
     

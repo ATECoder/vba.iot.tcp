@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_moduleName As String = "TcpClient"
+
 Implements IConnectable
 
 Private m_tcpClientSocket As IPv4StreamSocket
@@ -42,17 +44,17 @@ End Property
 Public Sub Initialize(ByVal a_connectedSocket As IPv4StreamSocket)
     
     If Me.Connected Then
-        Err.Raise cc_isr_Core.UserDefinedErrors.InvalidOperationError.Code, "cc_isr_Winsock.TcpClient.WinsockApi.Initialize", _
-                  cc_isr_Core.UserDefinedErrors.InvalidOperationError.Description & _
-                  " This Tc Client is connected to " & Me.TcpClientSocket.SocketAddress & _
-                  " A new Tcp Client must be used when initialized using a connected socket at " & _
-                  a_connectedSocket.SocketAddress & "."
+        cc_isr_Core.UserDefinedErrors.RaiseError cc_isr_Core.UserDefinedErrors.InvalidOperationError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Initialize", _
+                " Tcp Client, which is already connected to " & Me.TcpClientSocket.SocketAddress & _
+                ", must be disconnected before connecting to " & a_connectedSocket.SocketAddress & "."
     End If
     
     ' remove this socket
     If Not m_tcpClientSocket Is Nothing Then Set m_tcpClientSocket = Nothing
     
     Set m_tcpClientSocket = a_connectedSocket
+    
 End Sub
 
 ''' <summary>   Sends a terminated message to the server. </summary>

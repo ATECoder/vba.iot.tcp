@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_moduleName As String = "Winsock"
+
 ' true if Winsock was initiated
 Private m_initiated As Boolean
 
@@ -91,9 +93,9 @@ Public Function Initialize() As Long
     p_result = WSAStartup(wsock32.ws32_VERSION, p_startUpInfo)
     
     If p_result <> 0 Then
-        Err.Raise cc_isr_Core.UserDefinedErrors.WinsockStartingError.Code, "IdentityReader.Winsock.Initialize", _
-                  cc_isr_Core.UserDefinedErrors.WinsockStartingError.Description & _
-                  Me.LastErrorMessage(" Last error: ")
+        cc_isr_Core.UserDefinedErrors.RaiseError cc_isr_Core.UserDefinedErrors.WinsockStartingError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Initialize", _
+                Me.LastErrorMessage(" Last error: ")
     End If
     m_initiated = (p_result = 0)
     m_disposed = False
@@ -154,7 +156,7 @@ Public Function LastErrorMessage(ByVal prefix As String) As String
         Dim p_description As String
         p_description = Me.LastErrorDescription(p_number)
         If StringExtensions.IsNullOrEmpty(p_description) Then
-            LastErrorMessage = prefix & p_description & " #" & CStr(p_number) & "."
+            LastErrorMessage = prefix & p_description & " #" & VBA.CStr(p_number) & "."
         Else
             LastErrorMessage = prefix & "#" & CStr(p_number) & "."
         End If
@@ -213,9 +215,9 @@ Public Function Cleanup() As Long
     
     p_result = WSACleanup()
     If p_result = wsock32.ws32_SOCKET_ERROR Then
-        Err.Raise cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                  cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Description & _
-                  Winsock.LastErrorMessage(" Last error: ")
+        cc_isr_Core.UserDefinedErrors.RaiseError cc_isr_Core.UserDefinedErrors.WinsockCleanupError, _
+                ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Cleanup", _
+                Winsock.LastErrorMessage(" Last error: ")
     End If
     Cleanup = p_result
 
@@ -238,9 +240,9 @@ Public Sub Dispose()
         ' Shutdown Winsock DLL
         Dim p_result As Long: p_result = WSACleanup()
         If p_result = wsock32.ws32_SOCKET_ERROR Then
-            Err.Raise cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Code, "IdentityReader.Winsock.Cleanup", _
-                      cc_isr_Core.UserDefinedErrors.WinsockCleanupError.Description & _
-                      Winsock.LastErrorMessage(" Last error: ")
+            cc_isr_Core.UserDefinedErrors.RaiseError cc_isr_Core.UserDefinedErrors.WinsockCleanupError, _
+                    ThisWorkbook.VBProject.Name & "." & m_moduleName & ".Dispose", _
+                    Winsock.LastErrorMessage(" Last error: ")
         End If
     End If
     

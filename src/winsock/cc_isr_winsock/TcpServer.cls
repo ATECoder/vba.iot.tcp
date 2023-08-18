@@ -9,6 +9,8 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+Private Const m_moduleName As String = "TcpServer"
+
 Private m_tcpServerSocket As IPv4StreamSocket
 
 ''' <summary>   The event that is raised upon change of connection. </summary>

@@ -1,9 +1,10 @@
 # TODO
 
 ## Tests
-Flying
 
 ## Fixes
+
+Use user defined errors to raise all errors.
 
 ## Updates
 * Core: fix the test.ps1 script
