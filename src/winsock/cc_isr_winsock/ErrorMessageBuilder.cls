@@ -15,20 +15,26 @@ Option Explicit
 
 ''' <summary>   Builds a an error message from the VBA <see cref="Err"/>. </summary>
 ''' <returns>   A comma-separated error message string in the form: <para>
+''' <param name="a_numberCaption">        [String, 'Error Number='] Specifies the number caption. </param>
+''' <param name="a_sourceCaption">        [String, 'Source='] Specifies the source caption. </param>
+''' <param name="a_descriptionCaption">   [String, 'Source='] Specifies the description caption. </param>
 ''' Error Number=#(#/0x# (Last DLL Error 0x#)), Source={source}, Description={description}.
 ''' </returns>
-Public Function FormattedErr() As String
+Public Function FormattedErr(Optional ByVal a_numberCaption As String = "Error Number=", _
+                             Optional ByVal a_sourceCaption As String = "Source=", _
+                             Optional ByVal a_descriptionCaption As String = "Description=") As String
     
     Dim p_errNoDetails As String
-    p_errNoDetails = "(" & (VBA.Err.Number - VBA.vbObjectError) & "/0x" & _
+    p_errNoDetails = "(" & (VBA.Err.Number - VBA.vbObjectError) & " 0x" & _
                      VBA.LCase$(VBA.Hex$(VBA.Err.Number))
     If Err.LastDllError <> 0 Then
         p_errNoDetails = p_errNoDetails & " (Last DLL Error 0x"
         p_errNoDetails = p_errNoDetails & VBA.LCase$(VBA.Hex$(Err.LastDllError)) & ")"
     End If
     p_errNoDetails = p_errNoDetails & ")"
-    FormattedErr = "Error Number=" & VBA.Err.Number & p_errNoDetails & ", Source=" & _
-                   VBA.Err.Source & ", Description=" & VBA.Err.Description
+    FormattedErr = a_numberCaption & VBA.Err.Number & p_errNoDetails & "," & _
+                   a_sourceCaption & VBA.Err.Source & "," & _
+                   a_descriptionCaption & VBA.Err.Description
 
 End Function
 
@@ -123,7 +129,9 @@ Friend Function BuildErrorMessage(Optional ByVal a_displayWarning As Boolean = F
 
 End Function
 
-''' <summary>   Builds a standard error message. </summary>
+''' <summary>   Builds a standard error message. Appends the
+'''             <see cref="cc_isr_Core.UserDefinedErrors.LastError"/> if difference from the
+'''             <see cref="VBA.Err"/>. </summary>
 ''' <param name="a_displayWarning">         [Boolean, false] True
 '''                                         to display a warning rather than
 '''                                         an error message. </param>
@@ -139,12 +147,14 @@ Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boo
 
     Dim p_builder As String: p_builder = VBA.vbNullString
     Dim p_errorNumber As Long: p_errorNumber = VBA.Err.Number
+    Dim p_errorSource As String: p_errorSource = VBA.Err.Source
     If p_errorNumber <> 0 Then
         p_builder = Me.BuildErrorMessage(a_displayWarning, a_descriptionDelimiter)
     End If
     
     If Not cc_isr_Core.UserDefinedErrors.LastError Is Nothing Then
-        If p_errorNumber <> cc_isr_Core.UserDefinedErrors.LastError.Code Then
+        If p_errorNumber <> cc_isr_Core.UserDefinedErrors.LastError.Code Or _
+           p_errorSource <> cc_isr_Core.UserDefinedErrors.LastError.Source Then
             If VBA.Len(p_builder) > 0 Then p_builder = p_builder & vbCrLf
             p_builder = p_builder & cc_isr_Core.UserDefinedErrors.LastError.ToString()
         End If
@@ -153,4 +163,6 @@ Public Function BuildStandardErrorMessage(Optional ByVal a_displayWarning As Boo
     BuildStandardErrorMessage = p_builder
 
 End Function
+
+
 
